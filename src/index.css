@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dofus-gold: #c9a84c;
+  --color-dofus-gold-light: #e8d48b;
+  --color-dofus-dark: #1a1a2e;
+  --color-dofus-darker: #0f0f1e;
+  --color-dofus-panel: #16213e;
+  --color-dofus-panel-light: #1a2744;
+  --color-over: #e74c3c;
+  --color-over-bg: #2d1518;
+  --color-exo: #9b59b6;
+  --color-exo-bg: #231a2e;
+  --color-sacrificed: #7f8c8d;
+  --color-normal: #2ecc71;
+  --color-normal-bg: #152e1d;
+  --color-pool-positive: #2ecc71;
+  --color-pool-zero: #f39c12;
+  --color-pool-negative: #e74c3c;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-dofus-darker);
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+}
