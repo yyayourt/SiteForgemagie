@@ -132,6 +132,7 @@ export function mapEffectsToStats(effects: DatasetItemEffect[]): SimulatedStat[]
       weightPerPoint: density,
       isExo: false,
       isForgemeable: true,
+      isLocked: false,
     });
   }
 

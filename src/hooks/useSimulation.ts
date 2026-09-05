@@ -1,40 +1,87 @@
 import { useReducer, useMemo, useCallback } from 'react';
-import type { Item, SimulatedStat, RuneTier } from '../types';
+import type { Item, SimulatedStat, RuneTier, RuneOutcome, SimLogEntry } from '../types';
+import type { ForgemagieItemState, Rng } from '../types/forgemagie';
 import { simulationReducer, initialState } from '../logic/statsReducer';
-import { computeItemPool } from '../logic/poolCalculator';
-import { simulateRune } from '../logic/runeSimulator';
-import { getCharacteristicName } from '../data/dataset';
-import { getDensity } from '../data/params';
+import { computeWeightBudget } from '../logic/planning/weightBudget';
+import { applyRune as engineApplyRune } from '../logic/engine';
+import { getCharacteristicName, getRuneTiers } from '../data/dataset';
+import { getDensity, getEngineParams } from '../data/params';
+
+/** RNG de l'application (le moteur exige un RNG injecté ; les tests fournissent le leur). */
+const appRng: Rng = { next: () => Math.random() };
+
+/** Valeur ajoutée par une rune d'un palier donné (data/rune-tiers.json), repli sur le palier inférieur. */
+export function getRuneValue(characteristicId: number, tier: RuneTier): number {
+  const tiers = getRuneTiers(characteristicId);
+  if (!tiers) return 0;
+  switch (tier) {
+    case 'normal':
+      return tiers.normal?.value ?? 0;
+    case 'pa':
+      return tiers.pa?.value ?? tiers.normal?.value ?? 0;
+    case 'ra':
+      return tiers.ra?.value ?? tiers.pa?.value ?? tiers.normal?.value ?? 0;
+  }
+}
+
+/** Vue UI → état moteur. */
+function toEngineState(stats: SimulatedStat[], residualPool: number, level: number): ForgemagieItemState {
+  return {
+    level,
+    residualPool,
+    itemLocked: false,
+    lines: stats.map((s) => ({
+      characteristicId: s.characteristicId,
+      value: s.currentValue,
+      baseMin: s.baseMin,
+      baseMax: s.baseMax,
+      isExo: s.isExo,
+      isLocked: s.isLocked,
+    })),
+  };
+}
+
+/** État moteur → vue UI, en conservant les métadonnées d'affichage. */
+function fromEngineState(state: ForgemagieItemState, previous: SimulatedStat[]): SimulatedStat[] {
+  return state.lines.map((line) => {
+    const prev = previous.find((s) => s.characteristicId === line.characteristicId);
+    return {
+      characteristicId: line.characteristicId,
+      statName: prev?.statName ?? getCharacteristicName(line.characteristicId),
+      baseMin: line.baseMin,
+      baseMax: line.baseMax,
+      currentValue: line.value,
+      weightPerPoint: prev?.weightPerPoint ?? getDensity(line.characteristicId) ?? 0,
+      isExo: line.isExo,
+      isForgemeable: prev?.isForgemeable ?? true,
+      isLocked: line.isLocked,
+    };
+  });
+}
 
 /**
- * Hook principal de simulation de forgemagie.
- * Fournit l'état, les actions, le calcul de puits, et le mode simulation.
+ * Hook principal : lignes visibles, reliquat serveur, budget de planification, actions.
+ * L'issue SC/SN/EC est FOURNIE par l'interface (aucun modèle probabiliste avant la phase 3).
  */
 export function useSimulation() {
   const [state, dispatch] = useReducer(simulationReducer, initialState);
 
-  const pool = useMemo(() => computeItemPool(state.stats), [state.stats]);
+  const budget = useMemo(() => computeWeightBudget(state.stats), [state.stats]);
 
-  const selectItem = useCallback(
-    (item: Item, stats: SimulatedStat[]) => {
-      dispatch({ type: 'SET_ITEM', item, stats });
-    },
-    []
-  );
+  const selectItem = useCallback((item: Item, stats: SimulatedStat[]) => {
+    dispatch({ type: 'SET_ITEM', item, stats });
+  }, []);
 
-  const updateStat = useCallback(
-    (characteristicId: number, newValue: number) => {
-      dispatch({ type: 'UPDATE_STAT', characteristicId, newValue });
-    },
-    []
-  );
+  const updateStat = useCallback((characteristicId: number, newValue: number) => {
+    dispatch({ type: 'UPDATE_STAT', characteristicId, newValue });
+  }, []);
 
-  const addExo = useCallback(
-    (characteristicId: number) => {
-      const density = getDensity(characteristicId);
-      if (density === undefined) return;
-
-      const exoStat: SimulatedStat = {
+  const addExo = useCallback((characteristicId: number) => {
+    const density = getDensity(characteristicId);
+    if (density === undefined) return;
+    dispatch({
+      type: 'ADD_EXO',
+      stat: {
         characteristicId,
         statName: getCharacteristicName(characteristicId),
         baseMin: 0,
@@ -43,58 +90,69 @@ export function useSimulation() {
         weightPerPoint: density,
         isExo: true,
         isForgemeable: true,
-      };
-
-      dispatch({ type: 'ADD_EXO', stat: exoStat });
-    },
-    []
-  );
-
-  const removeExo = useCallback(
-    (characteristicId: number) => {
-      dispatch({ type: 'REMOVE_EXO', characteristicId });
-    },
-    []
-  );
-
-  const resetToPerfect = useCallback(() => {
-    dispatch({ type: 'RESET_TO_PERFECT' });
+        isLocked: false,
+      },
+    });
   }, []);
 
-  const undo = useCallback(() => {
-    dispatch({ type: 'UNDO' });
+  const removeExo = useCallback((characteristicId: number) => {
+    dispatch({ type: 'REMOVE_EXO', characteristicId });
   }, []);
 
-  const redo = useCallback(() => {
-    dispatch({ type: 'REDO' });
-  }, []);
-
-  const toggleMode = useCallback(() => {
-    dispatch({ type: 'TOGGLE_MODE' });
-  }, []);
+  const resetToPerfect = useCallback(() => dispatch({ type: 'RESET_TO_PERFECT' }), []);
+  const undo = useCallback(() => dispatch({ type: 'UNDO' }), []);
+  const redo = useCallback(() => dispatch({ type: 'REDO' }), []);
+  const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), []);
+  const clearLog = useCallback(() => dispatch({ type: 'CLEAR_LOG' }), []);
 
   const applyRune = useCallback(
-    (targetCharacteristicId: number, tier: RuneTier) => {
-      const result = simulateRune(
-        state.stats,
-        targetCharacteristicId,
-        tier,
-        state.logCounter + 1
+    (targetCharacteristicId: number, tier: RuneTier, outcome: RuneOutcome) => {
+      const target = state.stats.find((s) => s.characteristicId === targetCharacteristicId);
+      if (!target) return;
+      const runeValue = getRuneValue(targetCharacteristicId, tier);
+      if (runeValue <= 0) return;
+
+      const engineState = toEngineState(state.stats, state.residualPool, state.item?.level ?? 0);
+      const result = engineApplyRune(
+        engineState,
+        { characteristicId: targetCharacteristicId, value: runeValue },
+        outcome,
+        getEngineParams(),
+        appRng
       );
-      dispatch({ type: 'APPLY_RUNE', result });
+
+      const newStats = result.accepted ? fromEngineState(result.state, state.stats) : state.stats;
+      const logEntry: SimLogEntry = {
+        id: state.logCounter + 1,
+        targetStatName: target.statName,
+        targetCharacteristicId,
+        runeTier: tier,
+        runeValue,
+        runeWeight: result.runeWeight,
+        outcome,
+        refusedReason: result.accepted ? undefined : result.reason,
+        losses: result.losses.map((l) => ({
+          ...l,
+          statName:
+            state.stats.find((s) => s.characteristicId === l.characteristicId)?.statName ??
+            getCharacteristicName(l.characteristicId),
+        })),
+        absorbedByResidual: result.absorbedByResidual,
+        residualPoolBefore: result.residualPoolBefore,
+        residualPoolAfter: result.residualPoolAfter,
+      };
+
+      dispatch({ type: 'APPLY_RUNE', stats: newStats, residualPool: result.state.residualPool, logEntry });
       return result;
     },
-    [state.stats, state.logCounter]
+    [state.stats, state.residualPool, state.item, state.logCounter]
   );
-
-  const clearLog = useCallback(() => {
-    dispatch({ type: 'CLEAR_LOG' });
-  }, []);
 
   return {
     item: state.item,
     stats: state.stats,
-    pool,
+    budget,
+    residualPool: state.residualPool,
     mode: state.mode,
     simulationLog: state.simulationLog,
     canUndo: state.history.length > 0,

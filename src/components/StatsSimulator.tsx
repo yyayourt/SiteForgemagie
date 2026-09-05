@@ -1,20 +1,20 @@
 import { StatRow } from './StatRow';
 import { ExoAdder } from './ExoAdder';
-import type { SimulatedStat, AppMode, RuneTier } from '../types';
+import type { SimulatedStat, AppMode, RuneTier, RuneOutcome } from '../types';
 
 interface Props {
   stats: SimulatedStat[];
-  poolRemaining: number;
+  remainingBudget: number;
   mode: AppMode;
   onUpdate: (characteristicId: number, newValue: number) => void;
-  onApplyRune: (characteristicId: number, tier: RuneTier) => void;
+  onApplyRune: (characteristicId: number, tier: RuneTier, outcome: RuneOutcome) => void;
   onAddExo: (characteristicId: number) => void;
   onRemoveExo: (characteristicId: number) => void;
 }
 
 export function StatsSimulator({
   stats,
-  poolRemaining,
+  remainingBudget,
   mode,
   onUpdate,
   onApplyRune,
@@ -41,7 +41,7 @@ export function StatsSimulator({
           <StatRow
             key={stat.characteristicId}
             stat={stat}
-            poolRemaining={poolRemaining}
+            remainingBudget={remainingBudget}
             mode={mode}
             onUpdate={onUpdate}
             onApplyRune={onApplyRune}
@@ -59,7 +59,7 @@ export function StatsSimulator({
             <StatRow
               key={stat.characteristicId}
               stat={stat}
-              poolRemaining={poolRemaining}
+              remainingBudget={remainingBudget}
               mode={mode}
               onUpdate={onUpdate}
               onApplyRune={onApplyRune}

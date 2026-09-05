@@ -1,6 +1,7 @@
 {
   "$comment": "Paramètres NON certains du simulateur. Chaque entrée porte value / status / source / note / bounds / default. Statuts : SOURCE PRIMAIRE, MODÈLE EMPIRIQUE, HYPOTHÈSE COMMUNAUTAIRE, CONTRADICTION, INCONNU (cf. CLAUDE.md). Les règles SOURCE PRIMAIRE ne sont pas ici : elles sont codées en dur et testées. Sources abrégées : A = docs/knowledge/audit-forgemagie-dofus3.md ; R = docs/knowledge/Reconstruction_of_the_DOFUS_3_Unity_Forgemagie_Algorithm__2026_V.md ; AP = docs/audit-projet-existant.md.",
   "schemaVersion": 1,
+  "gameVersion": "3.6.10.11",
   "updatedAt": "2026-09-05",
   "params": {
     "overCapWeight": {
@@ -18,6 +19,111 @@
       "note": "Les deux rapports de docs/knowledge/ se contredisent. per_line : chaque ligne over/exo dispose de son propre plafond overCapWeight. global : la somme des poids over+exo de l'objet est plafonnée. Défaut per_line PROVISOIRE, choisi pour continuité avec le code précédent, pas par preuve.",
       "bounds": { "enum": ["per_line", "global"] },
       "default": "per_line"
+    },
+    "ecLossFactor": {
+      "value": 1,
+      "status": "INCONNU",
+      "source": "aucune ; A §5 et R PARTIE 3 décrivent seulement « l'EC n'applique pas le bonus et peut provoquer une perte »",
+      "note": "Quantité de poids perdue lors d'un échec critique, exprimée en multiple du poids de la rune. Défaut 1 (= poids de la rune) posé arbitrairement pour faire tourner la simulation ; l'ancien code utilisait 0,5 sans source non plus. Aucune donnée publique ne quantifie la perte en EC.",
+      "bounds": { "min": 0, "max": 10 },
+      "default": 1
+    },
+    "lossSelection": {
+      "strategy": {
+        "value": "weighted_by_value_times_weight",
+        "status": "INCONNU",
+        "source": "A §6 (modèles A–E concurrents, tous C) ; R PARTIE 5 et 16 ; A §15.2 (« bonne approximation, à signaler comme telle »)",
+        "note": "Loi de sélection de la ligne qui perd. uniform : équiprobable parmi les lignes admissibles (pseudo-code du PDF) ; weighted_by_weight : ∝ densité unitaire ; weighted_by_value_times_weight : ∝ valeur × densité (« masse magique »). Aucune expérience publiée ne départage ces modèles. Défaut = modèle le plus répandu dans les guides, sans preuve.",
+        "bounds": { "enum": ["uniform", "weighted_by_weight", "weighted_by_value_times_weight"] },
+        "default": "weighted_by_value_times_weight"
+      },
+      "prioritizeOverExo": {
+        "value": true,
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "R PARTIE 5 (Tofus, learn-dofus : « over/exo d'abord, puis puits, puis lignes naturelles ») ; A §15.2",
+        "note": "Si vrai, les lignes en over ou exotiques sont ciblées avant les lignes naturelles lors d'une perte. Hypothèse forte mais non démontrée expérimentalement.",
+        "bounds": { "enum": [true, false] },
+        "default": true
+      }
+    },
+    "residualPool": {
+      "resetOnEquipOrMarket": {
+        "value": true,
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "R PARTIE 2 (JeuxOnLine : « ce puits disparaît s'il est entreposé dans un hôtel de vente » ; Tofus, gamosaurus) ; A §4.2 classe la purge en D (inconnu) ; CLAUDE.md « à confirmer »",
+        "note": "Si vrai, le reliquat est remis à 0 quand l'objet est équipé, mis en HDV ou échangé. Les deux rapports divergent sur le niveau de preuve ; à tester (A §17 expérience G).",
+        "bounds": { "enum": [true, false] },
+        "default": true
+      }
+    },
+    "transcendence": {
+      "lockScope": {
+        "value": "line",
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "R PARTIE 10 et Dofus Wiki (Fandom) : « they render the item unable to be maged again » ; devblog 2.72 (texte exact à vérifier)",
+        "note": "Portée du verrouillage après une rune de transcendance. line : seule la ligne transcendée est verrouillée. item : plus aucune forgemagie sur l'objet (formulation du wiki). Défaut line posé par décision de projet ; le devblog 2.72 doit être relu pour trancher.",
+        "bounds": { "enum": ["line", "item"] },
+        "default": "line"
+      }
+    },
+    "brisage": {
+      "$comment": "Formule portée depuis KamelAkar/Calculateur_Brisage_Dofus (brisage_cli.py, main, 2025-04) et Icksir/crushing-calculator (backend/src/services/calculator.py, main, 2026-05). Les deux dépôts partagent vr = valeur × densité × niveau × levelFactor + constantOffset, puis × coefficient/100, puis ÷ poids d'une rune. Les écarts entre eux sont exposés comme paramètres à statut CONTRADICTION.",
+      "levelFactor": {
+        "value": 0.015,
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "KamelAkar brisage_cli.py l.425 (`0.0150`) ; Icksir calculator.py l.437 (`0.0150`) ; forum officiel (A [^9]) : 3 × jet × niveau × poids / 200 = 0,015",
+        "note": "Papycha rapporte un écart avec le jeu dans 34 cas sur 200 (erreur max 7 %) : formule empirique, pas exacte (R PARTIE 9).",
+        "bounds": { "min": 0.001, "max": 1 },
+        "default": 0.015
+      },
+      "constantOffset": {
+        "value": 1,
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "KamelAkar l.425 (`+ 1`) ; Icksir l.437 (`+ 1`) ; forum officiel (A [^9])",
+        "note": "Terme additif de la formule, appliqué avant le coefficient dans les deux dépôts.",
+        "bounds": { "min": 0, "max": 10 },
+        "default": 1
+      },
+      "focusOtherLinesFactor": {
+        "value": 0.5,
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "KamelAkar l.470 (`poids_focus + 0.5 * poids_others`) ; Icksir l.500 (`vr_propio + 0.5 * vr_resto`) ; R PARTIE 9 ; Reddit (A [^29])",
+        "note": "Part du poids des autres lignes convertie en runes de la ligne focus.",
+        "bounds": { "min": 0, "max": 1 },
+        "default": 0.5
+      },
+      "podsDivisor": {
+        "value": 2.5,
+        "status": "INCONNU",
+        "source": "KamelAkar l.424 et l.476 ; Icksir l.431 et l.507 (`/ 2.5`)",
+        "note": "Les deux dépôts divisent la valeur de Pods par 2,5 avant la formule, sans justification écrite. Origine inconnue (peut-être une correction de la densité 0,25 vs 2,5/pod).",
+        "bounds": { "min": 0.01, "max": 100 },
+        "default": 2.5
+      },
+      "forceOneForActionStats": {
+        "value": true,
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "KamelAkar l.418 ; Icksir l.428 : PA/PM/PO/Invocations avec valeur dans [0, 1] forcés à 1",
+        "note": "Quirk identique dans les deux dépôts, non expliqué.",
+        "bounds": { "enum": [true, false] },
+        "default": true
+      },
+      "podsDivisorOnNonFocusLines": {
+        "value": true,
+        "status": "CONTRADICTION",
+        "source": "Icksir l.431 : la division par 2,5 s'applique à la ligne Pods avant tout calcul (donc aussi quand elle contribue au focus d'une autre ligne) ; KamelAkar l.455-467 : en mode focus, la ligne Pods non focalisée contribue avec sa valeur brute",
+        "note": "Écart entre les deux dépôts. Défaut = comportement Icksir (cohérent avec le cas sans focus). Sans effet quand Pods est la ligne focus ou quand il n'y a pas de focus.",
+        "bounds": { "enum": [true, false] },
+        "default": true
+      },
+      "nonPositiveLineContribution": {
+        "value": "skip",
+        "status": "CONTRADICTION",
+        "source": "KamelAkar l.419 (`if value <= 0: continue`) ; Icksir l.436-438 (`else: vr = 1`, la ligne contribue constantOffset au total)",
+        "note": "Écart entre les deux dépôts sur les lignes à valeur nulle ou négative (malus). skip : ignorées ; offset : contribuent constantOffset au poids total (donc à 50 % en focus). Défaut = KamelAkar.",
+        "bounds": { "enum": ["skip", "offset"] },
+        "default": "skip"
+      }
     }
   },
   "densities": {
@@ -46,7 +152,7 @@
     "70": { "name": "Dommages pièges",       "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, ligne « Pi »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
     "18": { "name": "% Critique",            "value": 10,   "status": "CONTRADICTION", "source": "A §3.1 (« 10 dans les tables récentes ; certaines tables anciennes divergent », C-B) ; R PARTIE 1 (10, auparavant 30, changelog 2.29) ; AP §3.2", "note": "Le code précédent utilisait 5 en étiquetant à tort l'effet 115 « Dommages Critiques ». Valeur 10 retenue (tables récentes) ; 30 dans les tables pré-2.29.", "bounds": { "min": 0.01, "max": 100 }, "default": 10 },
     "49": { "name": "Soins",                 "value": 10,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C-B) ; R PARTIE 1 (10, auparavant 20/15)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 10 },
-    "50": { "name": "Renvoi de dommages",    "value": 5,    "status": "CONTRADICTION", "source": "DofusDB (page item 30942 Rune Pa Do Ren, « Densité 15 » pour +3 → 5/pt) ; AP §3.2 ; code précédent : 10", "note": "Absent des tables A et R. La densité affichée par le site DofusDB n'est pas exposée par son API. 5 retenu (source la plus proche d'une donnée client).", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
+    "50": { "name": "Renvoi de dommages",    "value": 5,    "status": "CONTRADICTION", "source": "DofusDB (page item 30942 Rune Pa Do Ren, « Densité 15 » pour +3 → 5/pt) ; AP §3.2 ; code précédent : 10", "note": "Absent des tables A et R. La densité affichée par le site DofusDB n'est pas exposée par son API. 5 retenu (source la plus proche d'une donnée client). Dépôts de brisage : KamelAkar 10, Icksir 5 (dernière affectation de sa table).", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
     "40": { "name": "Pods",                  "value": 0.25, "status": "CONTRADICTION", "source": "A §3.1 (0,25 par point ; rune Pod +10 = 2,5 ; C-B « désaccords historiques ») ; R PARTIE 1 (« 2,5 par pod ») ; AP §3.2", "note": "Les deux rapports divergent d'un facteur 10. 0,25/pt retenu : cohérent avec la rune Pod +10 = 2,5 de poids.", "bounds": { "min": 0.001, "max": 50 }, "default": 0.25 },
     "44": { "name": "Initiative",            "value": 0.1,  "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.001, "max": 10 }, "default": 0.1 },
     "78": { "name": "Fuite",                 "value": 4,    "status": "CONTRADICTION", "source": "A §3.1 (4, B) ; R PARTIE 1 (« 4 ou 5 selon sources ») ; AP §3.2", "note": "Non tranché entre 4 et 5.", "bounds": { "min": 0.01, "max": 100 }, "default": 4 },
@@ -71,8 +177,8 @@
     "120": { "name": "% Dommages distance",  "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
     "122": { "name": "% Dommages armes",     "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
     "123": { "name": "% Dommages sorts",     "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "124": { "name": "% Résistance mêlée",   "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires).", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "121": { "name": "% Résistance distance", "value": 15,  "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires).", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
+    "124": { "name": "% Résistance mêlée",   "value": 15,   "status": "CONTRADICTION", "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Mé, poids 10)", "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10.", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
+    "121": { "name": "% Résistance distance", "value": 15,  "status": "CONTRADICTION", "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Di, poids 10)", "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10.", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
     "142": { "name": "% Résistance armes",   "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "Aucune rune de forgemagie correspondante dans le dataset (ligne non ciblable, mais potentiellement présente sur un objet).", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
     "141": { "name": "% Résistance sorts",   "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "Aucune rune de forgemagie correspondante dans le dataset.", "bounds": { "min": 0.01, "max": 200 }, "default": 15 }
   },

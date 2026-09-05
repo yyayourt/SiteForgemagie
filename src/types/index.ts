@@ -1,12 +1,15 @@
 /**
- * Types du simulateur.
+ * Types de l'interface (simulateur). Les types du moteur sont dans ./forgemagie.ts.
  *
  * Clé d'identification d'une ligne de stat : `characteristicId` (champ `characteristic`
- * de DofusDB), jamais `effectId` (un même characteristicId a un effectId bonus et un
- * effectId malus distincts).
+ * de DofusDB), jamais `effectId`.
  */
 
-/** A single stat line in the simulation */
+import type { LossRecord, RefusalReason, RuneOutcome } from './forgemagie';
+
+export type { RuneOutcome } from './forgemagie';
+
+/** A single stat line in the simulation (vue UI d'une ItemLine) */
 export interface SimulatedStat {
   characteristicId: number;
   statName: string;
@@ -17,6 +20,8 @@ export interface SimulatedStat {
   weightPerPoint: number;
   isExo: boolean;
   isForgemeable: boolean;
+  /** Verrouillée par une rune de transcendance */
+  isLocked: boolean;
 }
 
 /** Processed item ready for simulation */
@@ -29,28 +34,27 @@ export interface Item {
   imgUrl: string;
 }
 
-/** Result of pool calculation (extended) */
-export interface PoolResult {
+/** Budget de poids de planification (src/logic/planning). PAS le reliquat serveur. */
+export interface WeightBudget {
   baseWeight: number;
   currentWeight: number;
-  poolGained: number;
-  poolSpent: number;
-  poolRemaining: number;
-  /** Poids max théorique (toutes lignes au max) */
+  /** Poids libéré par les lignes sous leur jet parfait */
+  freedWeight: number;
+  /** Poids consommé par les overs et les exos */
+  spentWeight: number;
+  /** freedWeight − spentWeight (peut être négatif : planification, pas reliquat) */
+  remainingBudget: number;
+  /** Poids max théorique (toutes lignes au plafond) */
   maxTheoreticalWeight: number;
-  /** Qualité de l'item : currentWeight / maxWeight en % */
+  /** Qualité de l'item : currentWeight / poids du jet parfait en % */
   qualityPercent: number;
-  /** Probabilité d'obtenir ce jet ou mieux (0-1) */
-  rollProbability: number;
-
-  // ─── Budget Over/Exo (règle des 101) ───
   /** Poids total des overs (stats au-dessus du jet parfait) */
   overWeight: number;
   /** Poids total des stats exotiques */
   exoWeight: number;
-  /** Poids combiné over + exo (ne doit pas dépasser 101) */
+  /** over + exo */
   overExoTotal: number;
-  /** Budget restant sur les 101 pour overs/exos */
+  /** overCapWeight − overExoTotal (lecture « globale », indicatif) */
   overExoBudgetRemaining: number;
 }
 
@@ -58,9 +62,6 @@ export interface PoolResult {
 
 /** Type de rune appliquée */
 export type RuneTier = 'normal' | 'pa' | 'ra';
-
-/** Résultat d'une tentative de rune */
-export type RuneOutcome = 'SC' | 'SN' | 'EC';
 
 /** Entrée dans le log de simulation */
 export interface SimLogEntry {
@@ -72,23 +73,15 @@ export interface SimLogEntry {
   runeTier: RuneTier;
   runeValue: number;
   runeWeight: number;
-  /** Résultat */
+  /** Issue (fournie manuellement tant que le modèle probabiliste n'existe pas) */
   outcome: RuneOutcome;
-  /** Détails du recul (si SN ou EC) */
-  sideEffect?: {
-    affectedStatName: string;
-    affectedCharacteristicId: number;
-    pointsLost: number;
-  };
-  /** Puits restant après cette action */
-  poolAfter: number;
-}
-
-/** Résultat du moteur de simulation pour une tentative */
-export interface SimulationResult {
-  outcome: RuneOutcome;
-  newStats: SimulatedStat[];
-  logEntry: SimLogEntry;
+  /** Tentative refusée par le moteur (plafond, verrou…) */
+  refusedReason?: RefusalReason;
+  /** Pertes appliquées sur des lignes */
+  losses: (LossRecord & { statName: string })[];
+  absorbedByResidual: number;
+  residualPoolBefore: number;
+  residualPoolAfter: number;
 }
 
 /** Mode de l'application */
@@ -98,8 +91,10 @@ export type AppMode = 'planning' | 'simulation';
 export interface SimulationState {
   item: Item | null;
   stats: SimulatedStat[];
-  history: SimulatedStat[][];
-  future: SimulatedStat[][];
+  /** Reliquat serveur (état propre, ≥ 0) */
+  residualPool: number;
+  history: { stats: SimulatedStat[]; residualPool: number }[];
+  future: { stats: SimulatedStat[]; residualPool: number }[];
   /** Mode actif */
   mode: AppMode;
   /** Log de simulation (mode simulation uniquement) */
@@ -118,5 +113,6 @@ export type SimulationAction =
   | { type: 'UNDO' }
   | { type: 'REDO' }
   | { type: 'TOGGLE_MODE' }
-  | { type: 'APPLY_RUNE'; result: SimulationResult }
+  | { type: 'APPLY_RUNE'; stats: SimulatedStat[]; residualPool: number; logEntry: SimLogEntry }
+  | { type: 'RESET_RESIDUAL' }
   | { type: 'CLEAR_LOG' };

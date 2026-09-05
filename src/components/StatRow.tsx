@@ -1,15 +1,14 @@
-import { getStatStatus, computeMaxReachable } from '../logic/poolCalculator';
-import { computeOutcomeProbabilities } from '../logic/runeSimulator';
+import { getStatStatus, computeMaxReachable } from '../logic/planning/weightBudget';
 import { getAvailableRuneTiers } from '../data/dataset';
 import { getStatAbsoluteMax } from '../data/statCaps';
-import type { SimulatedStat, AppMode, RuneTier } from '../types';
+import type { SimulatedStat, AppMode, RuneTier, RuneOutcome } from '../types';
 
 interface Props {
   stat: SimulatedStat;
-  poolRemaining: number;
+  remainingBudget: number;
   mode: AppMode;
   onUpdate: (characteristicId: number, newValue: number) => void;
-  onApplyRune?: (characteristicId: number, tier: RuneTier) => void;
+  onApplyRune?: (characteristicId: number, tier: RuneTier, outcome: RuneOutcome) => void;
   onRemoveExo?: (characteristicId: number) => void;
 }
 
@@ -23,31 +22,33 @@ const STATUS_STYLES = {
 
 const TIER_LABELS: Record<RuneTier, string> = { normal: '', pa: 'Pa', ra: 'Ra' };
 
-export function StatRow({ stat, poolRemaining, mode, onUpdate, onApplyRune, onRemoveExo }: Props) {
+/** Issues fournies manuellement : aucun modèle probabiliste avant la phase 3. */
+const OUTCOMES: { outcome: RuneOutcome; cls: string; title: string }[] = [
+  { outcome: 'SC', cls: 'text-green-400 hover:bg-green-900/40', title: 'Succès critique : la rune passe sans perte' },
+  { outcome: 'SN', cls: 'text-yellow-400 hover:bg-yellow-900/40', title: 'Succès neutre : la rune passe, perte = poids de la rune (reliquat consommé en priorité)' },
+  { outcome: 'EC', cls: 'text-red-400 hover:bg-red-900/40', title: 'Échec critique : la rune ne passe pas, perte (paramètre ecLossFactor)' },
+];
+
+export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, onRemoveExo }: Props) {
   const status = getStatStatus(stat);
   const style = STATUS_STYLES[status];
 
   // Budget effectif depuis la perspective de cette stat
-  // (si la stat est déjà en over, on récupère ce poids dans le budget pour calculer le max)
-  const effectivePoolForStat =
+  const effectiveBudgetForStat =
     stat.currentValue > stat.baseMax
-      ? poolRemaining + (stat.currentValue - stat.baseMax) * stat.weightPerPoint
+      ? remainingBudget + (stat.currentValue - stat.baseMax) * stat.weightPerPoint
       : stat.currentValue < stat.baseMax
-        ? poolRemaining - (stat.baseMax - stat.currentValue) * stat.weightPerPoint
-        : poolRemaining;
+        ? remainingBudget - (stat.baseMax - stat.currentValue) * stat.weightPerPoint
+        : remainingBudget;
 
   const maxReachable = stat.isExo
-    ? computeMaxReachable(stat, poolRemaining + stat.currentValue * stat.weightPerPoint)
-    : computeMaxReachable({ ...stat, currentValue: stat.baseMax }, Math.max(0, effectivePoolForStat));
+    ? computeMaxReachable(stat, remainingBudget + stat.currentValue * stat.weightPerPoint)
+    : computeMaxReachable({ ...stat, currentValue: stat.baseMax }, Math.max(0, effectiveBudgetForStat));
 
   const lineWeight = stat.currentValue * stat.weightPerPoint;
   const absoluteMax = getStatAbsoluteMax(stat);
-  const currentOver = stat.isExo
-    ? stat.currentValue
-    : Math.max(0, stat.currentValue - stat.baseMax);
-  const maxOver = absoluteMax === Infinity
-    ? null
-    : stat.isExo ? absoluteMax : absoluteMax - stat.baseMax;
+  const currentOver = stat.isExo ? stat.currentValue : Math.max(0, stat.currentValue - stat.baseMax);
+  const maxOver = absoluteMax === Infinity ? null : stat.isExo ? absoluteMax : absoluteMax - stat.baseMax;
 
   // Paliers de runes réellement existants (data/rune-tiers.json)
   const availableTiers = getAvailableRuneTiers(stat.characteristicId).map(({ tier, info }) => ({
@@ -70,6 +71,11 @@ export function StatRow({ stat, poolRemaining, mode, onUpdate, onApplyRune, onRe
             {style.label}
           </span>
         )}
+        {stat.isLocked && (
+          <span className="text-xs px-1.5 py-0.5 rounded font-bold bg-dofus-gold/20 text-dofus-gold" title="Ligne verrouillée par une rune de transcendance (devblog 2.72)">
+            🔒
+          </span>
+        )}
       </div>
 
       {/* Base range */}
@@ -82,7 +88,7 @@ export function StatRow({ stat, poolRemaining, mode, onUpdate, onApplyRune, onRe
       </div>
 
       {/* ── Mode Planning : stepper + quick rune buttons ── */}
-      {mode === 'planning' && (
+      {mode === 'planning' && !stat.isLocked && (
         <>
           <div className="flex items-center gap-1">
             <button
@@ -98,8 +104,7 @@ export function StatRow({ stat, poolRemaining, mode, onUpdate, onApplyRune, onRe
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10);
                 if (!isNaN(val)) {
-                  const clamped = Math.min(val, maxReachable);
-                  onUpdate(stat.characteristicId, Math.max(0, clamped));
+                  onUpdate(stat.characteristicId, Math.max(0, Math.min(val, maxReachable)));
                 }
               }}
               className={`w-16 text-center bg-dofus-dark border border-dofus-gold/20 rounded px-1 py-1 text-sm font-mono ${style.text} focus:outline-none focus:border-dofus-gold`}
@@ -131,37 +136,36 @@ export function StatRow({ stat, poolRemaining, mode, onUpdate, onApplyRune, onRe
         </>
       )}
 
-      {/* ── Mode Simulation : rune apply buttons avec % SC (moteur provisoire) ── */}
-      {mode === 'simulation' && onApplyRune && (
+      {/* ── Mode Simulation : issue choisie manuellement, moteur déterministe ── */}
+      {mode === 'simulation' && onApplyRune && !stat.isLocked && (
         <>
           <div className={`w-16 text-center font-mono text-sm ${style.text} bg-dofus-dark border border-dofus-gold/10 rounded px-1 py-1`}>
             {stat.currentValue}
           </div>
-          <div className="flex gap-1">
-            {availableTiers.map(({ tier, label, value }) => {
-              const runeWeight = value * stat.weightPerPoint;
-              const { pSC } = computeOutcomeProbabilities(poolRemaining, runeWeight, stat.isExo);
-              const scPercent = Math.round(pSC * 100);
-              return (
-                <button
-                  key={tier}
-                  onClick={() => onApplyRune(stat.characteristicId, tier)}
-                  className="text-xs px-2.5 py-1.5 rounded bg-dofus-panel-light border border-dofus-gold/20 hover:bg-dofus-gold/20 transition-colors"
-                  title={`Passer rune +${value}${label ? ' ' + label : ''} (${scPercent}% SC — modèle provisoire, non fidèle)`}
-                >
-                  <span className="text-dofus-gold-light">
-                    +{value}{label && <span className="ml-0.5 opacity-60">{label}</span>}
-                  </span>
-                  <span className={`ml-1.5 font-mono ${
-                    scPercent >= 70 ? 'text-green-400' : scPercent >= 40 ? 'text-yellow-400' : 'text-red-400'
-                  }`}>
-                    {scPercent}%
-                  </span>
-                </button>
-              );
-            })}
+          <div className="flex flex-wrap gap-2">
+            {availableTiers.map(({ tier, label, value }) => (
+              <div key={tier} className="flex items-center rounded border border-dofus-gold/20 bg-dofus-panel-light overflow-hidden">
+                <span className="text-xs px-2 text-dofus-gold-light" title={`Rune +${value}${label ? ' ' + label : ''} — poids ${(value * stat.weightPerPoint).toFixed(1)}`}>
+                  +{value}{label && <span className="ml-0.5 opacity-60">{label}</span>}
+                </span>
+                {OUTCOMES.map(({ outcome, cls, title }) => (
+                  <button
+                    key={outcome}
+                    onClick={() => onApplyRune(stat.characteristicId, tier, outcome)}
+                    className={`text-xs font-mono font-bold px-2 py-1.5 border-l border-dofus-gold/20 transition-colors ${cls}`}
+                    title={title}
+                  >
+                    {outcome}
+                  </button>
+                ))}
+              </div>
+            ))}
           </div>
         </>
+      )}
+
+      {mode === 'simulation' && stat.isLocked && (
+        <span className="text-xs text-gray-500">Verrouillée : plus aucune rune possible</span>
       )}
 
       {/* Weight + max info */}
@@ -175,12 +179,12 @@ export function StatRow({ stat, poolRemaining, mode, onUpdate, onApplyRune, onRe
             +{currentOver}/{maxOver}
           </span>
         )}
-        {stat.isForgemeable && (
+        {stat.isForgemeable && mode === 'planning' && (
           <span title="Max atteignable avec le budget de poids actuel" className="text-gray-600">
             ~{maxReachable}
           </span>
         )}
-        {stat.isExo && onRemoveExo && (
+        {stat.isExo && onRemoveExo && !stat.isLocked && (
           <button onClick={() => onRemoveExo(stat.characteristicId)} className="text-red-400 hover:text-red-300 transition-colors" title="Retirer cet exo">&times;</button>
         )}
       </div>

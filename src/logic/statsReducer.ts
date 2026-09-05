@@ -6,6 +6,7 @@ const MAX_HISTORY = 100;
 export const initialState: SimulationState = {
   item: null,
   stats: [],
+  residualPool: 0,
   history: [],
   future: [],
   mode: 'planning',
@@ -14,9 +15,8 @@ export const initialState: SimulationState = {
 };
 
 /**
- * Reducer pour la simulation de forgemagie.
- * Gère les modifications de stats avec undo/redo complet,
- * le mode planning/simulation, et le log de FM.
+ * Reducer de l'interface : lignes visibles + reliquat serveur (état propre, jamais
+ * dérivé des lignes), undo/redo, mode planning/simulation, journal.
  */
 export function simulationReducer(
   state: SimulationState,
@@ -32,34 +32,33 @@ export function simulationReducer(
 
     case 'UPDATE_STAT': {
       const newStats = state.stats.map((s) => {
-        if (s.characteristicId !== action.characteristicId) return s;
+        if (s.characteristicId !== action.characteristicId || s.isLocked) return s;
         const max = getStatAbsoluteMax(s);
         return { ...s, currentValue: Math.max(0, Math.min(max, action.newValue)) };
       });
-      return pushHistory(state, newStats);
+      return pushHistory(state, newStats, state.residualPool);
     }
 
     case 'ADD_EXO': {
       if (state.stats.some((s) => s.characteristicId === action.stat.characteristicId)) {
         return state;
       }
-      const newStats = [...state.stats, action.stat];
-      return pushHistory(state, newStats);
+      return pushHistory(state, [...state.stats, action.stat], state.residualPool);
     }
 
     case 'REMOVE_EXO': {
       const newStats = state.stats.filter(
         (s) => !(s.characteristicId === action.characteristicId && s.isExo)
       );
-      return pushHistory(state, newStats);
+      return pushHistory(state, newStats, state.residualPool);
     }
 
     case 'RESET_TO_PERFECT': {
       const newStats = state.stats
         .filter((s) => !s.isExo)
-        .map((s) => ({ ...s, currentValue: s.baseMax }));
+        .map((s) => ({ ...s, currentValue: s.baseMax, isLocked: false }));
       return {
-        ...pushHistory(state, newStats),
+        ...pushHistory(state, newStats, 0),
         simulationLog: [],
         logCounter: 0,
       };
@@ -68,24 +67,24 @@ export function simulationReducer(
     case 'UNDO': {
       if (state.history.length === 0) return state;
       const previous = state.history[state.history.length - 1];
-      const newHistory = state.history.slice(0, -1);
       return {
         ...state,
-        stats: previous,
-        history: newHistory,
-        future: [state.stats, ...state.future],
+        stats: previous.stats,
+        residualPool: previous.residualPool,
+        history: state.history.slice(0, -1),
+        future: [{ stats: state.stats, residualPool: state.residualPool }, ...state.future],
       };
     }
 
     case 'REDO': {
       if (state.future.length === 0) return state;
       const next = state.future[0];
-      const newFuture = state.future.slice(1);
       return {
         ...state,
-        stats: next,
-        history: [...state.history, state.stats],
-        future: newFuture,
+        stats: next.stats,
+        residualPool: next.residualPool,
+        history: [...state.history, { stats: state.stats, residualPool: state.residualPool }],
+        future: state.future.slice(1),
       };
     }
 
@@ -94,25 +93,21 @@ export function simulationReducer(
       return {
         ...state,
         mode: newMode,
-        // Clear log when switching to simulation mode
         simulationLog: newMode === 'simulation' ? [] : state.simulationLog,
         logCounter: newMode === 'simulation' ? 0 : state.logCounter,
       };
     }
 
     case 'APPLY_RUNE': {
-      const { result } = action;
-      // Safety clamp : toutes les stats respectent le max théorique (règle des 101)
-      const clampedStats = result.newStats.map((s) => {
-        const max = getStatAbsoluteMax(s);
-        return s.currentValue > max ? { ...s, currentValue: max } : s;
-      });
       return {
-        ...pushHistory(state, clampedStats),
-        simulationLog: [...state.simulationLog, result.logEntry],
+        ...pushHistory(state, action.stats, action.residualPool),
+        simulationLog: [...state.simulationLog, action.logEntry],
         logCounter: state.logCounter + 1,
       };
     }
+
+    case 'RESET_RESIDUAL':
+      return pushHistory(state, state.stats, 0);
 
     case 'CLEAR_LOG':
       return {
@@ -126,18 +121,20 @@ export function simulationReducer(
   }
 }
 
-/** Push current stats to history, clear future (new branch) */
+/** Push current snapshot to history, clear future (new branch) */
 function pushHistory(
   state: SimulationState,
-  newStats: SimulatedStat[]
+  newStats: SimulatedStat[],
+  newResidualPool: number
 ): SimulationState {
-  const history = [...state.history, state.stats];
+  const history = [...state.history, { stats: state.stats, residualPool: state.residualPool }];
   if (history.length > MAX_HISTORY) {
     history.shift();
   }
   return {
     ...state,
     stats: newStats,
+    residualPool: newResidualPool,
     history,
     future: [],
   };
