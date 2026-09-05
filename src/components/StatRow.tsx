@@ -1,8 +1,9 @@
 import { getStatStatus, computeMaxReachable } from '../logic/planning/weightBudget';
 import { getAvailableRuneTiers } from '../data/dataset';
-import { getStatAbsoluteMax } from '../data/statCaps';
+import { getStatAbsoluteMax, getStatCategory } from '../data/statCaps';
 import type { SimulatedStat, AppMode, RuneTier, RuneOutcome } from '../types';
 import type { RuneEstimate } from '../hooks/useSimulation';
+import { RuneGlyph } from './atelier/RuneGlyph';
 
 interface Props {
   stat: SimulatedStat;
@@ -10,35 +11,38 @@ interface Props {
   mode: AppMode;
   onUpdate: (characteristicId: number, newValue: number) => void;
   onApplyRune?: (characteristicId: number, tier: RuneTier, outcome: RuneOutcome) => void;
-  /** Tirage de l'issue par le MODÈLE probabiliste (paramétré, INCONNU), puis application. */
   onDrawRune?: (characteristicId: number, tier: RuneTier) => void;
-  /** Estimation du modèle pour affichage ; null si indisponible. */
   estimateRune?: (characteristicId: number, tier: RuneTier) => RuneEstimate | null;
   onRemoveExo?: (characteristicId: number) => void;
 }
 
-const STATUS_STYLES = {
-  perfect: { bg: 'bg-dofus-dark', text: 'text-green-400', label: 'Parfait' },
-  normal: { bg: 'bg-dofus-dark', text: 'text-gray-300', label: '' },
-  over: { bg: 'bg-over-bg', text: 'text-over', label: 'OVER' },
-  exo: { bg: 'bg-exo-bg', text: 'text-exo', label: 'EXO' },
-  sacrificed: { bg: 'bg-dofus-dark', text: 'text-sacrificed', label: 'Sacrifié' },
-};
+/**
+ * Code couleur des lignes (client 2.58) : exo froid, over vert clair, ligne à 0 grise,
+ * naturelle ivoire. Verrouillée = teinte cuivre.
+ */
+const LINE_TONE = {
+  perfect: { text: 'text-ivory', badge: '', badgeLabel: '' },
+  normal: { text: 'text-ivory', badge: '', badgeLabel: '' },
+  sacrificed: { text: 'text-ivory-muted', badge: 'border-ivory-faint text-ivory-muted', badgeLabel: 'sous le jet' },
+  over: { text: 'text-over', badge: 'border-over-deep bg-over-deep/40 text-over', badgeLabel: 'over' },
+  exo: { text: 'text-exo', badge: 'border-exo-deep bg-exo-deep/40 text-exo', badgeLabel: 'exo' },
+} as const;
 
 const TIER_LABELS: Record<RuneTier, string> = { normal: '', pa: 'Pa', ra: 'Ra' };
 
-/** Issues fournies manuellement (moteur déterministe). */
 const OUTCOMES: { outcome: RuneOutcome; cls: string; title: string }[] = [
-  { outcome: 'SC', cls: 'text-green-400 hover:bg-green-900/40', title: 'Succès critique : la rune passe sans perte' },
-  { outcome: 'SN', cls: 'text-yellow-400 hover:bg-yellow-900/40', title: 'Succès neutre : la rune passe, perte = poids de la rune (reliquat consommé en priorité)' },
-  { outcome: 'EC', cls: 'text-red-400 hover:bg-red-900/40', title: 'Échec critique : la rune ne passe pas, perte (paramètre ecLossFactor)' },
+  { outcome: 'SC', cls: 'text-sc hover:bg-sc/15', title: 'Forcer un succès critique : la rune passe sans perte' },
+  { outcome: 'SN', cls: 'text-sn hover:bg-sn/15', title: 'Forcer un succès neutre : la rune passe, perte = poids de la rune, reliquat consommé en priorité' },
+  { outcome: 'EC', cls: 'text-ec hover:bg-ec/15', title: 'Forcer un échec critique : la rune ne passe pas, perte selon ecLossFactor' },
 ];
 
 const pct = (x: number) => `${Math.round(x * 100)} %`;
 
 export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, onDrawRune, estimateRune, onRemoveExo }: Props) {
   const status = getStatStatus(stat);
-  const style = STATUS_STYLES[status];
+  const isZero = stat.currentValue === 0;
+  const tone = LINE_TONE[status];
+  const nameTone = stat.isLocked ? 'text-locked' : isZero ? 'text-zero' : tone.text;
 
   const effectiveBudgetForStat =
     stat.currentValue > stat.baseMax
@@ -56,49 +60,62 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
   const currentOver = stat.isExo ? stat.currentValue : Math.max(0, stat.currentValue - stat.baseMax);
   const maxOver = absoluteMax === Infinity ? null : stat.isExo ? absoluteMax : absoluteMax - stat.baseMax;
 
+  // Barre de jet : position de la valeur entre min et max, dépassement en over
+  const span = Math.max(1, stat.baseMax - stat.baseMin);
+  const rollPercent = stat.isExo ? 100 : Math.min(100, Math.max(0, ((stat.currentValue - stat.baseMin) / span) * 100));
+  const overPercent = maxOver && maxOver > 0 ? Math.min(100, (currentOver / maxOver) * 100) : 0;
+
   const availableTiers = getAvailableRuneTiers(stat.characteristicId).map(({ tier, info }) => ({
     tier,
     label: TIER_LABELS[tier],
     value: info.value,
   }));
 
+  const inputId = `line-${stat.characteristicId}`;
+
   return (
-    <div className={`${style.bg} border border-dofus-gold/10 rounded-lg px-4 py-3 flex flex-wrap items-center gap-3 transition-colors`}>
-      <div className="flex items-center gap-2 min-w-[180px]">
-        <span className={`font-medium ${style.text}`}>{stat.statName}</span>
-        {style.label && (
-          <span className={`text-xs px-1.5 py-0.5 rounded font-bold ${
-            status === 'over' ? 'bg-over/20 text-over'
-              : status === 'exo' ? 'bg-exo/20 text-exo'
-              : 'bg-gray-600/30 text-gray-400'
-          }`}>
-            {style.label}
-          </span>
-        )}
-        {stat.isLocked && (
-          <span className="text-xs px-1.5 py-0.5 rounded font-bold bg-dofus-gold/20 text-dofus-gold" title="Objet transcendé : plus de forgemagie ni d'orbe (devblog 2.58)">
-            🔒
-          </span>
-        )}
+    <div
+      className={`surface-metal grid gap-x-4 gap-y-2 px-4 py-3 items-center ${
+        stat.isLocked ? 'opacity-90' : ''
+      } grid-cols-[auto_1fr_auto] md:grid-cols-[auto_minmax(11rem,1.2fr)_minmax(9rem,1fr)_auto]`}
+    >
+      {/* Glyphe gravé */}
+      <div className={`${nameTone} opacity-80`} aria-hidden="true">
+        <RuneGlyph category={getStatCategory(stat.characteristicId)} size={26} />
       </div>
 
-      <div className="text-xs text-gray-500 min-w-[80px]">
-        {stat.isExo
-          ? 'Exotique'
-          : stat.baseMin === stat.baseMax
-            ? <>Base : {stat.baseMax}</>
-            : <>Base : {stat.baseMin}–{stat.baseMax}</>}
+      {/* Nom, badges, base */}
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`font-display text-[0.95rem] font-semibold tracking-wide ${nameTone}`}>{stat.statName}</span>
+          {tone.badgeLabel && !stat.isLocked && (
+            <span className={`text-[0.7rem] px-1.5 py-px rounded-control border ${tone.badge}`}>{tone.badgeLabel}</span>
+          )}
+          {stat.isLocked && (
+            <span className="text-[0.7rem] px-1.5 py-px rounded-control border border-locked/60 text-locked" title="Objet transcendé : plus de forgemagie ni d'orbe (devblog 2.58)">
+              verrouillée
+            </span>
+          )}
+        </div>
+        <div className="text-xs text-ivory-faint tnum">
+          {stat.isExo ? 'ajoutée par forgemagie' : stat.baseMin === stat.baseMax ? `jet fixe ${stat.baseMax}` : `jet ${stat.baseMin} à ${stat.baseMax}`}
+        </div>
       </div>
 
-      {mode === 'planning' && !stat.isLocked && (
-        <>
+      {/* Valeur + barre de jet */}
+      <div className="col-span-3 md:col-span-1 order-last md:order-none flex items-center gap-3">
+        {mode === 'planning' && !stat.isLocked ? (
           <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={() => onUpdate(stat.characteristicId, stat.currentValue - 1)}
               disabled={stat.currentValue <= 0}
-              className="w-7 h-7 rounded bg-dofus-panel-light border border-dofus-gold/20 text-white hover:bg-dofus-gold/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-bold"
-            >-</button>
+              aria-label={`Retirer 1 ${stat.statName}`}
+              className="w-7 h-7 rounded-control border border-forge-line bg-forge-surface-raised text-ivory hover:border-bronze disabled:opacity-30 disabled:cursor-not-allowed"
+            >−</button>
+            <label htmlFor={inputId} className="sr-only">Valeur de {stat.statName}</label>
             <input
+              id={inputId}
               type="number"
               value={stat.currentValue}
               min={0}
@@ -107,107 +124,115 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
                 const val = parseInt(e.target.value, 10);
                 if (!isNaN(val)) onUpdate(stat.characteristicId, Math.max(0, Math.min(val, maxReachable)));
               }}
-              className={`w-16 text-center bg-dofus-dark border border-dofus-gold/20 rounded px-1 py-1 text-sm font-mono ${style.text} focus:outline-none focus:border-dofus-gold`}
+              className={`w-16 text-center bg-forge-bg-deep border border-forge-line rounded-control px-1 py-1 text-base tnum font-semibold ${nameTone}`}
             />
             <button
+              type="button"
               onClick={() => onUpdate(stat.characteristicId, Math.min(stat.currentValue + 1, maxReachable))}
               disabled={stat.currentValue >= maxReachable}
-              className="w-7 h-7 rounded bg-dofus-panel-light border border-dofus-gold/20 text-white hover:bg-dofus-gold/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-bold"
+              aria-label={`Ajouter 1 ${stat.statName}`}
+              className="w-7 h-7 rounded-control border border-forge-line bg-forge-surface-raised text-ivory hover:border-bronze disabled:opacity-30 disabled:cursor-not-allowed"
             >+</button>
           </div>
-          {availableTiers.length > 1 && (
-            <div className="flex gap-1">
-              {availableTiers.map(({ tier, label, value }) => {
-                const wouldExceedCap = stat.currentValue + value > maxReachable;
-                return (
-                  <button
-                    key={tier}
-                    onClick={() => onUpdate(stat.characteristicId, Math.min(stat.currentValue + value, maxReachable))}
-                    disabled={wouldExceedCap}
-                    className="text-xs px-2 py-1 rounded bg-dofus-panel-light border border-dofus-gold/15 text-dofus-gold-light hover:bg-dofus-gold/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    title={wouldExceedCap ? `Budget insuffisant (max ~${maxReachable})` : `+${value} (Rune ${label || 'normale'})`}
-                  >
-                    +{value}{label && <span className="ml-0.5 opacity-60">{label}</span>}
-                  </button>
-                );
-              })}
+        ) : (
+          <div className={`w-16 text-center text-lg tnum font-semibold ${nameTone}`}>{stat.currentValue}</div>
+        )}
+        <div className="flex-1 min-w-[5rem]" title={stat.isExo ? 'Ligne exotique' : `Position dans le jet ${stat.baseMin}–${stat.baseMax}, puis over jusqu'à +${maxOver ?? '∞'}`}>
+          <div className="roll-track h-1.5 rounded-full overflow-hidden flex">
+            <div className={`h-full ${stat.isExo ? 'bg-exo' : 'bg-bronze'}`} style={{ width: `${rollPercent}%` }} />
+          </div>
+          {maxOver !== null && maxOver > 0 && (
+            <div className="roll-track h-1 mt-0.5 rounded-full overflow-hidden">
+              <div className={`h-full ${stat.isExo ? 'bg-exo' : 'bg-over'}`} style={{ width: `${overPercent}%` }} />
             </div>
           )}
-        </>
-      )}
+        </div>
+      </div>
 
-      {mode === 'simulation' && onApplyRune && !stat.isLocked && (
-        <>
-          <div className={`w-16 text-center font-mono text-sm ${style.text} bg-dofus-dark border border-dofus-gold/10 rounded px-1 py-1`}>
-            {stat.currentValue}
+      {/* Poids et plafond */}
+      <div className="text-right text-xs tnum leading-tight">
+        <div className="text-ivory-muted"><span className="text-ivory font-semibold text-sm">{lineWeight.toFixed(1)}</span> poids</div>
+        {maxOver !== null && (
+          <div className={currentOver >= maxOver ? 'text-ec' : currentOver > 0 ? (stat.isExo ? 'text-exo' : 'text-over') : 'text-ivory-faint'} title="Poids ajouté au-delà du jet parfait / plafond par ligne (empirical_params.json)">
+            +{currentOver} sur {maxOver}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {availableTiers.map(({ tier, label, value }) => {
+        )}
+        {stat.isExo && onRemoveExo && !stat.isLocked && (
+          <button type="button" onClick={() => onRemoveExo(stat.characteristicId)} className="text-ec hover:text-copper mt-0.5" aria-label={`Retirer l'exo ${stat.statName}`}>
+            retirer
+          </button>
+        )}
+      </div>
+
+      {/* Actions : runes par palier */}
+      {!stat.isLocked && availableTiers.length > 0 && (
+        <div className="col-span-3 md:col-span-4 flex flex-wrap gap-2 pt-1 border-t border-forge-line/60">
+          {mode === 'planning' &&
+            availableTiers.map(({ tier, label, value }) => {
+              const wouldExceedCap = stat.currentValue + value > maxReachable;
+              return (
+                <button
+                  key={tier}
+                  type="button"
+                  onClick={() => onUpdate(stat.characteristicId, Math.min(stat.currentValue + value, maxReachable))}
+                  disabled={wouldExceedCap}
+                  className="text-xs px-2.5 py-1 rounded-control border border-bronze-dim bg-forge-surface-raised text-copper hover:border-copper disabled:opacity-30 disabled:cursor-not-allowed tnum"
+                  title={wouldExceedCap ? `Budget insuffisant (max ~${maxReachable})` : `Ajouter +${value} (rune ${label || 'simple'})`}
+                >
+                  +{value}{label && <span className="ml-1 text-ivory-faint">{label}</span>}
+                </button>
+              );
+            })}
+
+          {mode === 'simulation' && onApplyRune &&
+            availableTiers.map(({ tier, label, value }) => {
               const estimate = estimateRune?.(stat.characteristicId, tier) ?? null;
               return (
-                <div key={tier} className="flex flex-col rounded border border-dofus-gold/20 bg-dofus-panel-light overflow-hidden">
-                  <div className="flex items-center">
-                    <span className="text-xs px-2 text-dofus-gold-light" title={`Rune +${value}${label ? ' ' + label : ''} — poids ${(value * stat.weightPerPoint).toFixed(1)}`}>
-                      +{value}{label && <span className="ml-0.5 opacity-60">{label}</span>}
+                <div key={tier} className="flex flex-col rounded-control border border-bronze-dim bg-forge-bg-deep/60 overflow-hidden">
+                  <div className="flex items-stretch">
+                    <span className="text-xs px-2 self-center text-copper tnum" title={`Rune +${value}${label ? ' ' + label : ''}, poids ${(value * stat.weightPerPoint).toFixed(1)}`}>
+                      +{value}{label && <span className="ml-1 text-ivory-faint">{label}</span>}
                     </span>
+                    {onDrawRune && estimate && (
+                      <button
+                        type="button"
+                        onClick={() => onDrawRune(stat.characteristicId, tier)}
+                        className="text-xs font-semibold px-2.5 border-l border-bronze-dim text-ivory bg-bronze-dim/40 hover:bg-bronze-dim/70"
+                        title={`Tirer l'issue avec le modèle « ${estimate.model} » (modèle empirique, statut INCONNU : la formule serveur est secrète)`}
+                      >
+                        Tenter
+                      </button>
+                    )}
                     {OUTCOMES.map(({ outcome, cls, title }) => (
                       <button
                         key={outcome}
+                        type="button"
                         onClick={() => onApplyRune(stat.characteristicId, tier, outcome)}
-                        className={`text-xs font-mono font-bold px-2 py-1.5 border-l border-dofus-gold/20 transition-colors ${cls}`}
-                        title={`${title} (issue choisie manuellement)`}
+                        className={`text-xs tnum font-semibold px-2 border-l border-bronze-dim ${cls}`}
+                        title={title}
                       >
                         {outcome}
                       </button>
                     ))}
-                    {onDrawRune && estimate && (
-                      <button
-                        onClick={() => onDrawRune(stat.characteristicId, tier)}
-                        className="text-xs px-2 py-1.5 border-l border-dofus-gold/20 text-exo hover:bg-exo/20 transition-colors"
-                        title={`Tirer l'issue avec le MODÈLE « ${estimate.model} » (statut INCONNU : la formule serveur est secrète, ceci n'en est pas une reproduction)`}
-                      >
-                        🎲
-                      </button>
-                    )}
                   </div>
                   {estimate && (
-                    <div
-                      className="text-[10px] font-mono px-2 py-0.5 text-gray-500 border-t border-dofus-gold/10"
-                      title={`Estimation du modèle « ${estimate.model} » (empirical_params.json → probability), statut INCONNU. Seules les bornes 15 % / 1 % sont officielles.${estimate.isHeavyExo ? ' Exo lourd : plancher 1 %.' : ''}`}
-                    >
-                      modèle · SC {pct(estimate.pSC)} · SN {pct(estimate.pSN)} · EC {pct(estimate.pEC)}
+                    <div className="flex items-center gap-2 text-[0.7rem] px-2 py-0.5 border-t border-bronze-dim/60 text-ivory-muted tnum">
+                      <span
+                        className="px-1 rounded-control border border-status-unknown/60 text-status-unknown"
+                        title={`Modèle « ${estimate.model} » (empirical_params.json → probability), statut INCONNU. Seules les bornes 15 % / 1 % sont officielles.${estimate.isHeavyExo ? ' Exo lourd : plancher 1 %.' : ''}`}
+                      >
+                        modèle empirique
+                      </span>
+                      <span><span className="text-sc">SC</span> {pct(estimate.pSC)}</span>
+                      <span><span className="text-sn">SN</span> {pct(estimate.pSN)}</span>
+                      <span><span className="text-ec">EC</span> {pct(estimate.pEC)}</span>
                     </div>
                   )}
                 </div>
               );
             })}
-          </div>
-        </>
+        </div>
       )}
-
-      {mode === 'simulation' && stat.isLocked && (
-        <span className="text-xs text-gray-500">Verrouillée : plus aucune rune possible</span>
-      )}
-
-      <div className="ml-auto flex items-center gap-3 text-xs text-gray-500">
-        <span title="Poids de cette ligne">{lineWeight.toFixed(1)}p</span>
-        {stat.isForgemeable && maxOver !== null && (
-          <span
-            title={`Plafond par ligne (empirical_params.json) — over max: +${maxOver} | Max: ${absoluteMax}`}
-            className={currentOver >= maxOver ? 'text-red-400 font-semibold' : currentOver > 0 ? 'text-over' : 'text-gray-600'}
-          >
-            +{currentOver}/{maxOver}
-          </span>
-        )}
-        {stat.isForgemeable && mode === 'planning' && (
-          <span title="Max atteignable avec le budget de poids actuel" className="text-gray-600">
-            ~{maxReachable}
-          </span>
-        )}
-        {stat.isExo && onRemoveExo && !stat.isLocked && (
-          <button onClick={() => onRemoveExo(stat.characteristicId)} className="text-red-400 hover:text-red-300 transition-colors" title="Retirer cet exo">&times;</button>
-        )}
-      </div>
     </div>
   );
 }

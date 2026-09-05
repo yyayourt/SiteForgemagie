@@ -1,0 +1,159 @@
+/*
+ * Thème « atelier de forgemage » — SEULE source de couleurs, polices et matières.
+ *
+ * Règles :
+ *  - aucune couleur Tailwind par défaut (la palette par défaut est désactivée ci-dessous) ;
+ *  - toute couleur passe par un token --color-* (utilitaires bg-/text-/border-…) ;
+ *  - exo = froid (bleu-vert), over = vert clair, ligne à 0 = gris, cohérent avec le code
+ *    couleur du client depuis la 2.58 ;
+ *  - aucune ressource Ankama : glyphes, ornements et icônes sont des SVG originaux.
+ */
+
+@theme {
+  /* ─── Désactivation de la palette Tailwind par défaut ───
+   * Activée lors de la généralisation (phase 4, étape 2) : tant que les anciens composants
+   * utilisent les couleurs gray et green de Tailwind, la ligne « --color-* : initial »
+   * reste désactivée ici.
+   */
+
+  /* ─── Fonds : charbon brun, métal sombre ─── */
+  --color-forge-bg: #1b1512;
+  --color-forge-bg-deep: #120e0c;
+  --color-forge-surface: #251d18;
+  --color-forge-surface-raised: #2f2620;
+  --color-forge-line: #3d3128;
+
+  /* ─── Parchemin (panneaux de connaissance) ─── */
+  --color-parchment: #e8dbc1;
+  --color-parchment-deep: #d9c9a8;
+  --color-parchment-ink: #2b2016;
+  --color-parchment-ink-muted: #6b5a47;
+
+  /* ─── Accents chauds ─── */
+  --color-bronze: #b87a3b;
+  --color-bronze-dim: #7c5227;
+  --color-copper: #d4914f;
+  --color-ember: #e0a83a;
+
+  /* ─── Texte ─── */
+  --color-ivory: #f2e9da;
+  --color-ivory-muted: #b9ac99;
+  --color-ivory-faint: #8d8272;
+
+  /* ─── Sémantique des lignes (client 2.58) ─── */
+  --color-exo: #3fb5ad;
+  --color-exo-deep: #1d5f5a;
+  --color-over: #9cd46b;
+  --color-over-deep: #3f6a25;
+  --color-zero: #7e766d;
+  --color-locked: #d4914f;
+
+  /* ─── Issues ─── */
+  --color-sc: #8fc46a;
+  --color-sn: #e0a83a;
+  --color-ec: #d2553f;
+
+  /* ─── Statuts épistémiques ─── */
+  --color-status-primary: #8fc46a;
+  --color-status-empirical: #6fb3d2;
+  --color-status-hypothesis: #b9ac99;
+  --color-status-contradiction: #e0a83a;
+  --color-status-unknown: #d2553f;
+
+  /* ─── Typographie ─── */
+  --font-display: 'Cinzel', 'Georgia', serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+
+  /* ─── Rayons, ombres ─── */
+  --radius-panel: 0.75rem;
+  --radius-control: 0.375rem;
+  --shadow-panel: 0 8px 24px -12px rgb(0 0 0 / 0.7), 0 1px 0 0 rgb(255 232 200 / 0.04) inset;
+  --shadow-inset-metal: inset 0 1px 0 rgb(255 232 200 / 0.05), inset 0 -1px 0 rgb(0 0 0 / 0.45);
+}
+
+/* ─── Base ─── */
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--color-forge-bg);
+  background-image:
+    radial-gradient(ellipse at top, rgb(184 122 59 / 0.08), transparent 55%),
+    radial-gradient(ellipse at bottom right, rgb(63 181 173 / 0.04), transparent 50%);
+  color: var(--color-ivory);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+/* Chiffres tabulaires partout où des données s'alignent */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Focus visible (accessibilité) ─── */
+:focus-visible {
+  outline: 2px solid var(--color-copper);
+  outline-offset: 2px;
+}
+
+/* ─── Matières ─── */
+
+/* Métal brossé sombre : zone de simulation */
+.surface-metal {
+  background-color: var(--color-forge-surface);
+  background-image:
+    linear-gradient(180deg, rgb(255 232 200 / 0.03), transparent 40%),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.012) 0 1px, transparent 1px 3px);
+  border: 1px solid var(--color-forge-line);
+  box-shadow: var(--shadow-panel), var(--shadow-inset-metal);
+  border-radius: var(--radius-panel);
+}
+
+/* Parchemin : panneaux de connaissance, tooltips longs */
+.surface-parchment {
+  background-color: var(--color-parchment);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgb(255 255 255 / 0.35), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgb(120 80 30 / 0.12), transparent 45%);
+  color: var(--color-parchment-ink);
+  border: 1px solid var(--color-bronze-dim);
+  box-shadow: var(--shadow-panel);
+  border-radius: var(--radius-panel);
+}
+
+/* Filet ornemental : bordure bronze + hairline intérieure */
+.ornament {
+  position: relative;
+  border: 1px solid var(--color-bronze-dim);
+}
+.ornament::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgb(184 122 59 / 0.25);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Ligne d'objet : barre de jet (min → max) */
+.roll-track {
+  background: linear-gradient(90deg, var(--color-forge-bg-deep), var(--color-forge-line));
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.6);
+}
+
+/* ─── Mouvement : uniquement en réponse à une action ─── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -40,6 +40,11 @@ const CATEGORY_BY_CHARACTERISTIC: Record<StatCapCategory, readonly number[]> = {
   utility: [],
 };
 
+/** Famille d'affichage d'une caractéristique (glyphe, regroupement du guide). */
+export function getStatCategory(characteristicId: number): StatCapCategory {
+  return categoryOf(characteristicId);
+}
+
 function categoryOf(characteristicId: number): StatCapCategory {
   for (const [category, ids] of Object.entries(CATEGORY_BY_CHARACTERISTIC)) {
     if (ids.includes(characteristicId)) return category as StatCapCategory;
