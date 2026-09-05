@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction A — La Forge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..900,0..100&family=Instrument+Sans:ital,wght@0,400..700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────────────────────────────────────────────────
+   DIRECTION A — « LA FORGE »
+   Une seule source de lumière : le creuset. Tout le reste est fer noir.
+   ──────────────────────────────────────────────────────────────── */
+/* ── Tokens. Mode principal : sombre (la forge la nuit). Second mode : clair (l'atelier le jour). ──
+   Seuls les fonds, les bordures et l'encre changent entre les deux ; le creuset, les braises,
+   les couleurs d'issue, le vert d'action et les couleurs de ligne restent la même identité. */
+:root {
+  /* fonds et fer */
+  --pitch: #0b0806;            /* page */
+  --iron: #17110d;             /* panneaux */
+  --iron-2: #211913;           /* panneaux en relief */
+  --iron-edge: #3a2b20;        /* bordures */
+  --slab-a: #221a14; --slab-b: #140f0b; --slab-c: #100c09; --slab-edge: #3d2e22;   /* la dalle d'enclume */
+  --well: var(--well);             /* creux : champs, boutons secondaires, journal */
+  --track: #0a0705;            /* rail des barres de jet */
+  /* encre */
+  --ash: #eadfcf;              /* texte */
+  --ash-2: #a99a86;            /* texte secondaire */
+  --ash-3: #6f6355;            /* texte discret, AA sur --iron */
+  /* feu (identité, inchangé entre les modes) */
+  --ember: #ff7a1a;
+  --ember-deep: #b8470c;
+  --molten: #ffc25c;
+  --molten-white: #fff1d0;
+  --molten-text: #ffc25c;      /* métal en fusion utilisé comme TEXTE : lisible sur les fonds du mode */
+  --lamp: rgba(255,122,26,.18); /* halo de la forge sur la page */
+  /* ACTION : vert franc et chaud (jaune-vert saturé), réservé aux boutons d'action principaux.
+     Distinct du vert des lignes over par la teinte (chaud vs menthe), la saturation et l'usage. */
+  --cta: #4fae1f;
+  --cta-hover: #5cbf2a;
+  --cta-ink: #0e1a08;          /* texte sur le vert : contraste 6,3:1 */
+  --cta-glow: rgba(79,174,31,.45);
+  /* LIGNES : exo froid (bleu-vert), over vert-menthe DÉSATURÉ (jamais le vert d'action), éteinte grise */
+  --exo: #4fd1c5;
+  --over: #9ed8bb;
+  --zero: #6d665e;
+  /* issues */
+  --sc: #ffd27a;
+  --sn: #ff9f43;
+  --ec: #ff4d3d;
+  --model: #e0a83a;
+  --grain: .35;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-text: 'Instrument Sans', system-ui, sans-serif;
+  --r: 14px;
+}
+/* Second mode : l'atelier de jour. Plâtre chaud, bois clair, fer poli. */
+[data-theme="light"] {
+  --pitch: #e9dcc3;
+  --iron: #f6eee0;
+  --iron-2: #fbf5ea;
+  --iron-edge: #cdb894;
+  --slab-a: #e2d3b6; --slab-b: #d6c5a4; --slab-c: #cdbb98; --slab-edge: #a88b5c;
+  --well: #efe4cf;
+  --track: #cdbb98;
+  --ash: #2a1d12;
+  --ash-2: #5c4a36;
+  --ash-3: #7a6650;             /* AA sur --iron : 5,2:1 */
+  --lamp: rgba(255,150,60,.16);
+  --molten-text: #9a4a10;       /* cuivre chaud, 5,6:1 sur --iron clair */
+  --cta: #3f9a19;
+  --cta-hover: #4aad21;
+  --cta-ink: #ffffff;           /* 4,6:1 sur #3f9a19 */
+  --cta-glow: rgba(63,154,25,.35);
+  --exo: #176b62;               /* 4,9:1 sur vélin */
+  --over: #24704a;              /* menthe profonde, 4,8:1 */
+  --zero: #8a8074;
+  --sc: #8c6a12;
+  --sn: #a85a10;
+  --ec: #b0301f;
+  --model: #8c6a12;
+  --grain: .18;
+}
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
+body {
+  margin: 0; min-height: 100vh; color: var(--ash); font-family: var(--font-text); font-size: 15px; line-height: 1.45;
+  background:
+    radial-gradient(1200px 700px at 18% 62%, var(--lamp), transparent 60%),
+    radial-gradient(900px 500px at 50% -10%, rgba(255,194,92,.06), transparent 60%),
+    var(--pitch);
+  background-attachment: fixed;
+  transition: background-color .25s, color .25s;
+}
+.num { font-variant-numeric: tabular-nums; }
+h1,h2,h3 { font-family: var(--font-display); font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+:focus-visible { outline: 2px solid var(--molten); outline-offset: 3px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+/* Grain de fer */
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; opacity: var(--grain); mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+/* ─── En-tête : une barre de fer, un filet de braise ─── */
+.top {
+  display: flex; align-items: center; gap: 20px; padding: 14px 28px; border-bottom: 1px solid var(--iron-edge);
+  background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+  position: relative;
+}
+.top::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ember) 30%, var(--molten) 50%, var(--ember) 70%, transparent); opacity: .6; }
+.brand { font-family: var(--font-display); font-size: 22px; font-weight: 700; font-variation-settings: "SOFT" 40; color: var(--molten-text); }
+.brand small { display: block; font-family: var(--font-text); font-size: 12px; color: var(--ash-3); font-weight: 400; letter-spacing: 0; }
+.search { flex: 1; max-width: 520px; display: flex; align-items: center; gap: 10px; background: var(--iron); border: 1px solid var(--iron-edge); border-radius: 999px; padding: 8px 14px; color: var(--ash-2); }
+.search svg { flex: none; }
+.search input { background: none; border: 0; color: var(--ash); font: inherit; width: 100%; outline: none; }
+.nav { margin-left: auto; display: flex; gap: 6px; }
+.nav a { color: var(--ash-2); text-decoration: none; padding: 8px 12px; border-radius: 8px; border: 1px solid transparent; }
+.nav a:hover, .nav a[aria-current] { color: var(--ash); border-color: var(--iron-edge); background: var(--iron); }
+
+/* ─── Grille de l'atelier ─── */
+.atelier {
+  display: grid; grid-template-columns: 260px minmax(0, 1fr) 320px; gap: 22px; padding: 26px 28px 40px; max-width: 1480px; margin: 0 auto;
+}
+@media (max-width: 1100px) { .atelier { grid-template-columns: 1fr; } }
+
+/* ─── Creuset (Reliquat) : l'élément signature ─── */
+.crucible {
+  background: linear-gradient(180deg, var(--iron-2), var(--iron)); border: 1px solid var(--iron-edge); border-radius: var(--r); padding: 18px 18px 16px; position: relative;
+  box-shadow: 0 30px 60px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.gauge-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.gauge-title h2 { font-size: 17px; }
+.gauge-title .status { font-size: 11px; color: var(--ash-3); border: 1px solid var(--iron-edge); border-radius: 999px; padding: 2px 8px; }
+.vessel {
+  position: relative; height: 230px; border-radius: 10px 10px 70px 70px / 10px 10px 40px 40px; overflow: hidden;
+  background: linear-gradient(180deg, #2a2019, #0e0a08 70%); border: 1px solid #3f3026;
+  box-shadow: inset 0 0 40px rgba(0,0,0,.9), inset 0 -8px 20px rgba(0,0,0,.8);
+}
+.vessel .rim { position: absolute; inset: 0 0 auto 0; height: 10px; background: linear-gradient(180deg, #4a3829, #1d1611); border-bottom: 1px solid #57432f; }
+.molten {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 34%;
+  background: linear-gradient(180deg, var(--molten-white) 0%, var(--molten) 12%, var(--ember) 45%, var(--ember-deep) 100%);
+  box-shadow: 0 -12px 40px rgba(255,140,40,.55), 0 -2px 0 rgba(255,241,208,.8);
+  animation: swell 6s ease-in-out infinite alternate;
+}
+.molten::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 14px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); filter: blur(4px); animation: sheen 3.6s linear infinite; }
+.molten::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60px 20px at 30% 30%, rgba(255,255,255,.25), transparent 70%), radial-gradient(40px 14px at 70% 60%, rgba(255,255,255,.18), transparent 70%); mix-blend-mode: screen; }
+@keyframes swell { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+@keyframes sheen { from { transform: translateX(-60%); } to { transform: translateX(60%); } }
+.vessel .glow { position: absolute; inset: auto -30% -20% -30%; height: 70%; background: radial-gradient(closest-side, rgba(255,122,26,.45), transparent); filter: blur(18px); pointer-events: none; }
+.vessel .ticks { position: absolute; right: 8px; top: 18px; bottom: 30px; display: flex; flex-direction: column; justify-content: space-between; font-size: 10px; color: var(--ash-3); text-align: right; }
+.vessel .ticks span::after { content: ""; display: inline-block; width: 10px; height: 1px; background: var(--iron-edge); margin-left: 4px; vertical-align: middle; }
+.readout { display: flex; align-items: baseline; gap: 8px; margin-top: 12px; }
+.readout b { font-family: var(--font-display); font-size: 34px; font-weight: 700; color: var(--molten-text); line-height: 1; }
+.readout span { color: var(--ash-2); font-size: 13px; }
+.hint { font-size: 12px; color: var(--ash-3); margin-top: 8px; line-height: 1.4; }
+.hint abbr { text-decoration: underline dotted; cursor: help; }
+
+/* Balance (Budget de poids) — fer froid, pas de lumière */
+.scale { margin-top: 18px; background: var(--iron); border: 1px solid var(--iron-edge); border-radius: var(--r); padding: 16px 18px; }
+.scale h2 { font-size: 15px; color: var(--ash-2); }
+.beam { position: relative; height: 54px; margin: 12px 0 6px; }
+.beam .bar { position: absolute; left: 6%; right: 6%; top: 18px; height: 3px; background: linear-gradient(90deg, #4a3a2c, #7a5f47, #4a3a2c); transform: rotate(-3deg); transform-origin: center; border-radius: 2px; }
+.beam .pivot { position: absolute; left: 50%; top: 8px; width: 12px; height: 22px; margin-left: -6px; background: #5a4634; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.beam .pan { position: absolute; top: 30px; width: 54px; height: 10px; border-radius: 0 0 20px 20px; background: #3b2e23; border: 1px solid #5a4634; border-top: 0; }
+.beam .pan.l { left: 8%; top: 27px; } .beam .pan.r { right: 8%; top: 33px; }
+.beam .pan i { position: absolute; left: 50%; bottom: 100%; width: 1px; height: 12px; background: #5a4634; }
+.scale .rows { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 13px; color: var(--ash-2); }
+.scale .rows b { color: var(--ash); font-weight: 600; }
+.scale .rows .neg { color: var(--sn); }
+
+/* ─── L'objet : la dalle d'enclume ─── */
+.slab {
+  position: relative; border-radius: 18px; padding: 26px 28px 22px;
+  background:
+    radial-gradient(800px 300px at 20% 100%, rgba(255,122,26,.10), transparent 60%),
+    linear-gradient(180deg, var(--slab-a), var(--slab-b) 60%, var(--slab-c));
+  border: 1px solid var(--slab-edge); box-shadow: 0 40px 80px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.08), inset 0 -40px 60px -50px rgba(255,122,26,.25);
+}
+.slab::before { content: ""; position: absolute; inset: 10px; border: 1px solid rgba(255,194,92,.10); border-radius: 12px; pointer-events: none; }
+.hero { display: flex; align-items: center; gap: 18px; padding-bottom: 18px; border-bottom: 1px solid #2f241b; }
+.hero .icon { width: 72px; height: 72px; border-radius: 12px; background: var(--well); border: 1px solid var(--slab-edge); display: grid; place-items: center; box-shadow: inset 0 0 20px rgba(0,0,0,.8), 0 0 0 4px rgba(255,194,92,.06); overflow: hidden; }
+.hero .icon img { width: 60px; height: 60px; image-rendering: auto; }
+.hero h1 { font-size: 30px; font-variation-settings: "SOFT" 60, "opsz" 36; color: var(--ash); }
+/* Bascule de thème : sombre par défaut, clair en second mode (mémorisé dans localStorage) */
+.theme-toggle { display: inline-flex; align-items: center; gap: 8px; background: var(--iron); border: 1px solid var(--iron-edge); border-radius: 999px; padding: 6px 10px 6px 8px; color: var(--ash-2); font-size: 12px; }
+.theme-toggle:hover { color: var(--ash); border-color: var(--ash-3); }
+.theme-toggle svg { color: var(--molten-text); }
+.theme-toggle .day { display: none; } [data-theme="light"] .theme-toggle .day { display: inline; } [data-theme="light"] .theme-toggle .night { display: none; }
+.hero .meta { color: var(--ash-2); font-size: 13px; margin-top: 2px; }
+.hero .quality { margin-left: auto; text-align: right; }
+.hero .quality b { font-family: var(--font-display); font-size: 26px; color: var(--ash); }
+.hero .quality span { display: block; font-size: 12px; color: var(--ash-3); }
+
+/* Lignes gravées */
+.lines { list-style: none; margin: 8px 0 0; padding: 0; }
+.line {
+  display: grid; grid-template-columns: 34px minmax(140px, 1.1fr) 84px minmax(120px, 1.4fr) 110px; align-items: center; gap: 14px;
+  padding: 11px 6px; border-bottom: 1px solid rgba(255,255,255,.035); position: relative;
+}
+.line:last-child { border-bottom: 0; }
+.line .glyph { color: var(--ash-3); display: grid; place-items: center; }
+.line .name { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--ash); font-variation-settings: "SOFT" 30; }
+.line .base { display: block; font-family: var(--font-text); font-size: 12px; color: var(--ash-3); font-weight: 400; }
+.line .val { font-family: var(--font-display); font-size: 24px; font-weight: 700; text-align: right; color: var(--ash); }
+.line .track { display: block; position: relative; height: 8px; border-radius: 4px; background: var(--track); box-shadow: inset 0 1px 3px rgba(0,0,0,.9); overflow: hidden; }
+.line .track i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #6a4a2b, #b98a4a); border-radius: 4px; }
+.line .track i.ov { background: linear-gradient(90deg, color-mix(in srgb, var(--over) 60%, #2a4a3a), var(--over)); box-shadow: 0 0 10px color-mix(in srgb, var(--over) 50%, transparent); }
+.line .track i.ex { background: linear-gradient(90deg, #1f7a70, var(--exo)); box-shadow: 0 0 10px rgba(79,209,197,.5); }
+.line .cap { display: block; font-size: 11px; color: var(--ash-3); margin-top: 4px; }
+.line .weight { text-align: right; font-size: 13px; color: var(--ash-2); }
+.line .weight b { display: block; font-size: 15px; color: var(--ash); }
+.line.over .name, .line.over .val { color: var(--over); }
+.line.exo .name, .line.exo .val { color: var(--exo); }
+.line.zero .name, .line.zero .val, .line.zero .glyph { color: var(--zero); }
+.line.malus .name, .line.malus .val { color: var(--ash-3); }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; margin-left: 8px; vertical-align: middle; opacity: .9; font-family: var(--font-text); font-weight: 500; }
+
+/* Micro-interaction : la dernière frappe. Un éclat de forge sur la ligne touchée. */
+.line.struck::after {
+  content: ""; position: absolute; inset: 0; border-radius: 8px; pointer-events: none;
+  background: radial-gradient(300px 40px at 30% 50%, rgba(255,194,92,.35), transparent 70%);
+  animation: strike 1.2s ease-out 1 both;
+}
+.line.lost::after {
+  content: ""; position: absolute; inset: 0; border-radius: 8px; pointer-events: none;
+  background: radial-gradient(300px 40px at 60% 50%, rgba(255,77,61,.35), transparent 70%);
+  animation: strike 1.4s ease-out .15s 1 both;
+}
+@keyframes strike { 0% { opacity: 0; transform: scaleX(.2); } 15% { opacity: 1; transform: scaleX(1); } 100% { opacity: 0; } }
+.sparks { position: absolute; left: 58%; top: 40%; pointer-events: none; }
+.sparks i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--molten); box-shadow: 0 0 6px var(--ember); animation: spark 1s ease-out 1 both; }
+.sparks i:nth-child(2) { animation-delay: .05s; --dx: 28px; --dy: -22px; }
+.sparks i:nth-child(3) { animation-delay: .1s; --dx: -18px; --dy: -30px; }
+.sparks i:nth-child(4) { animation-delay: .08s; --dx: 40px; --dy: -8px; }
+.sparks i:nth-child(1) { --dx: 12px; --dy: -36px; }
+@keyframes spark { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 30px)); opacity: 0; } }
+
+/* ─── Colonne d'action ─── */
+.tools { display: flex; flex-direction: column; gap: 14px; }
+.panel { background: var(--iron); border: 1px solid var(--iron-edge); border-radius: var(--r); padding: 16px 18px; }
+.panel h2 { font-size: 16px; margin-bottom: 10px; }
+.tabs { display: flex; gap: 4px; background: var(--well); border: 1px solid var(--iron-edge); border-radius: 10px; padding: 3px; }
+.tabs button { flex: 1; background: none; border: 0; border-radius: 8px; padding: 7px 4px; font-size: 13px; color: var(--ash-2); }
+.tabs button[aria-selected="true"] { background: var(--iron-2); color: var(--ash); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+.runes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.rune {
+  background: var(--well); border: 1px solid var(--iron-edge); border-radius: 12px; padding: 12px 8px 10px; text-align: center; color: var(--ash-2);
+  display: grid; gap: 4px; justify-items: center; transition: border-color .15s, transform .15s;
+}
+.rune:hover { border-color: var(--ash-3); transform: translateY(-1px); }
+.rune[aria-pressed="true"] { border-color: var(--molten-text); color: var(--ash); box-shadow: 0 0 0 1px color-mix(in srgb, var(--molten-text) 35%, transparent), 0 0 24px -6px color-mix(in srgb, var(--molten-text) 60%, transparent); }
+.rune svg { color: var(--molten-text); }
+.rune b { font-family: var(--font-display); font-size: 18px; }
+.rune small { font-size: 11px; color: var(--ash-3); }
+.target { margin-top: 12px; font-size: 13px; color: var(--ash-2); display: flex; justify-content: space-between; }
+.target b { color: var(--ash); }
+
+.forecast { margin-top: 14px; padding: 12px; border-radius: 10px; background: var(--well); border: 1px dashed var(--iron-edge); }
+.forecast .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--model); border: 1px solid var(--model); border-radius: 999px; padding: 2px 8px; }
+.forecast .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--model); box-shadow: 0 0 8px var(--model); }
+.forecast .p { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.forecast .p div { text-align: center; }
+.forecast .p b { display: block; font-family: var(--font-display); font-size: 22px; }
+.forecast .p small { color: var(--ash-3); font-size: 11px; }
+.forecast .p .sc b { color: var(--sc); } .forecast .p .sn b { color: var(--sn); } .forecast .p .ec b { color: var(--ec); }
+.forecast p { margin: 8px 0 0; font-size: 11px; color: var(--ash-3); }
+
+/* Bouton d'action principal : vert franc (--cta). Le feu reste au creuset, le vert dit « agir ». */
+.strike-btn {
+  width: 100%; margin-top: 14px; padding: 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--cta) 70%, #000);
+  font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--cta-ink);
+  background: linear-gradient(180deg, var(--cta-hover), var(--cta) 55%, color-mix(in srgb, var(--cta) 85%, #000) 100%);
+  box-shadow: 0 10px 28px -10px var(--cta-glow), inset 0 1px 0 rgba(255,255,255,.35);
+  transition: transform .08s, box-shadow .08s, filter .08s;
+}
+.strike-btn:hover { transform: translateY(-1px); filter: brightness(1.06); box-shadow: 0 14px 34px -10px var(--cta-glow), inset 0 1px 0 rgba(255,255,255,.35); }
+.strike-btn:active { transform: translateY(1px) scale(.99); filter: brightness(.96); }
+.strike-btn:focus-visible { outline-color: var(--cta-hover); }
+.force { display: grid; grid-template-columns: auto repeat(3, 1fr); gap: 6px; margin-top: 10px; align-items: center; font-size: 12px; color: var(--ash-3); }
+.force button { background: var(--well); border: 1px solid var(--iron-edge); border-radius: 8px; padding: 7px 0; font-weight: 600; font-size: 13px; }
+.force .sc { color: var(--sc); } .force .sn { color: var(--sn); } .force .ec { color: var(--ec); }
+.force button:hover { border-color: currentColor; }
+
+/* ─── Livre de forge (historique) ─── */
+.log { grid-column: 1 / -1; background: var(--iron); border: 1px solid var(--iron-edge); border-radius: var(--r); padding: 16px 20px; }
+.log-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
+.log-head h2 { font-size: 16px; }
+.log-head .tally { margin-left: auto; font-size: 13px; color: var(--ash-2); display: flex; gap: 14px; }
+.log-head .tally b { color: var(--ash); }
+.entries { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.entry { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--well); border: 1px solid var(--iron-edge); font-size: 13px; }
+.entry .mark { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 12px; border: 1px solid currentColor; }
+.entry.sc .mark { color: var(--sc); background: rgba(255,210,122,.08); box-shadow: 0 0 14px -4px var(--sc); }
+.entry.sn .mark { color: var(--sn); background: rgba(255,159,67,.08); }
+.entry.ec .mark { color: var(--ec); background: rgba(255,77,61,.08); }
+.entry .what b { color: var(--ash); }
+.entry .what small { display: block; color: var(--ash-3); font-size: 12px; }
+.entry .res { text-align: right; color: var(--ash-3); font-size: 12px; }
+.entry .res b { display: block; color: var(--molten-text); font-size: 14px; }
+.entry.latest { border-color: var(--ash-3); animation: forged .8s ease-out both; }
+@keyframes forged { from { box-shadow: 0 0 0 0 rgba(255,194,92,.6); background: #2a1c10; } to { box-shadow: 0 0 0 12px rgba(255,194,92,0); background: var(--well); } }
+
+/* ─── États : vide, chargement, erreur ─── */
+.states { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.state { padding: 16px; border-radius: 12px; border: 1px dashed var(--iron-edge); color: var(--ash-2); font-size: 13px; display: flex; gap: 12px; align-items: center; }
+.state b { color: var(--ash); display: block; }
+.embers { width: 36px; height: 36px; border-radius: 50%; background: radial-gradient(circle, var(--molten), var(--ember) 40%, transparent 70%); animation: breathe 1.6s ease-in-out infinite; flex: none; }
+@keyframes breathe { 0%,100% { transform: scale(.85); opacity: .7; } 50% { transform: scale(1); opacity: 1; } }
+.state.err { border-color: rgba(255,77,61,.5); }
+.state.err b { color: var(--ec); }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+@media (max-width: 720px) {
+  .top { flex-wrap: wrap; padding: 12px 16px; } .search { max-width: none; order: 3; flex-basis: 100%; }
+  .atelier { padding: 16px; gap: 14px; }
+  .line { grid-template-columns: 30px 1fr 70px; }
+  .line .track, .line .weight { grid-column: 2 / -1; }
+  .line .weight { text-align: left; } .line .weight b { display: inline; margin-right: 6px; }
+  .hero h1 { font-size: 24px; } .hero .quality { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">La Forge<small>simulateur de forgemagie, DOFUS 3.6</small></div>
+  <label class="search">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+    <input type="search" placeholder="Poser un objet sur l'enclume…" value="Amulette du Strigide">
+  </label>
+  <nav class="nav">
+    <a href="#" aria-current="page">Atelier</a><a href="#">Monte Carlo</a><a href="#">Paramètres</a><a href="#">Savoir</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" title="Basculer entre la forge de nuit (mode principal) et l'atelier de jour">
+    <svg class="night" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 15.5A8 8 0 0 1 8.5 4a8 8 0 1 0 11.5 11.5Z"/></svg>
+    <svg class="day" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+    <span class="night">Forge de nuit</span><span class="day">Atelier de jour</span>
+  </button>
+</header>
+
+<main class="atelier">
+
+  <!-- ─── Jauges ─── -->
+  <aside>
+    <section class="crucible" aria-labelledby="rel">
+      <div class="gauge-title"><h2 id="rel">Reliquat</h2><span class="status" title="Reliquat serveur : créé par un succès neutre ou un échec (perte − rune), consommé en priorité, jamais négatif. Sa visibilité en jeu est une CONTRADICTION non tranchée.">état serveur · hypothèse</span></div>
+      <div class="vessel" role="img" aria-label="Reliquat : 12,4 de poids en fusion">
+        <div class="rim"></div>
+        <div class="ticks"><span>50</span><span>25</span><span>0</span></div>
+        <div class="glow"></div>
+        <div class="molten"></div>
+      </div>
+      <div class="readout"><b class="num">12,4</b><span>de poids en fusion</span></div>
+      <p class="hint">Ce qui a fondu lors des dernières pertes et sera repris avant toute ligne. <abbr title="Aucune source primaire : formule serveur inconnue, comportement décrit par les guides (JeuxOnLine, Tofus).">Pourquoi « hypothèse » ?</abbr></p>
+    </section>
+
+    <section class="scale" aria-labelledby="bud">
+      <h2 id="bud">Budget de poids <span class="status" style="font-size:11px;border:1px solid var(--iron-edge);border-radius:999px;padding:1px 7px;margin-left:6px;color:var(--ash-3)">planification</span></h2>
+      <div class="beam" aria-hidden="true"><div class="bar"></div><div class="pivot"></div><div class="pan l"><i></i></div><div class="pan r"><i></i></div></div>
+      <div class="rows num">
+        <span>Poids libéré</span><b>60,0</b>
+        <span>Poids consommé</span><b>151,0</b>
+        <span>Reste à payer</span><b class="neg">−91,0</b>
+      </div>
+      <p class="hint">Calculé depuis les lignes visibles. Ce n'est pas le reliquat : la balance dit ce que vous <em>planifiez</em>, le creuset ce que le serveur <em>retient</em>.</p>
+    </section>
+  </aside>
+
+  <!-- ─── L'objet ─── -->
+  <section class="slab" aria-labelledby="obj">
+    <div class="hero">
+      <div class="icon"><img src="https://api.dofusdb.fr/img/items/1235.png" alt=""></div>
+      <div>
+        <h1 id="obj">Amulette du Strigide</h1>
+        <div class="meta">Amulette · niveau 200 · 11 lignes, 2 exotiques</div>
+      </div>
+      <div class="quality"><b class="num">104,7 %</b><span>du jet parfait</span></div>
+    </div>
+
+    <ul class="lines">
+      <li class="line over struck">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 21 12 12 21 3 12Z"/><path d="M12 7.5 16.5 12 12 16.5 7.5 12Z" stroke-width="1"/></svg></span>
+        <span class="name">Vitalité<span class="tag">over</span><span class="base">jet 351 à 400</span></span>
+        <span class="val num">415</span>
+        <span><span class="track"><i style="width:100%"></i><i class="ov" style="left:100%;width:0"></i></span><span class="track" style="margin-top:4px;height:4px"><i class="ov" style="width:3%"></i></span><span class="cap num">+15 sur 505</span></span>
+        <span class="weight num"><b>83,0</b>poids</span>
+        <span class="sparks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </li>
+      <li class="line">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 21 12 12 21 3 12Z"/></svg></span>
+        <span class="name">Sagesse<span class="base">jet 31 à 40</span></span>
+        <span class="val num">40</span>
+        <span><span class="track"><i style="width:100%"></i></span><span class="cap num">+0 sur 33</span></span>
+        <span class="weight num"><b>120,0</b>poids</span>
+      </li>
+      <li class="line lost">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 21 12 12 21 3 12Z"/></svg></span>
+        <span class="name">Puissance<span class="base">jet 51 à 70</span></span>
+        <span class="val num">68</span>
+        <span><span class="track"><i style="width:89%"></i></span><span class="cap num">+0 sur 50</span></span>
+        <span class="weight num"><b>136,0</b>poids</span>
+      </li>
+      <li class="line">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8" stroke-width="1"/></svg></span>
+        <span class="name">% Critique<span class="base">jet 4 à 6</span></span>
+        <span class="val num">6</span>
+        <span><span class="track"><i style="width:100%"></i></span><span class="cap num">+0 sur 10</span></span>
+        <span class="weight num"><b>60,0</b>poids</span>
+      </li>
+      <li class="line">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 20 19H4Z"/><circle cx="12" cy="14" r="1.5" fill="currentColor"/></svg></span>
+        <span class="name">PA<span class="base">jet fixe 1</span></span>
+        <span class="val num">1</span>
+        <span><span class="track"><i style="width:100%"></i></span><span class="cap num">+0 sur 1</span></span>
+        <span class="weight num"><b>100,0</b>poids</span>
+      </li>
+      <li class="line exo">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 20 19H4Z"/><circle cx="12" cy="14" r="1.5" fill="currentColor"/></svg></span>
+        <span class="name">PM<span class="tag">exo</span><span class="base">ajouté par forgemagie</span></span>
+        <span class="val num">1</span>
+        <span><span class="track"><i class="ex" style="width:100%"></i></span><span class="cap num">+1 sur 1</span></span>
+        <span class="weight num"><b>90,0</b>poids</span>
+      </li>
+      <li class="line">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 19 6v6c0 4.5-3.5 7.5-7 9-3.5-1.5-7-4.5-7-9V6Z"/></svg></span>
+        <span class="name">% Résistance Terre<span class="base">jet 6 à 8</span></span>
+        <span class="val num">8</span>
+        <span><span class="track"><i style="width:100%"></i></span><span class="cap num">+0 sur 16</span></span>
+        <span class="weight num"><b>48,0</b>poids</span>
+      </li>
+      <li class="line zero">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8" stroke-width="1"/></svg></span>
+        <span class="name">Tacle<span class="tag">éteinte</span><span class="base">jet 11 à 15</span></span>
+        <span class="val num">0</span>
+        <span><span class="track"><i style="width:0"></i></span><span class="cap num">+0 sur 25</span></span>
+        <span class="weight num"><b>0,0</b>poids</span>
+      </li>
+      <li class="line">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5 14 9.5 21 12l-7 2.5L12 21.5 10 14.5 3 12l7-2.5Z"/></svg></span>
+        <span class="name">Dommages critiques<span class="base">jet 16 à 25</span></span>
+        <span class="val num">25</span>
+        <span><span class="track"><i style="width:100%"></i></span><span class="cap num">+0 sur 20</span></span>
+        <span class="weight num"><b>125,0</b>poids</span>
+      </li>
+      <li class="line malus">
+        <span class="glyph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 19 6v6c0 4.5-3.5 7.5-7 9-3.5-1.5-7-4.5-7-9V6Z"/></svg></span>
+        <span class="name">Résistance critiques<span class="tag">malus</span><span class="base">jet −16 à −20</span></span>
+        <span class="val num">−18</span>
+        <span><span class="track"></span><span class="cap">non forgeable</span></span>
+        <span class="weight num"><b>—</b></span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ─── Actions ─── -->
+  <aside class="tools">
+    <section class="panel" aria-labelledby="act">
+      <h2 id="act">Frapper</h2>
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true">Rune</button><button role="tab">Potion</button><button role="tab">Orbe</button><button role="tab">Transcendance</button>
+      </div>
+      <div class="runes" role="group" aria-label="Palier de rune">
+        <button class="rune"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 21 12 12 21 3 12Z"/></svg><b>+5</b><small>Vi · 1,0</small></button>
+        <button class="rune" aria-pressed="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 21 12 12 21 3 12Z"/><path d="M12 7.5 16.5 12 12 16.5 7.5 12Z" stroke-width="1"/></svg><b>+15</b><small>Pa Vi · 3,0</small></button>
+        <button class="rune"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 21 12 12 21 3 12Z"/><path d="M12 7.5 16.5 12 12 16.5 7.5 12Z" stroke-width="1"/><path d="M12 10.5 13.5 12 12 13.5 10.5 12Z" stroke-width="1"/></svg><b>+50</b><small>Ra Vi · 10,0</small></button>
+      </div>
+      <div class="target"><span>Sur la ligne</span><b>Vitalité, 415</b></div>
+
+      <div class="forecast">
+        <span class="badge" title="Modèle « official_factors_linear », statut INCONNU. La formule serveur est secrète : ceci est une estimation paramétrée, pas une reproduction. Seules les bornes 15 % et 1 % sont officielles.">modèle empirique</span>
+        <div class="p num"><div class="sc"><b>15 %</b><small>succès critique</small></div><div class="sn"><b>43 %</b><small>succès neutre</small></div><div class="ec"><b>43 %</b><small>échec critique</small></div></div>
+        <p>official_factors_linear · plancher officiel 15 % atteint (ligne au-delà du jet parfait)</p>
+      </div>
+
+      <button class="strike-btn">Tenter la rune</button>
+      <div class="force"><span>Forcer</span><button class="sc">SC</button><button class="sn">SN</button><button class="ec">EC</button></div>
+    </section>
+  </aside>
+
+  <!-- ─── Livre de forge ─── -->
+  <section class="log" aria-labelledby="hist">
+    <div class="log-head"><h2 id="hist">Livre de forge</h2><span style="color:var(--ash-3);font-size:12px">chaque frappe, telle que le moteur l'a appliquée</span>
+      <span class="tally num"><span>Frappes <b>9</b></span><span style="color:var(--sc)">SC <b>2</b></span><span style="color:var(--sn)">SN <b>5</b></span><span style="color:var(--ec)">EC <b>2</b></span></span></div>
+    <div class="entries">
+      <div class="entry sn latest"><span class="mark">SN</span><span class="what"><b>Pa Vi +15</b> sur Vitalité<small>Puissance −2 (4,0 de poids) · reliquat +1,0</small></span><span class="res num">reliquat<b>12,4</b></span></div>
+      <div class="entry ec"><span class="mark">EC</span><span class="what"><b>Ga PM</b> sur PM<small>le reliquat a tout absorbé (90,0)</small></span><span class="res num">reliquat<b>11,4</b></span></div>
+      <div class="entry sc"><span class="mark">SC</span><span class="what"><b>Ga PM</b> sur PM<small>aucune perte</small></span><span class="res num">reliquat<b>101,4</b></span></div>
+      <div class="entry sn"><span class="mark">SN</span><span class="what"><b>Rune Tac</b> sur Tacle<small>Tacle −15 (60,0) · reliquat +56,0</small></span><span class="res num">reliquat<b>101,4</b></span></div>
+      <div class="entry ec"><span class="mark">EC</span><span class="what"><b>Rune Pa Sa</b> sur Sagesse<small>Vitalité −5 (1,0)</small></span><span class="res num">reliquat<b>45,4</b></span></div>
+      <div class="entry sn"><span class="mark">SN</span><span class="what"><b>Rune Vi</b> sur Vitalité<small>refusée : plafond d'over dépassé</small></span><span class="res num">reliquat<b>45,4</b></span></div>
+    </div>
+  </section>
+
+  <!-- ─── États dessinés ─── -->
+  <section class="states" aria-label="États de l'interface">
+    <div class="state"><span class="embers" aria-hidden="true"></span><span><b>Le creuset chauffe</b>chargement des 3 371 objets du dataset local…</span></div>
+    <div class="state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ash-3)" stroke-width="1.4"><path d="M4 18h16M6 18V9l6-4 6 4v9"/></svg><span><b>L'enclume est vide</b>Cherchez un objet par son nom pour le poser ici.</span></div>
+    <div class="state err"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ec)" stroke-width="1.6"><path d="M12 3 21 19H3Z"/><path d="M12 9v5M12 16.5v.5"/></svg><span><b>Frappe refusée</b>Objet transcendé : plus aucune forgemagie possible (devblog 2.58).</span></div>
+  </section>
+
+</main>
+<script>
+  // Sombre = mode principal. Le clair est un second mode explicite, mémorisé.
+  (function () {
+    var root = document.documentElement, btn = document.getElementById('theme-toggle');
+    var saved = null; try { saved = localStorage.getItem('forge-theme'); } catch (e) {}
+    function apply(t) { if (t === 'light') root.setAttribute('data-theme', 'light'); else root.removeAttribute('data-theme'); btn.setAttribute('aria-pressed', String(t === 'light')); }
+    apply(saved);
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      apply(next); try { localStorage.setItem('forge-theme', next); } catch (e) {}
+    });
+  })();
+</script>
+</body>
+</html>

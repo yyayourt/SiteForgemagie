@@ -16,3 +16,9 @@ Aucune valeur n'est un fait sans preuve. Chaque règle, valeur ou formule porte 
 - `docs/knowledge/` — audits et rapports de reconstruction ; `docs/plans/` — plans en cours ; `docs/archive/` — documents obsolètes conservés pour l'historique.
 
 Commandes : `npm run dev`, `npm run build`, `npm test`, `npm run lint`.
+
+## Interface et assets
+
+L'interface (« La Forge ») est entièrement originale : thème, glyphes de runes, ornements et icônes sont des SVG et des CSS écrits pour ce projet, sans logo, sprite, police ni illustration Ankama. Seule exception : les **icônes d'objets** affichées dans la recherche et sur l'enclume proviennent de DofusDB (`api.dofusdb.fr/img/items/…`) et restent des assets Ankama, utilisés dans un cadre communautaire, risque assumé par le projet. Elles peuvent être retirées en remplaçant `imgUrl` par une chaîne vide dans `src/hooks/useItemSearch.ts`.
+
+Deux modes visuels : forge de nuit (principal) et atelier de jour, bascule dans la barre supérieure. Toute probabilité affichée porte le badge « modèle empirique » avec le nom du modèle actif ; le budget de poids (planification) et le reliquat (état serveur) sont toujours affichés séparément.

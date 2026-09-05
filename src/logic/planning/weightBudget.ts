@@ -15,9 +15,13 @@
 
 import type { SimulatedStat, WeightBudget } from '../../types';
 import { getMaxOverOrExo, getStatAbsoluteMax } from '../../data/statCaps';
-import { OVER_CAP_WEIGHT } from '../../data/params';
+import { getOverCapWeight, type ParamOverrides } from '../../data/params';
 
-export function computeWeightBudget(stats: SimulatedStat[]): WeightBudget {
+/**
+ * `overrides` : surcharges de paramètres (profil du panneau « Paramètres avancés »).
+ * Sans argument, valeurs de empirical_params.json — comportement inchangé.
+ */
+export function computeWeightBudget(stats: SimulatedStat[], overrides?: ParamOverrides): WeightBudget {
   let baseWeight = 0;
   let currentWeight = 0;
   let freedWeight = 0;
@@ -31,7 +35,7 @@ export function computeWeightBudget(stats: SimulatedStat[]): WeightBudget {
     if (!stat.isForgemeable) continue;
 
     const weight = stat.weightPerPoint;
-    const maxOver = getMaxOverOrExo(stat.characteristicId);
+    const maxOver = getMaxOverOrExo(stat.characteristicId, overrides);
 
     if (stat.isExo) {
       const ew = stat.currentValue * weight;
@@ -72,7 +76,7 @@ export function computeWeightBudget(stats: SimulatedStat[]): WeightBudget {
     overWeight: round2(overWeight),
     exoWeight: round2(exoWeight),
     overExoTotal,
-    overExoBudgetRemaining: round2(OVER_CAP_WEIGHT - overExoTotal),
+    overExoBudgetRemaining: round2(getOverCapWeight(overrides) - overExoTotal),
   };
 }
 
@@ -91,11 +95,15 @@ export function getStatStatus(
  * Maximum atteignable pour une ligne en planification :
  * min(max permis par le budget restant, plafond par ligne).
  */
-export function computeMaxReachable(stat: SimulatedStat, remainingBudget: number): number {
+export function computeMaxReachable(
+  stat: SimulatedStat,
+  remainingBudget: number,
+  overrides?: ParamOverrides
+): number {
   if (!stat.isForgemeable || stat.weightPerPoint === 0) return stat.currentValue;
 
   const maxByBudget = stat.currentValue + Math.floor(remainingBudget / stat.weightPerPoint);
-  const maxByCap = getStatAbsoluteMax(stat);
+  const maxByCap = getStatAbsoluteMax(stat, overrides);
 
   return Math.max(stat.currentValue, Math.min(maxByBudget, maxByCap));
 }

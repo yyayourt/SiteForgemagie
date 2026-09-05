@@ -1,22 +1,2 @@
 @import "tailwindcss";
 @import "./styles/theme.css";
-
-/*
- * TOKENS HÉRITÉS — à supprimer lors de la généralisation du thème (phase 4, étape 2).
- * Les composants non encore redessinés (Header, PoolSummary, SimulationLog, ExoAdder,
- * ItemSelector, ActionBar, TheoryGuide) les utilisent encore.
- */
-@theme {
-  --color-dofus-gold: #c9a84c;
-  --color-dofus-gold-light: #e8d48b;
-  --color-dofus-dark: #1a1a2e;
-  --color-dofus-darker: #0f0f1e;
-  --color-dofus-panel: #16213e;
-  --color-dofus-panel-light: #1a2744;
-  --color-sacrificed: #7f8c8d;
-  --color-pool-positive: #2ecc71;
-  --color-pool-zero: #f39c12;
-  --color-pool-negative: #e74c3c;
-  --color-over-bg: #2d1518;
-  --color-exo-bg: #231a2e;
-}

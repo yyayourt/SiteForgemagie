@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction B — Le Grimoire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────────────────────────────────────────────────
+   DIRECTION B — « LE GRIMOIRE »
+   Le forgemage est un érudit : un livre ouvert sur un bureau de chêne,
+   éclairé à la chandelle. La page de gauche est l'objet, la page de droite
+   s'écrit à l'encre à chaque tentative.
+   ──────────────────────────────────────────────────────────────── */
+:root {
+  --oak: #3a2618;
+  --oak-deep: #23160d;
+  --vellum: #f3e7cc;
+  --vellum-2: #ead9b6;
+  --vellum-edge: #cbb48b;
+  --ink: #2a1d12;
+  --ink-2: #5c4a36;
+  --ink-3: #8a7863;
+  --rule: #b9a27c;
+  --gold: #c39a3c;
+  --gold-ink: #7d5f14;
+  --oxblood: #7a2e1e;
+  --amber-ink: #9a5b14;
+  --verdigris: #2f6a5e;
+  --moss: #4f6f1f;
+  --sepia: #9a8d7a;
+  --wax: #8b1e1e;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-text: 'Source Serif 4', Georgia, serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; font-family: var(--font-text); font-size: 15.5px; line-height: 1.5; color: var(--ink);
+  background:
+    radial-gradient(900px 600px at 50% 20%, rgba(255,214,140,.22), transparent 65%),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, var(--oak), var(--oak-deep));
+  background-attachment: fixed;
+}
+.num { font-variant-numeric: tabular-nums; }
+h1,h2,h3 { font-family: var(--font-display); font-weight: 600; margin: 0; }
+:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 3px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+/* Chandelle : halo chaud qui respire très lentement */
+body::after { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(700px 500px at 50% 0%, rgba(255,200,110,.10), transparent 70%); animation: candle 7s ease-in-out infinite alternate; }
+@keyframes candle { from { opacity: .8; } to { opacity: 1; } }
+
+/* ─── Bureau : barre haute ─── */
+.desk { display: flex; align-items: center; gap: 18px; padding: 14px 32px; color: var(--vellum); }
+.desk .brand { font-family: var(--font-display); font-size: 26px; font-weight: 700; font-style: italic; color: var(--vellum); }
+.desk .brand small { display: block; font-style: normal; font-family: var(--font-text); font-size: 12px; color: var(--vellum-edge); }
+.desk nav { margin-left: auto; display: flex; gap: 4px; }
+.desk nav a { color: var(--vellum-edge); text-decoration: none; padding: 6px 12px; border-bottom: 1px solid transparent; font-style: italic; }
+.desk nav a:hover, .desk nav a[aria-current] { color: var(--vellum); border-color: var(--gold); }
+
+/* ─── Le livre ouvert ─── */
+.book {
+  max-width: 1400px; margin: 6px auto 24px; padding: 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 0; position: relative;
+  filter: drop-shadow(0 30px 40px rgba(0,0,0,.6));
+}
+.page {
+  background: var(--vellum);
+  background-image:
+    radial-gradient(circle at 10% 15%, rgba(255,255,255,.45), transparent 35%),
+    radial-gradient(circle at 90% 85%, rgba(120,80,30,.16), transparent 40%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
+  padding: 34px 40px 40px; min-height: 780px; position: relative;
+}
+.page.left { border-radius: 10px 2px 2px 10px; box-shadow: inset -30px 0 40px -30px rgba(60,35,10,.55); }
+.page.right { border-radius: 2px 10px 10px 2px; box-shadow: inset 30px 0 40px -30px rgba(60,35,10,.55); }
+.spine { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: linear-gradient(180deg, transparent, rgba(60,35,10,.5) 10%, rgba(60,35,10,.5) 90%, transparent); }
+.folio { position: absolute; bottom: 16px; font-family: var(--font-display); font-style: italic; color: var(--ink-3); font-size: 14px; }
+.page.left .folio { left: 40px; } .page.right .folio { right: 40px; }
+
+/* Lettrine et titre de l'objet */
+.title { display: flex; align-items: center; gap: 18px; padding-bottom: 14px; border-bottom: 2px solid var(--rule); position: relative; }
+.title::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: var(--rule); }
+.title .icon { width: 74px; height: 74px; border: 1px solid var(--rule); border-radius: 4px; background: #fff8e8; display: grid; place-items: center; box-shadow: 2px 3px 0 var(--vellum-edge); }
+.title .icon img { width: 60px; height: 60px; }
+.title h1 { font-size: 34px; line-height: 1.05; }
+.title .meta { color: var(--ink-2); font-style: italic; margin-top: 2px; }
+.search { margin-left: auto; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--ink-3); padding: 4px 2px; color: var(--ink-2); }
+.search input { border: 0; background: none; font: inherit; font-style: italic; color: var(--ink); outline: none; width: 190px; }
+
+/* Table à l'encre */
+table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+th { text-align: left; font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--ink-2); padding: 6px 8px; border-bottom: 1px solid var(--rule); }
+th.r, td.r { text-align: right; }
+td { padding: 9px 8px; border-bottom: 1px dotted var(--rule); vertical-align: middle; }
+td.name { font-family: var(--font-display); font-size: 19px; font-weight: 600; }
+td.name small { display: block; font-family: var(--font-text); font-size: 12px; color: var(--ink-3); font-weight: 400; font-style: italic; }
+td.val { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+td.w { color: var(--ink-2); font-size: 14px; }
+td.w b { color: var(--ink); }
+.margin { font-family: var(--font-display); font-style: italic; font-size: 14px; }
+tr.over td.name, tr.over td.val, tr.over .margin { color: var(--moss); }
+tr.exo td.name, tr.exo td.val, tr.exo .margin { color: var(--verdigris); }
+tr.zero td.name, tr.zero td.val, tr.zero .margin { color: var(--sepia); }
+tr.malus td { color: var(--ink-3); }
+.pen { display: inline-block; height: 6px; width: 100px; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--ink-2) 0 2px, transparent 2px 4px); vertical-align: middle; opacity: .55; position: relative; }
+.pen i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); border-radius: 3px; }
+tr.over .pen i { background: var(--moss); } tr.exo .pen i { background: var(--verdigris); }
+/* La dernière ligne touchée : encre fraîche qui s'étale */
+tr.fresh td.val { position: relative; }
+tr.fresh td.val::after { content: ""; position: absolute; right: -8px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50% 40% 60% 45%; background: var(--amber-ink); opacity: .7; animation: blot 1.4s ease-out both; }
+tr.lost td.val::after { content: ""; position: absolute; right: -8px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 60% 40% 50% 55%; background: var(--oxblood); opacity: .75; animation: blot 1.6s ease-out .2s both; }
+@keyframes blot { from { transform: scale(.2); opacity: 0; } 30% { opacity: .9; } to { transform: scale(1); opacity: .7; } }
+
+/* Marginalia des jauges, en bas de la page gauche */
+.gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 22px; }
+.inkwell { position: relative; padding: 14px 16px 14px 90px; border: 1px solid var(--rule); border-radius: 6px; background: rgba(255,255,255,.25); min-height: 120px; }
+.inkwell svg.well { position: absolute; left: 14px; top: 14px; }
+.inkwell h2, .balance h2 { font-size: 18px; }
+.inkwell .lvl { font-family: var(--font-display); font-size: 34px; font-weight: 700; color: var(--ink); line-height: 1; margin-top: 4px; }
+.inkwell p, .balance p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-2); font-style: italic; line-height: 1.35; }
+.seal-status { display: inline-block; font-size: 11px; font-style: normal; border: 1px solid var(--ink-3); color: var(--ink-2); border-radius: 3px; padding: 0 6px; margin-left: 6px; vertical-align: middle; }
+.balance { padding: 14px 16px; border: 1px solid var(--rule); border-radius: 6px; background: rgba(255,255,255,.25); }
+.balance dl { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; margin: 6px 0 0; font-size: 14px; }
+.balance dt { color: var(--ink-2); } .balance dd { margin: 0; font-weight: 600; text-align: right; }
+.balance dd.neg { color: var(--oxblood); }
+
+/* ─── Page de droite : le registre qui s'écrit ─── */
+.ledger h2 { font-size: 26px; }
+.ledger .sub { font-style: italic; color: var(--ink-3); margin: 2px 0 14px; }
+.entry { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 10px 4px; border-bottom: 1px dotted var(--rule); }
+.entry .seal { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--vellum); position: relative; }
+.entry.sc .seal { background: radial-gradient(circle at 35% 30%, #e6c26a, var(--gold) 55%, #8d6a1c); box-shadow: 0 2px 4px rgba(0,0,0,.35); }
+.entry.sn .seal { background: radial-gradient(circle at 35% 30%, #d99a4a, var(--amber-ink) 60%, #5e3608); }
+.entry.ec .seal { background: radial-gradient(circle at 35% 30%, #b8433a, var(--wax) 60%, #4d0f0f); border-radius: 48% 52% 45% 55%; }
+.entry .seal::before { content: ""; position: absolute; inset: 6px; border-radius: inherit; border: 1px solid rgba(255,255,255,.35); }
+.entry .txt b { font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+.entry .txt small { display: block; font-size: 13px; color: var(--ink-2); font-style: italic; }
+.entry .rel { text-align: right; font-size: 12px; color: var(--ink-3); font-style: italic; }
+.entry .rel b { display: block; font-style: normal; font-family: var(--font-display); font-size: 18px; color: var(--ink); }
+/* La plume écrit la dernière entrée */
+.entry.writing .txt { overflow: hidden; }
+.entry.writing .txt > * { display: block; clip-path: inset(0 100% 0 0); animation: write 1.2s steps(28, end) forwards; }
+.entry.writing .txt small { animation-delay: .9s; animation-duration: 1s; }
+.entry.writing .seal { animation: stamp .5s cubic-bezier(.2,1.6,.4,1) 2.1s both; }
+@keyframes write { to { clip-path: inset(0 0 0 0); } }
+@keyframes stamp { from { transform: scale(2.2) rotate(-14deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.tally { display: flex; gap: 18px; margin-top: 12px; font-style: italic; color: var(--ink-2); font-size: 14px; }
+.tally b { font-style: normal; color: var(--ink); }
+
+/* Outils de l'écritoire, sur la page droite, bas */
+.writing-tools { margin-top: 26px; border-top: 2px solid var(--rule); padding-top: 16px; }
+.writing-tools h3 { font-size: 20px; margin-bottom: 8px; }
+.choices { display: flex; flex-wrap: wrap; gap: 6px; }
+.choice { border: 1px solid var(--rule); background: rgba(255,255,255,.35); border-radius: 4px; padding: 6px 12px; font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+.choice[aria-pressed="true"] { background: var(--ink); color: var(--vellum); border-color: var(--ink); }
+.choice small { font-family: var(--font-text); font-weight: 400; font-size: 12px; color: inherit; opacity: .8; margin-left: 4px; }
+.forecast { margin-top: 12px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 14px; }
+.badge { font-size: 11px; font-style: italic; border: 1px solid var(--amber-ink); color: var(--amber-ink); border-radius: 3px; padding: 1px 7px; }
+.forecast .p b { font-family: var(--font-display); font-size: 20px; margin-right: 2px; }
+.forecast .sc b { color: var(--gold-ink); } .forecast .sn b { color: var(--amber-ink); } .forecast .ec b { color: var(--oxblood); }
+.act { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+.quill {
+  padding: 11px 22px; border-radius: 4px; border: 1px solid var(--ink); background: var(--ink); color: var(--vellum);
+  font-family: var(--font-display); font-size: 19px; font-weight: 700; box-shadow: 2px 3px 0 var(--vellum-edge);
+  transition: transform .08s, box-shadow .08s;
+}
+.quill:hover { transform: translate(-1px,-1px); box-shadow: 3px 4px 0 var(--vellum-edge); }
+.quill:active { transform: translate(1px,1px); box-shadow: 0 0 0 var(--vellum-edge); }
+.force { display: flex; gap: 6px; align-items: center; font-style: italic; color: var(--ink-3); font-size: 13px; margin-left: 6px; }
+.force button { border: 1px solid var(--rule); background: transparent; border-radius: 4px; padding: 6px 10px; font-weight: 600; font-style: normal; }
+.force .sc { color: var(--gold-ink); } .force .sn { color: var(--amber-ink); } .force .ec { color: var(--oxblood); }
+.force button:hover { border-color: currentColor; }
+
+/* États dessinés */
+.notes { max-width: 1400px; margin: 0 auto 40px; padding: 0 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.note { background: var(--vellum-2); border: 1px solid var(--vellum-edge); padding: 14px 16px; border-radius: 3px; font-size: 14px; color: var(--ink-2); font-style: italic; transform: rotate(-.4deg); box-shadow: 0 8px 20px -10px rgba(0,0,0,.6); }
+.note:nth-child(2) { transform: rotate(.5deg); } .note:nth-child(3) { transform: rotate(-.2deg); }
+.note b { display: block; font-style: normal; font-family: var(--font-display); font-size: 18px; color: var(--ink); }
+.note.err { border-color: var(--oxblood); } .note.err b { color: var(--oxblood); }
+.drip { display: inline-block; width: 14px; height: 14px; border-radius: 50% 50% 55% 45%; background: var(--ink); animation: drip 1.4s ease-in-out infinite; vertical-align: middle; margin-right: 8px; }
+@keyframes drip { 0%,100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(3px) scaleY(1.15); } }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .entry.writing .txt > * { clip-path: none; } }
+@media (max-width: 960px) {
+  .book { grid-template-columns: 1fr; padding: 0 12px; } .spine { display: none; }
+  .page { padding: 24px 20px 40px; min-height: 0; border-radius: 6px !important; box-shadow: none !important; }
+  .page.right { margin-top: 10px; }
+  .gauges { grid-template-columns: 1fr; }
+  .title { flex-wrap: wrap; } .search { margin-left: 0; flex-basis: 100%; }
+  th.w, td.w, th.pen-h, td.pen-c { display: none; }
+  td.name { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+
+<header class="desk">
+  <div class="brand">Le Grimoire<small>registre de forgemagie · DOFUS 3.6</small></div>
+  <nav><a href="#" aria-current="page">Atelier</a><a href="#">Monte Carlo</a><a href="#">Paramètres</a><a href="#">Ce que l'on sait</a></nav>
+</header>
+
+<main class="book">
+  <div class="spine" aria-hidden="true"></div>
+
+  <!-- ─── Page de gauche : l'objet ─── -->
+  <section class="page left" aria-labelledby="obj">
+    <div class="title">
+      <div class="icon"><img src="https://api.dofusdb.fr/img/items/1235.png" alt=""></div>
+      <div><h1 id="obj">Amulette du Strigide</h1><div class="meta">Amulette, niveau 200 · onze lignes, dont deux exotiques · 104,7 % du jet parfait</div></div>
+      <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" placeholder="chercher un autre objet"></label>
+    </div>
+
+    <table>
+      <thead><tr><th>Caractéristique</th><th class="r">valeur</th><th class="pen-h">jet</th><th class="r w">poids</th><th>marge</th></tr></thead>
+      <tbody class="num">
+        <tr class="over fresh"><td class="name">Vitalité<small>jet 351 à 400</small></td><td class="val r">415</td><td class="pen-c"><span class="pen"><i style="width:100%"></i></span></td><td class="w r"><b>83,0</b></td><td><span class="margin">over, +15 sur 505</span></td></tr>
+        <tr><td class="name">Sagesse<small>jet 31 à 40</small></td><td class="val r">40</td><td class="pen-c"><span class="pen"><i style="width:100%"></i></span></td><td class="w r"><b>120,0</b></td><td><span class="margin">au jet parfait</span></td></tr>
+        <tr class="lost"><td class="name">Puissance<small>jet 51 à 70</small></td><td class="val r">68</td><td class="pen-c"><span class="pen"><i style="width:89%"></i></span></td><td class="w r"><b>136,0</b></td><td><span class="margin">2 points fondus</span></td></tr>
+        <tr><td class="name">% Critique<small>jet 4 à 6</small></td><td class="val r">6</td><td class="pen-c"><span class="pen"><i style="width:100%"></i></span></td><td class="w r"><b>60,0</b></td><td><span class="margin">au jet parfait</span></td></tr>
+        <tr><td class="name">PA<small>jet fixe</small></td><td class="val r">1</td><td class="pen-c"><span class="pen"><i style="width:100%"></i></span></td><td class="w r"><b>100,0</b></td><td><span class="margin">au jet parfait</span></td></tr>
+        <tr class="exo"><td class="name">PM<small>ajouté par forgemagie</small></td><td class="val r">1</td><td class="pen-c"><span class="pen"><i style="width:100%"></i></span></td><td class="w r"><b>90,0</b></td><td><span class="margin">exotique, +1 sur 1</span></td></tr>
+        <tr><td class="name">% Résistance Terre<small>jet 6 à 8</small></td><td class="val r">8</td><td class="pen-c"><span class="pen"><i style="width:100%"></i></span></td><td class="w r"><b>48,0</b></td><td><span class="margin">au jet parfait</span></td></tr>
+        <tr class="zero"><td class="name">Tacle<small>jet 11 à 15</small></td><td class="val r">0</td><td class="pen-c"><span class="pen"><i style="width:0"></i></span></td><td class="w r"><b>0,0</b></td><td><span class="margin">éteinte, tout fondu</span></td></tr>
+        <tr><td class="name">Dommages critiques<small>jet 16 à 25</small></td><td class="val r">25</td><td class="pen-c"><span class="pen"><i style="width:100%"></i></span></td><td class="w r"><b>125,0</b></td><td><span class="margin">au jet parfait</span></td></tr>
+        <tr class="malus"><td class="name">Résistance critiques<small>malus, jet −16 à −20</small></td><td class="val r">−18</td><td class="pen-c"></td><td class="w r">—</td><td><span class="margin">non forgeable</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="gauges">
+      <section class="inkwell" aria-labelledby="rel">
+        <svg class="well" width="62" height="86" viewBox="0 0 62 86" aria-hidden="true">
+          <path d="M14 20h34l6 12v46a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V32z" fill="#2a1d12"/>
+          <rect x="10" y="48" width="42" height="30" fill="#0e0906"/>
+          <rect x="10" y="60" width="42" height="18" fill="#3b2a5c" opacity=".9"><animate attributeName="y" values="60;58;60" dur="6s" repeatCount="indefinite"/></rect>
+          <path d="M20 8h22v12H20z" fill="#5c4a36"/><path d="M24 2h14v6H24z" fill="#8a7863"/>
+          <path d="M44 12l14-8" stroke="#c39a3c" stroke-width="2"/><path d="M54 0l8 6-4 3z" fill="#c39a3c"/>
+        </svg>
+        <h2 id="rel">Reliquat<span class="seal-status" title="État serveur. Créé par un succès neutre ou un échec (perte − rune), consommé avant toute ligne, jamais négatif. Visibilité en jeu : CONTRADICTION non tranchée.">hypothèse</span></h2>
+        <div class="lvl num">12,4</div>
+        <p>Encre dans l'encrier : ce que les dernières pertes ont laissé, et que le serveur reprend d'abord.</p>
+      </section>
+      <section class="balance" aria-labelledby="bud">
+        <h2 id="bud">Budget de poids<span class="seal-status">planification</span></h2>
+        <dl class="num"><dt>libéré</dt><dd>60,0</dd><dt>consommé</dt><dd>151,0</dd><dt>reste</dt><dd class="neg">−91,0</dd></dl>
+        <p>Compté sur les lignes visibles. Ce n'est pas le reliquat : l'un prépare, l'autre retient.</p>
+      </section>
+    </div>
+    <span class="folio">— objet —</span>
+  </section>
+
+  <!-- ─── Page de droite : le registre ─── -->
+  <section class="page right ledger" aria-labelledby="hist">
+    <h2 id="hist">Registre des tentatives</h2>
+    <p class="sub">Chaque ligne s'écrit quand le moteur applique une frappe.</p>
+
+    <div class="entry sn writing"><span class="seal">SN</span><span class="txt"><b>Pa Vi +15 sur Vitalité</b><small>Puissance perd 2 (4,0 de poids), le reliquat gagne 1,0</small></span><span class="rel num">reliquat<b>12,4</b></span></div>
+    <div class="entry ec"><span class="seal">EC</span><span class="txt"><b>Ga PM sur PM</b><small>le reliquat absorbe tout (90,0), aucune ligne touchée</small></span><span class="rel num">reliquat<b>11,4</b></span></div>
+    <div class="entry sc"><span class="seal">SC</span><span class="txt"><b>Ga PM sur PM</b><small>aucune perte</small></span><span class="rel num">reliquat<b>101,4</b></span></div>
+    <div class="entry sn"><span class="seal">SN</span><span class="txt"><b>Rune Tac sur Tacle</b><small>Tacle perd 15 (60,0), le reliquat gagne 56,0</small></span><span class="rel num">reliquat<b>101,4</b></span></div>
+    <div class="entry ec"><span class="seal">EC</span><span class="txt"><b>Pa Sa sur Sagesse</b><small>Vitalité perd 5 (1,0)</small></span><span class="rel num">reliquat<b>45,4</b></span></div>
+    <div class="tally num"><span>Frappes <b>9</b></span><span>succès critiques <b>2</b></span><span>neutres <b>5</b></span><span>échecs <b>2</b></span></div>
+
+    <div class="writing-tools">
+      <h3>Prochaine frappe</h3>
+      <div class="choices" role="group" aria-label="Action">
+        <button class="choice" aria-pressed="true">Rune</button><button class="choice">Potion</button><button class="choice">Orbe</button><button class="choice">Transcendance</button>
+      </div>
+      <div class="choices" role="group" aria-label="Palier" style="margin-top:8px">
+        <button class="choice">Vi +5<small>1,0</small></button><button class="choice" aria-pressed="true">Pa Vi +15<small>3,0</small></button><button class="choice">Ra Vi +50<small>10,0</small></button>
+      </div>
+      <div class="forecast num">
+        <span class="badge" title="Modèle « official_factors_linear », statut INCONNU : la formule du serveur est secrète, ceci est une estimation paramétrée. Seules les bornes 15 % et 1 % sont officielles.">modèle empirique</span>
+        <span class="p sc"><b>15 %</b>succès critique</span><span class="p sn"><b>43 %</b>neutre</span><span class="p ec"><b>43 %</b>échec</span>
+      </div>
+      <div class="act">
+        <button class="quill">Tenter la rune</button>
+        <span class="force">ou forcer <button class="sc">SC</button><button class="sn">SN</button><button class="ec">EC</button></span>
+      </div>
+    </div>
+    <span class="folio">— registre —</span>
+  </section>
+</main>
+
+<section class="notes" aria-label="États de l'interface">
+  <div class="note"><b><span class="drip" aria-hidden="true"></span>L'encre sèche</b>chargement des 3 371 objets du dataset local…</div>
+  <div class="note"><b>Page blanche</b>Cherchez un objet par son nom pour ouvrir son registre.</div>
+  <div class="note err"><b>Frappe refusée</b>Objet transcendé : plus aucune forgemagie possible (devblog 2.58).</div>
+</section>
+
+</body>
+</html>

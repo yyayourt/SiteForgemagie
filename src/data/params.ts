@@ -2,8 +2,10 @@
  * Accès typé à empirical_params.json : tout ce qui n'est PAS SOURCE PRIMAIRE.
  *
  * Aucune de ces valeurs ne doit être recopiée en dur ailleurs dans le code.
+ * Chaque lecture passe par `readParam(path, overrides)` : le panneau « Paramètres avancés »
+ * fournit des surcharges (profil) qui s'appliquent sans modifier le fichier.
  * `getEngineParams()` / `getBrisageParams()` / `getProbabilityParams()` construisent les
- * objets consommés par src/logic/* ; les tests peuvent les surcharger.
+ * objets consommés par src/logic/* ; sans argument, ils renvoient les valeurs du fichier.
  */
 
 import paramsJson from '../../empirical_params.json';
@@ -29,6 +31,9 @@ export interface DensityParam extends ParamEntry<number> {
   name: string;
 }
 
+/** Surcharges de paramètres : chemin ("params.overCapWeight", "densities.11") → valeur. */
+export type ParamOverrides = Readonly<Record<string, unknown>>;
+
 export type OverCapScope = 'per_line' | 'global';
 export type LossSelectionStrategyName =
   | 'uniform'
@@ -46,38 +51,45 @@ export const PARAMS_META = {
   updatedAt: paramsJson.updatedAt,
 };
 
-const p = paramsJson.params;
+// ─── Lecture par chemin ──────────────────────────────────────────────────────
 
-export const OVER_CAP_WEIGHT_PARAM = p.overCapWeight as ParamEntry<number>;
-export const OVER_CAP_SCOPE_PARAM = p.overCapScope as ParamEntry<OverCapScope>;
-export const EC_LOSS_FACTOR_PARAM = p.ecLossFactor as ParamEntry<number>;
-export const LOSS_STRATEGY_PARAM = p.lossSelection.strategy as ParamEntry<LossSelectionStrategyName>;
-export const PRIORITIZE_OVER_EXO_PARAM = p.lossSelection.prioritizeOverExo as ParamEntry<boolean>;
-export const RESIDUAL_RESET_PARAM = p.residualPool.resetOnEquipOrMarket as ParamEntry<boolean>;
-export const RESIDUAL_VISIBLE_PARAM = p.residualPool.visibleInClient as ParamEntry<boolean>;
-export const TRANSCENDENCE_REFUSE_EXO_PARAM = p.transcendence.refuseIfExo as ParamEntry<boolean>;
-export const TRANSCENDENCE_REFUSE_OVER_PARAM = p.transcendence.refuseIfOver as ParamEntry<boolean>;
-export const TRANSCENDENCE_THRESHOLDS_PARAM = p.transcendence
-  .maxCurrentValueByRank as unknown as ParamEntry<TranscendenceThresholds>;
-export const TRANSCENDENCE_SUCCESS_RATE_PARAM = p.transcendence.successRateByRank as ParamEntry<
-  Record<TranscendenceRank, number>
->;
+function nodeAt(path: string): unknown {
+  let node: unknown = paramsJson;
+  for (const part of path.split('.')) {
+    if (typeof node !== 'object' || node === null) return undefined;
+    node = (node as Record<string, unknown>)[part];
+  }
+  return node;
+}
 
-/** Poids maximal d'over/exo (HYPOTHÈSE COMMUNAUTAIRE, défaut 101). */
-export const OVER_CAP_WEIGHT: number = OVER_CAP_WEIGHT_PARAM.value;
+/** Entrée complète d'un paramètre (valeur du fichier, statut, source…). */
+export function getParamEntry<T = unknown>(path: string): ParamEntry<T> | undefined {
+  const node = nodeAt(path);
+  if (typeof node === 'object' && node !== null && 'value' in node && 'status' in node) return node as ParamEntry<T>;
+  return undefined;
+}
 
-/** Portée de la borne : par ligne ou globale (CONTRADICTION, défaut per_line provisoire). */
-export const OVER_CAP_SCOPE: OverCapScope = OVER_CAP_SCOPE_PARAM.value;
+/** Valeur effective d'un paramètre : surcharge si présente, sinon valeur du fichier. */
+export function readParam<T>(path: string, overrides?: ParamOverrides): T {
+  if (overrides && path in overrides) return overrides[path] as T;
+  const entry = getParamEntry<T>(path);
+  if (!entry) throw new Error(`Paramètre inconnu : ${path}`);
+  return entry.value;
+}
 
-/** Densités par characteristicId (les clés commençant par `$` sont des commentaires). */
+// ─── Densités ────────────────────────────────────────────────────────────────
+
+/** Densités du fichier par characteristicId (les clés commençant par `$` sont des commentaires). */
 export const DENSITIES: ReadonlyMap<number, DensityParam> = new Map(
   Object.entries(paramsJson.densities as Record<string, DensityParam | string>)
     .filter((entry): entry is [string, DensityParam] => !entry[0].startsWith('$'))
     .map(([id, param]) => [Number(id), param])
 );
 
-/** Poids par point d'une caractéristique, ou undefined si aucune densité n'est documentée. */
-export function getDensity(characteristicId: number): number | undefined {
+/** Poids par point d'une caractéristique (surcharges honorées), ou undefined si non documenté. */
+export function getDensity(characteristicId: number, overrides?: ParamOverrides): number | undefined {
+  const path = `densities.${characteristicId}`;
+  if (overrides && path in overrides) return overrides[path] as number;
   return DENSITIES.get(characteristicId)?.value;
 }
 
@@ -85,8 +97,27 @@ export function getDensityParam(characteristicId: number): DensityParam | undefi
   return DENSITIES.get(characteristicId);
 }
 
+/** Carte characteristicId → densité effective. */
+export function getDensityMap(overrides?: ParamOverrides): ReadonlyMap<number, number> {
+  return new Map([...DENSITIES.keys()].map((id) => [id, getDensity(id, overrides)!]));
+}
+
 /** Caractéristiques dotées d'une densité (donc pesables dans le budget de poids). */
 export const CHARACTERISTICS_WITH_DENSITY: readonly number[] = [...DENSITIES.keys()];
+
+// ─── Bornes d'over/exo ───────────────────────────────────────────────────────
+
+/** Poids maximal d'over/exo (HYPOTHÈSE COMMUNAUTAIRE, défaut 101). */
+export const OVER_CAP_WEIGHT: number = readParam<number>('params.overCapWeight');
+/** Portée de la borne : par ligne ou globale (CONTRADICTION, défaut per_line provisoire). */
+export const OVER_CAP_SCOPE: OverCapScope = readParam<OverCapScope>('params.overCapScope');
+
+export function getOverCapWeight(overrides?: ParamOverrides): number {
+  return readParam<number>('params.overCapWeight', overrides);
+}
+export function getOverCapScope(overrides?: ParamOverrides): OverCapScope {
+  return readParam<OverCapScope>('params.overCapScope', overrides);
+}
 
 // ─── Moteur (règles + reliquat) ──────────────────────────────────────────────
 
@@ -118,25 +149,26 @@ export interface EngineParams {
   };
 }
 
-export function getEngineParams(): EngineParams {
+export function getEngineParams(overrides?: ParamOverrides): EngineParams {
+  const r = <T,>(p: string) => readParam<T>(p, overrides);
   return {
-    densities: new Map([...DENSITIES.entries()].map(([id, d]) => [id, d.value])),
-    overCapWeight: OVER_CAP_WEIGHT_PARAM.value,
-    overCapScope: OVER_CAP_SCOPE_PARAM.value,
-    ecLossFactor: EC_LOSS_FACTOR_PARAM.value,
+    densities: getDensityMap(overrides),
+    overCapWeight: r<number>('params.overCapWeight'),
+    overCapScope: r<OverCapScope>('params.overCapScope'),
+    ecLossFactor: r<number>('params.ecLossFactor'),
     lossSelection: {
-      strategy: LOSS_STRATEGY_PARAM.value,
-      prioritizeOverExo: PRIORITIZE_OVER_EXO_PARAM.value,
+      strategy: r<LossSelectionStrategyName>('params.lossSelection.strategy'),
+      prioritizeOverExo: r<boolean>('params.lossSelection.prioritizeOverExo'),
     },
     residualPool: {
-      resetOnEquipOrMarket: RESIDUAL_RESET_PARAM.value,
-      visibleInClient: RESIDUAL_VISIBLE_PARAM.value,
+      resetOnEquipOrMarket: r<boolean>('params.residualPool.resetOnEquipOrMarket'),
+      visibleInClient: r<boolean>('params.residualPool.visibleInClient'),
     },
     transcendence: {
-      refuseIfExo: TRANSCENDENCE_REFUSE_EXO_PARAM.value,
-      refuseIfOver: TRANSCENDENCE_REFUSE_OVER_PARAM.value,
-      maxCurrentValueByRank: { ...TRANSCENDENCE_THRESHOLDS_PARAM.value },
-      successRateByRank: { ...TRANSCENDENCE_SUCCESS_RATE_PARAM.value },
+      refuseIfExo: r<boolean>('params.transcendence.refuseIfExo'),
+      refuseIfOver: r<boolean>('params.transcendence.refuseIfOver'),
+      maxCurrentValueByRank: { ...r<TranscendenceThresholds>('params.transcendence.maxCurrentValueByRank') },
+      successRateByRank: { ...r<Record<TranscendenceRank, number>>('params.transcendence.successRateByRank') },
     },
   };
 }
@@ -155,18 +187,17 @@ export interface BrisageParams {
   nonPositiveLineContribution: NonPositiveLineContribution;
 }
 
-const b = p.brisage;
-
-export function getBrisageParams(): BrisageParams {
+export function getBrisageParams(overrides?: ParamOverrides): BrisageParams {
+  const r = <T,>(p: string) => readParam<T>(`params.brisage.${p}`, overrides);
   return {
-    densities: new Map([...DENSITIES.entries()].map(([id, d]) => [id, d.value])),
-    levelFactor: (b.levelFactor as ParamEntry<number>).value,
-    constantOffset: (b.constantOffset as ParamEntry<number>).value,
-    focusOtherLinesFactor: (b.focusOtherLinesFactor as ParamEntry<number>).value,
-    podsDivisor: (b.podsDivisor as ParamEntry<number>).value,
-    forceOneForActionStats: (b.forceOneForActionStats as ParamEntry<boolean>).value,
-    podsDivisorOnNonFocusLines: (b.podsDivisorOnNonFocusLines as ParamEntry<boolean>).value,
-    nonPositiveLineContribution: (b.nonPositiveLineContribution as ParamEntry<NonPositiveLineContribution>).value,
+    densities: getDensityMap(overrides),
+    levelFactor: r<number>('levelFactor'),
+    constantOffset: r<number>('constantOffset'),
+    focusOtherLinesFactor: r<number>('focusOtherLinesFactor'),
+    podsDivisor: r<number>('podsDivisor'),
+    forceOneForActionStats: r<boolean>('forceOneForActionStats'),
+    podsDivisorOnNonFocusLines: r<boolean>('podsDivisorOnNonFocusLines'),
+    nonPositiveLineContribution: r<NonPositiveLineContribution>('nonPositiveLineContribution'),
   };
 }
 
@@ -213,22 +244,20 @@ export interface ProbabilityParams {
   lookupTable: LookupTableSpec;
 }
 
-const pr = p.probability;
-
-export function getProbabilityParams(): ProbabilityParams {
-  const linear = pr.officialFactorsLinear;
+export function getProbabilityParams(overrides?: ParamOverrides): ProbabilityParams {
+  const r = <T,>(p: string) => readParam<T>(`params.probability.${p}`, overrides);
   return {
-    model: (pr.model as ParamEntry<ProbabilityModelName>).value,
-    heavyExoCharacteristics: [...(pr.heavyExoCharacteristics as ParamEntry<number[]>).value],
-    ecShare: (pr.ecShare as ParamEntry<number>).value,
-    heavyExoEcShare: (pr.heavyExoEcShare as ParamEntry<number>).value,
+    model: r<ProbabilityModelName>('model'),
+    heavyExoCharacteristics: [...r<number[]>('heavyExoCharacteristics')],
+    ecShare: r<number>('ecShare'),
+    heavyExoEcShare: r<number>('heavyExoEcShare'),
     officialFactorsLinear: {
-      a: (linear.a as ParamEntry<number>).value,
-      b: (linear.b as ParamEntry<number>).value,
-      c: (linear.c as ParamEntry<number>).value,
-      levelNormalizer: (linear.levelNormalizer as ParamEntry<number>).value,
+      a: r<number>('officialFactorsLinear.a'),
+      b: r<number>('officialFactorsLinear.b'),
+      c: r<number>('officialFactorsLinear.c'),
+      levelNormalizer: r<number>('officialFactorsLinear.levelNormalizer'),
     },
-    poolRatioLegacy: { ...(pr.poolRatioLegacy.coefficients as ParamEntry<PoolRatioLegacyCoefficients>).value },
-    lookupTable: JSON.parse(JSON.stringify((pr.lookupTable.table as unknown as ParamEntry<LookupTableSpec>).value)),
+    poolRatioLegacy: { ...r<PoolRatioLegacyCoefficients>('poolRatioLegacy.coefficients') },
+    lookupTable: JSON.parse(JSON.stringify(r<LookupTableSpec>('lookupTable.table'))),
   };
 }

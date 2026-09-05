@@ -1,5 +1,5 @@
 /**
- * Types de l'interface (simulateur). Les types du moteur sont dans ./forgemagie.ts.
+ * Types de l'interface (atelier). Les types du moteur sont dans ./forgemagie.ts.
  *
  * Clé d'identification d'une ligne de stat : `characteristicId` (champ `characteristic`
  * de DofusDB), jamais `effectId`.
@@ -16,11 +16,11 @@ export interface SimulatedStat {
   baseMin: number;
   baseMax: number;
   currentValue: number;
-  /** Densité (poids par point) figée au chargement depuis empirical_params.json */
+  /** Densité (poids par point), résolue depuis empirical_params.json et les surcharges actives */
   weightPerPoint: number;
   isExo: boolean;
   isForgemeable: boolean;
-  /** Verrouillée par une rune de transcendance */
+  /** Verrouillée (objet transcendé) */
   isLocked: boolean;
 }
 
@@ -63,18 +63,24 @@ export interface WeightBudget {
 /** Type de rune appliquée */
 export type RuneTier = 'normal' | 'pa' | 'ra';
 
-/** Entrée dans le log de simulation */
+export type ForgeActionKind = 'rune' | 'transcendence' | 'orb' | 'potion';
+
+/** Entrée dans le Livre de forge */
 export interface SimLogEntry {
   id: number;
-  /** Stat ciblée */
+  kind: ForgeActionKind;
+  /** Libellé de l'action, ex. « Pa Vi +15 », « Ta Fo +10 », « Orbe régénérant » */
+  actionLabel: string;
+  /** Stat ciblée (vide pour un orbe) */
   targetStatName: string;
-  targetCharacteristicId: number;
-  /** Rune utilisée */
-  runeTier: RuneTier;
+  targetCharacteristicId: number | null;
   runeValue: number;
   runeWeight: number;
-  /** Issue (fournie manuellement tant que le modèle probabiliste n'existe pas) */
+  /** Issue (fournie ou tirée par le modèle) */
   outcome: RuneOutcome;
+  /** L'issue a été tirée par le modèle probabiliste (sinon forcée à la main) */
+  drawnByModel: boolean;
+  modelName?: string;
   /** Tentative refusée par le moteur (plafond, verrou…) */
   refusedReason?: RefusalReason;
   /** Pertes appliquées sur des lignes */
@@ -84,35 +90,53 @@ export interface SimLogEntry {
   residualPoolAfter: number;
 }
 
-/** Mode de l'application */
-export type AppMode = 'planning' | 'simulation';
+/** Dernier événement appliqué, pour les micro-interactions (rejouées par clé) */
+export interface ForgeEvent {
+  id: number;
+  kind: ForgeActionKind;
+  outcome: RuneOutcome;
+  refused: boolean;
+  targetCharacteristicId: number | null;
+  lostCharacteristicIds: number[];
+  residualDelta: number;
+}
 
-/** State of the simulation with undo history */
-export interface SimulationState {
+export type AtelierMode = 'forge' | 'adjust';
+
+export interface AtelierSnapshot {
+  stats: SimulatedStat[];
+  residualPool: number;
+  itemLocked: boolean;
+}
+
+/** State of the atelier with undo history */
+export interface AtelierState {
   item: Item | null;
   stats: SimulatedStat[];
   /** Reliquat serveur (état propre, ≥ 0) */
   residualPool: number;
-  history: { stats: SimulatedStat[]; residualPool: number }[];
-  future: { stats: SimulatedStat[]; residualPool: number }[];
-  /** Mode actif */
-  mode: AppMode;
-  /** Log de simulation (mode simulation uniquement) */
-  simulationLog: SimLogEntry[];
-  /** Compteur auto-incrémenté pour les IDs de log */
+  /** Objet transcendé (plus de forgemagie ni d'orbe) */
+  itemLocked: boolean;
+  history: AtelierSnapshot[];
+  future: AtelierSnapshot[];
+  mode: AtelierMode;
+  selectedCharacteristicId: number | null;
+  log: SimLogEntry[];
   logCounter: number;
+  lastEvent: ForgeEvent | null;
 }
 
-/** Actions for the simulation reducer */
-export type SimulationAction =
+export type AtelierAction =
   | { type: 'SET_ITEM'; item: Item; stats: SimulatedStat[] }
-  | { type: 'UPDATE_STAT'; characteristicId: number; newValue: number }
+  | { type: 'RESTORE'; state: Partial<AtelierState> }
+  | { type: 'UPDATE_STAT'; characteristicId: number; newValue: number; max: number }
   | { type: 'ADD_EXO'; stat: SimulatedStat }
   | { type: 'REMOVE_EXO'; characteristicId: number }
   | { type: 'RESET_TO_PERFECT' }
   | { type: 'UNDO' }
   | { type: 'REDO' }
-  | { type: 'TOGGLE_MODE' }
-  | { type: 'APPLY_RUNE'; stats: SimulatedStat[]; residualPool: number; logEntry: SimLogEntry }
+  | { type: 'SET_MODE'; mode: AtelierMode }
+  | { type: 'SELECT_LINE'; characteristicId: number | null }
+  | { type: 'APPLY_RESULT'; snapshot: AtelierSnapshot; logEntry: SimLogEntry; event: ForgeEvent }
   | { type: 'RESET_RESIDUAL' }
   | { type: 'CLEAR_LOG' };

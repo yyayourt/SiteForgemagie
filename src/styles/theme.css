@@ -1,159 +1,315 @@
 /*
- * Thème « atelier de forgemage » — SEULE source de couleurs, polices et matières.
+ * THÈME « LA FORGE » — seule source de couleurs, polices, ombres et matières.
+ *
+ * Mode principal : sombre (la forge la nuit). Second mode : clair (l'atelier de jour),
+ * activé par data-theme="light" sur <html>. Seuls fonds, bordures et encre changent ;
+ * le creuset, le feu, le vert d'action, les couleurs d'issue et de ligne restent l'identité.
  *
  * Règles :
- *  - aucune couleur Tailwind par défaut (la palette par défaut est désactivée ci-dessous) ;
+ *  - la palette et les ombres Tailwind par défaut sont désactivées ci-dessous ;
  *  - toute couleur passe par un token --color-* (utilitaires bg-/text-/border-…) ;
- *  - exo = froid (bleu-vert), over = vert clair, ligne à 0 = gris, cohérent avec le code
- *    couleur du client depuis la 2.58 ;
+ *  - ACTION = vert franc et chaud (--color-cta), réservé aux boutons d'action principaux ;
+ *  - OVER = vert-menthe désaturé (--color-over), jamais sur un bouton ; EXO = bleu-vert froid ;
+ *    ligne éteinte = gris. Cohérent avec le code couleur du client depuis la 2.58 ;
  *  - aucune ressource Ankama : glyphes, ornements et icônes sont des SVG originaux.
  */
 
 @theme {
-  /* ─── Désactivation de la palette Tailwind par défaut ───
-   * Activée lors de la généralisation (phase 4, étape 2) : tant que les anciens composants
-   * utilisent les couleurs gray et green de Tailwind, la ligne « --color-* : initial »
-   * reste désactivée ici.
-   */
+  --color-*: initial;
+  --shadow-*: initial;
+  --font-*: initial;
 
-  /* ─── Fonds : charbon brun, métal sombre ─── */
-  --color-forge-bg: #1b1512;
-  --color-forge-bg-deep: #120e0c;
-  --color-forge-surface: #251d18;
-  --color-forge-surface-raised: #2f2620;
-  --color-forge-line: #3d3128;
+  /* ─── Fonds et fer (mode sombre) ─── */
+  --color-pitch: #0b0806;
+  --color-iron: #17110d;
+  --color-iron-2: #211913;
+  --color-iron-edge: #3a2b20;
+  --color-slab: #1a1410;
+  --color-slab-edge: #3d2e22;
+  --color-well: #0d0907;
+  --color-track: #0a0705;
 
-  /* ─── Parchemin (panneaux de connaissance) ─── */
-  --color-parchment: #e8dbc1;
-  --color-parchment-deep: #d9c9a8;
-  --color-parchment-ink: #2b2016;
-  --color-parchment-ink-muted: #6b5a47;
+  /* ─── Encre ─── */
+  --color-ash: #eadfcf;
+  --color-ash-2: #a99a86;
+  --color-ash-3: #7c6f5f;
 
-  /* ─── Accents chauds ─── */
-  --color-bronze: #b87a3b;
-  --color-bronze-dim: #7c5227;
-  --color-copper: #d4914f;
-  --color-ember: #e0a83a;
+  /* ─── Feu (identique dans les deux modes) ─── */
+  --color-ember: #ff7a1a;
+  --color-ember-deep: #b8470c;
+  --color-molten: #ffc25c;
+  --color-molten-white: #fff1d0;
+  --color-molten-text: #ffc25c;
 
-  /* ─── Texte ─── */
-  --color-ivory: #f2e9da;
-  --color-ivory-muted: #b9ac99;
-  --color-ivory-faint: #8d8272;
+  /* ─── Action : vert franc, chaud, saturé ─── */
+  --color-cta: #4fae1f;
+  --color-cta-hover: #5cbf2a;
+  --color-cta-ink: #0e1a08;
 
-  /* ─── Sémantique des lignes (client 2.58) ─── */
-  --color-exo: #3fb5ad;
-  --color-exo-deep: #1d5f5a;
-  --color-over: #9cd46b;
-  --color-over-deep: #3f6a25;
-  --color-zero: #7e766d;
+  /* ─── Lignes ─── */
+  --color-exo: #4fd1c5;
+  --color-over: #9ed8bb;
+  --color-zero: #7a7269;
   --color-locked: #d4914f;
 
   /* ─── Issues ─── */
-  --color-sc: #8fc46a;
-  --color-sn: #e0a83a;
-  --color-ec: #d2553f;
+  --color-sc: #ffd27a;
+  --color-sn: #ff9f43;
+  --color-ec: #ff4d3d;
 
-  /* ─── Statuts épistémiques ─── */
-  --color-status-primary: #8fc46a;
-  --color-status-empirical: #6fb3d2;
-  --color-status-hypothesis: #b9ac99;
-  --color-status-contradiction: #e0a83a;
-  --color-status-unknown: #d2553f;
+  /* ─── Modèle et statuts épistémiques ─── */
+  --color-model: #e0a83a;
+  --color-st-primary: #9ed8bb;
+  --color-st-empirical: #7cc4e8;
+  --color-st-hypothesis: #c9bca6;
+  --color-st-contradiction: #ffb454;
+  --color-st-unknown: #ff6b5e;
 
   /* ─── Typographie ─── */
-  --font-display: 'Cinzel', 'Georgia', serif;
-  --font-body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-text: 'Instrument Sans', system-ui, sans-serif;
 
-  /* ─── Rayons, ombres ─── */
-  --radius-panel: 0.75rem;
-  --radius-control: 0.375rem;
-  --shadow-panel: 0 8px 24px -12px rgb(0 0 0 / 0.7), 0 1px 0 0 rgb(255 232 200 / 0.04) inset;
-  --shadow-inset-metal: inset 0 1px 0 rgb(255 232 200 / 0.05), inset 0 -1px 0 rgb(0 0 0 / 0.45);
+  /* ─── Rayons et ombres maison ─── */
+  --radius-panel: 14px;
+  --radius-control: 10px;
+  --shadow-panel: 0 30px 60px -30px rgb(0 0 0 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --shadow-slab: 0 40px 80px -40px rgb(0 0 0 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.08), inset 0 -40px 60px -50px rgb(255 122 26 / 0.25);
+  --shadow-cta: 0 10px 28px -10px rgb(79 174 31 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.35);
+  --shadow-cta-hover: 0 14px 34px -10px rgb(79 174 31 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.35);
+  --shadow-inset: inset 0 1px 3px rgb(0 0 0 / 0.9);
+}
+
+/* ─── Second mode : l'atelier de jour ─── */
+[data-theme='light'] {
+  --color-pitch: #e9dcc3;
+  --color-iron: #f6eee0;
+  --color-iron-2: #fbf5ea;
+  --color-iron-edge: #cdb894;
+  --color-slab: #dccba9;
+  --color-slab-edge: #a88b5c;
+  --color-well: #efe4cf;
+  --color-track: #cdbb98;
+  --color-ash: #2a1d12;
+  --color-ash-2: #5c4a36;
+  --color-ash-3: #7a6650;
+  --color-molten-text: #9a4a10;
+  --color-cta: #3f9a19;
+  --color-cta-hover: #4aad21;
+  --color-cta-ink: #ffffff;
+  --color-exo: #176b62;
+  --color-over: #24704a;
+  --color-zero: #8a8074;
+  --color-locked: #8a4a12;
+  --color-sc: #8c6a12;
+  --color-sn: #a85a10;
+  --color-ec: #b0301f;
+  --color-model: #8c6a12;
+  --color-st-primary: #24704a;
+  --color-st-empirical: #1f5f7a;
+  --color-st-hypothesis: #6b5a47;
+  --color-st-contradiction: #9a5b14;
+  --color-st-unknown: #b0301f;
+  --shadow-panel: 0 20px 40px -28px rgb(60 35 10 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.5);
+  --shadow-slab: 0 30px 60px -36px rgb(60 35 10 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 -30px 50px -50px rgb(255 122 26 / 0.18);
+  --shadow-cta: 0 10px 28px -10px rgb(63 154 25 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.4);
+  --shadow-cta-hover: 0 14px 34px -10px rgb(63 154 25 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.4);
+  --shadow-inset: inset 0 1px 3px rgb(60 35 10 / 0.35);
+  --lamp: rgb(255 150 60 / 0.16);
+  --grain: 0.18;
+  color-scheme: light;
 }
 
 /* ─── Base ─── */
-html {
+:root {
+  --lamp: rgb(255 122 26 / 0.18);
+  --grain: 0.35;
   color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: var(--color-forge-bg);
-  background-image:
-    radial-gradient(ellipse at top, rgb(184 122 59 / 0.08), transparent 55%),
-    radial-gradient(ellipse at bottom right, rgb(63 181 173 / 0.04), transparent 50%);
-  color: var(--color-ivory);
-  font-family: var(--font-body);
+  color: var(--color-ash);
+  font-family: var(--font-text);
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.45;
+  background-color: var(--color-pitch);
+  background-image:
+    radial-gradient(1200px 700px at 18% 62%, var(--lamp), transparent 60%),
+    radial-gradient(900px 500px at 50% -10%, rgb(255 194 92 / 0.06), transparent 60%);
+  background-attachment: fixed;
+  transition: background-color 0.25s, color 0.25s;
 }
 
-h1, h2, h3, .font-display {
-  font-family: var(--font-display);
-  letter-spacing: 0.01em;
+/* Grain de fer, très léger */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--grain);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
 }
+#root { position: relative; z-index: 1; }
 
-/* Chiffres tabulaires partout où des données s'alignent */
-.tnum {
-  font-variant-numeric: tabular-nums;
-}
+h1, h2, h3, .font-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; }
+.tnum { font-variant-numeric: tabular-nums; }
+.soft { font-variation-settings: 'SOFT' 40; }
 
-/* ─── Focus visible (accessibilité) ─── */
-:focus-visible {
-  outline: 2px solid var(--color-copper);
-  outline-offset: 2px;
-}
+:focus-visible { outline: 2px solid var(--color-molten); outline-offset: 3px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+input, select, textarea { font: inherit; color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* ─── Matières ─── */
 
-/* Métal brossé sombre : zone de simulation */
-.surface-metal {
-  background-color: var(--color-forge-surface);
-  background-image:
-    linear-gradient(180deg, rgb(255 232 200 / 0.03), transparent 40%),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.012) 0 1px, transparent 1px 3px);
-  border: 1px solid var(--color-forge-line);
-  box-shadow: var(--shadow-panel), var(--shadow-inset-metal);
+/* Panneau de fer */
+.surface-iron {
+  background: linear-gradient(180deg, var(--color-iron-2), var(--color-iron));
+  border: 1px solid var(--color-iron-edge);
   border-radius: var(--radius-panel);
-}
-
-/* Parchemin : panneaux de connaissance, tooltips longs */
-.surface-parchment {
-  background-color: var(--color-parchment);
-  background-image:
-    radial-gradient(circle at 20% 10%, rgb(255 255 255 / 0.35), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgb(120 80 30 / 0.12), transparent 45%);
-  color: var(--color-parchment-ink);
-  border: 1px solid var(--color-bronze-dim);
   box-shadow: var(--shadow-panel);
-  border-radius: var(--radius-panel);
 }
 
-/* Filet ornemental : bordure bronze + hairline intérieure */
-.ornament {
+/* Dalle d'enclume : l'objet */
+.slab {
   position: relative;
-  border: 1px solid var(--color-bronze-dim);
+  border-radius: 18px;
+  background-color: var(--color-slab);
+  background-image:
+    radial-gradient(800px 300px at 20% 100%, rgb(255 122 26 / 0.1), transparent 60%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.04), transparent 60%, rgb(0 0 0 / 0.08));
+  border: 1px solid var(--color-slab-edge);
+  box-shadow: var(--shadow-slab);
 }
-.ornament::after {
+.slab::before {
   content: '';
   position: absolute;
-  inset: 3px;
-  border: 1px solid rgb(184 122 59 / 0.25);
-  border-radius: inherit;
+  inset: 10px;
+  border: 1px solid rgb(255 194 92 / 0.1);
+  border-radius: 12px;
   pointer-events: none;
 }
 
-/* Ligne d'objet : barre de jet (min → max) */
-.roll-track {
-  background: linear-gradient(90deg, var(--color-forge-bg-deep), var(--color-forge-line));
-  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.6);
-}
+/* Creux : champs, boutons secondaires, journal */
+.well { background-color: var(--color-well); border: 1px solid var(--color-iron-edge); }
 
-/* ─── Mouvement : uniquement en réponse à une action ─── */
+/* Rail d'une barre de jet */
+.roll-track { background-color: var(--color-track); box-shadow: var(--shadow-inset); }
+
+/* Filet de braise sous l'en-tête */
+.ember-rule { height: 1px; background: linear-gradient(90deg, transparent, var(--color-ember) 30%, var(--color-molten) 50%, var(--color-ember) 70%, transparent); opacity: 0.6; }
+
+/* Bouton d'action principal : vert franc */
+.btn-cta {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-cta) 70%, #000);
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-cta-ink);
+  background: linear-gradient(180deg, var(--color-cta-hover), var(--color-cta) 55%, color-mix(in srgb, var(--color-cta) 85%, #000) 100%);
+  box-shadow: var(--shadow-cta);
+  transition: transform 0.08s, box-shadow 0.08s, filter 0.08s;
+}
+.btn-cta:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.06); box-shadow: var(--shadow-cta-hover); }
+.btn-cta:active:not(:disabled) { transform: translateY(1px) scale(0.99); filter: brightness(0.96); }
+.btn-cta:disabled { filter: saturate(0.3) brightness(0.8); opacity: 0.7; }
+.btn-cta:focus-visible { outline-color: var(--color-cta-hover); }
+
+/* Bouton secondaire en creux */
+.btn-well {
+  background-color: var(--color-well);
+  border: 1px solid var(--color-iron-edge);
+  border-radius: var(--radius-control);
+  color: var(--color-ash-2);
+  transition: border-color 0.15s, color 0.15s, transform 0.15s;
+}
+.btn-well:hover:not(:disabled) { border-color: var(--color-ash-3); color: var(--color-ash); }
+.btn-well[aria-pressed='true'], .btn-well[aria-selected='true'] {
+  border-color: var(--color-molten-text);
+  color: var(--color-ash);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-molten-text) 35%, transparent), 0 0 24px -6px color-mix(in srgb, var(--color-molten-text) 60%, transparent);
+}
+.btn-well:disabled { opacity: 0.4; }
+
+/* ─── Creuset (Reliquat) ─── */
+.vessel {
+  position: relative;
+  border-radius: 10px 10px 70px 70px / 10px 10px 40px 40px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2a2019, #0e0a08 70%);
+  border: 1px solid #3f3026;
+  box-shadow: inset 0 0 40px rgb(0 0 0 / 0.9), inset 0 -8px 20px rgb(0 0 0 / 0.8);
+}
+.vessel-rim { position: absolute; inset: 0 0 auto 0; height: 10px; background: linear-gradient(180deg, #4a3829, #1d1611); border-bottom: 1px solid #57432f; }
+.vessel-glow { position: absolute; inset: auto -30% -20% -30%; height: 70%; background: radial-gradient(closest-side, rgb(255 122 26 / 0.45), transparent); filter: blur(18px); pointer-events: none; transition: opacity 0.6s; }
+.molten {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, var(--color-molten-white) 0%, var(--color-molten) 12%, var(--color-ember) 45%, var(--color-ember-deep) 100%);
+  box-shadow: 0 -12px 40px rgb(255 140 40 / 0.55), 0 -2px 0 rgb(255 241 208 / 0.8);
+  transition: height 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  animation: swell 6s ease-in-out infinite alternate;
+}
+.molten::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 14px; background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent); filter: blur(4px); animation: sheen 3.6s linear infinite; }
+.molten::after { content: ''; position: absolute; inset: 0; background: radial-gradient(60px 20px at 30% 30%, rgb(255 255 255 / 0.25), transparent 70%), radial-gradient(40px 14px at 70% 60%, rgb(255 255 255 / 0.18), transparent 70%); mix-blend-mode: screen; }
+.molten.boil { animation: swell 6s ease-in-out infinite alternate, boil 0.9s ease-out 1; }
+@keyframes swell { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+@keyframes sheen { from { transform: translateX(-60%); } to { transform: translateX(60%); } }
+@keyframes boil { 0% { filter: brightness(1.6); } 100% { filter: brightness(1); } }
+
+/* ─── Balance (Budget de poids) ─── */
+.beam-bar { background: linear-gradient(90deg, #4a3a2c, #7a5f47, #4a3a2c); transition: transform 0.5s ease; }
+.beam-pivot { background: #5a4634; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.beam-pan { background: #3b2e23; border: 1px solid #5a4634; border-top: 0; border-radius: 0 0 20px 20px; }
+
+/* ─── Micro-interactions de ligne ─── */
+.line-struck::after {
+  content: ''; position: absolute; inset: 0; border-radius: 10px; pointer-events: none;
+  background: radial-gradient(320px 44px at 30% 50%, rgb(255 194 92 / 0.35), transparent 70%);
+  animation: strike 1.1s ease-out 1 both;
+}
+.line-struck-sc::after { background: radial-gradient(320px 44px at 30% 50%, rgb(255 210 122 / 0.5), transparent 70%); }
+.line-lost::after {
+  content: ''; position: absolute; inset: 0; border-radius: 10px; pointer-events: none;
+  background: radial-gradient(320px 44px at 60% 50%, rgb(255 77 61 / 0.35), transparent 70%);
+  animation: strike 1.3s ease-out 0.15s 1 both;
+}
+.line-refused::after {
+  content: ''; position: absolute; inset: 0; border-radius: 10px; pointer-events: none;
+  background: linear-gradient(90deg, rgb(255 77 61 / 0.15), transparent);
+  animation: shake 0.4s ease-out 1 both;
+}
+@keyframes strike { 0% { opacity: 0; transform: scaleX(0.2); } 15% { opacity: 1; transform: scaleX(1); } 100% { opacity: 0; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.spark { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--color-molten); box-shadow: 0 0 6px var(--color-ember); animation: spark 0.9s ease-out 1 both; pointer-events: none; }
+@keyframes spark { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 30px)); opacity: 0; } }
+.value-bump { animation: bump 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 1; display: inline-block; }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+/* Nouvelle entrée du Livre de forge */
+.entry-forged { animation: forged 0.8s ease-out both; }
+@keyframes forged { from { box-shadow: 0 0 0 0 rgb(255 194 92 / 0.6); background-color: color-mix(in srgb, var(--color-molten) 18%, var(--color-well)); } to { box-shadow: 0 0 0 12px rgb(255 194 92 / 0); background-color: var(--color-well); } }
+
+/* Braise qui respire (chargement) */
+.embers { border-radius: 50%; background: radial-gradient(circle, var(--color-molten), var(--color-ember) 40%, transparent 70%); animation: breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { transform: scale(0.85); opacity: 0.7; } 50% { transform: scale(1); opacity: 1; } }
+
+/* Panneau latéral */
+.drawer { box-shadow: -30px 0 60px -30px rgb(0 0 0 / 0.9); }
+.drawer-enter { animation: slide-in 0.25s ease-out both; }
+@keyframes slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Détails (source / note) */
+details > summary { list-style: none; cursor: pointer; }
+details > summary::-webkit-details-marker { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
-  * {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

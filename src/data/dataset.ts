@@ -108,6 +108,66 @@ export function getAvailableRuneTiers(
   });
 }
 
+// ─── Runes de transcendance, potions, orbes (dataset, données tierces) ───────
+
+export type TranscendenceRankName = 'Ta' | 'Pata' | 'Rata';
+
+export interface TranscendenceRuneInfo {
+  runeId: number;
+  nameFr: string;
+  level: number;
+  rank: TranscendenceRankName;
+  characteristicId: number;
+  value: number;
+}
+
+function rankFromName(nameFr: string): TranscendenceRankName | null {
+  if (/^Rune Rata /.test(nameFr)) return 'Rata';
+  if (/^Rune Pata /.test(nameFr)) return 'Pata';
+  if (/^Rune Ta /.test(nameFr)) return 'Ta';
+  return null;
+}
+
+const transcendenceByCharacteristic = new Map<number, TranscendenceRuneInfo[]>();
+for (const r of datasetJson.transcendenceRunes) {
+  const eff = r.effects.find((e) => e.characteristicId > 0);
+  const rank = rankFromName(r.nameFr);
+  if (!eff || !rank) continue;
+  const list = transcendenceByCharacteristic.get(eff.characteristicId) ?? [];
+  list.push({ runeId: r.id, nameFr: r.nameFr, level: r.level, rank, characteristicId: eff.characteristicId, value: eff.value });
+  transcendenceByCharacteristic.set(eff.characteristicId, list);
+}
+const RANK_ORDER: TranscendenceRankName[] = ['Ta', 'Pata', 'Rata'];
+for (const list of transcendenceByCharacteristic.values()) {
+  list.sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank));
+}
+
+/** Runes de transcendance disponibles pour une caractéristique, dans l'ordre Ta → Pata → Rata. */
+export function getTranscendenceRunes(characteristicId: number): TranscendenceRuneInfo[] {
+  return transcendenceByCharacteristic.get(characteristicId) ?? [];
+}
+
+export interface ConsumableInfo {
+  id: number;
+  nameFr: string;
+  level: number;
+  descriptionFr: string;
+}
+
+export const FM_POTIONS: readonly ConsumableInfo[] = datasetJson.potions.map((p) => ({
+  id: p.id,
+  nameFr: p.nameFr,
+  level: p.level,
+  descriptionFr: p.descriptionFr,
+}));
+
+export const FM_ORBS: readonly ConsumableInfo[] = datasetJson.orbs.map((o) => ({
+  id: o.id,
+  nameFr: o.nameFr,
+  level: o.level,
+  descriptionFr: o.descriptionFr,
+}));
+
 /** Chargement différé de la liste des objets (fichier volumineux, chunk séparé). */
 export async function loadItems(): Promise<DatasetItem[]> {
   const mod = await import('../../data/items.json');

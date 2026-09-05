@@ -1,147 +1,71 @@
-import { useEffect, useCallback, useState } from 'react';
-import { Header } from './components/Header';
-import { ItemSelector } from './components/ItemSelector';
-import { StatsSimulator } from './components/StatsSimulator';
-import { PoolSummary } from './components/PoolSummary';
-import { ActionBar } from './components/ActionBar';
-import { SimulationLog } from './components/SimulationLog';
-import { TheoryGuide } from './components/TheoryGuide';
-import { useSimulation } from './hooks/useSimulation';
+import { useCallback, useEffect, useState } from 'react';
+import { TopBar, type Page } from './components/shell/TopBar';
+import { AtelierPage } from './pages/AtelierPage';
+import { MonteCarloPage } from './pages/MonteCarloPage';
+import { KnowledgePage } from './pages/KnowledgePage';
+import { ParamsDrawer } from './pages/ParamsDrawer';
+import { useAtelier } from './hooks/useAtelier';
 
-type AppTab = 'simulator' | 'theory';
+function pageFromHash(): Page {
+  const h = window.location.hash.replace('#', '');
+  return h === 'montecarlo' || h === 'savoir' ? h : 'atelier';
+}
 
 function App() {
-  const [activeTab, setActiveTab] = useState<AppTab>('simulator');
-  const {
-    item,
-    stats,
-    budget,
-    residualPool,
-    mode,
-    simulationLog,
-    canUndo,
-    canRedo,
-    selectItem,
-    updateStat,
-    addExo,
-    removeExo,
-    resetToPerfect,
-    undo,
-    redo,
-    toggleMode,
-    applyRune,
-    drawAndApplyRune,
-    estimateRune,
-    clearLog,
-  } = useSimulation();
+  const [page, setPage] = useState<Page>(pageFromHash);
+  const [paramsOpen, setParamsOpen] = useState(false);
+  const atelier = useAtelier();
 
-  // Keyboard shortcuts: Ctrl+Z / Ctrl+Y
+  const navigate = useCallback((p: Page) => {
+    setPage(p);
+    window.location.hash = p;
+    window.scrollTo({ top: 0 });
+  }, []);
+
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        undo();
-      }
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
-        e.preventDefault();
-        redo();
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo]);
+    const onHash = () => setPage(pageFromHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
-  // Save to localStorage
-  const handleSave = useCallback(() => {
-    if (!item) return;
-    const key = `fm-build-${item.id}`;
-    const data = { item, stats, residualPool, savedAt: new Date().toISOString() };
-    localStorage.setItem(key, JSON.stringify(data));
-    localStorage.setItem('fm-last-save', key);
-    alert(`Build sauvegardé pour ${item.name}`);
-  }, [item, stats, residualPool]);
+  // Raccourcis : Ctrl+Z / Ctrl+Y (hors champs de saisie)
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) return;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); atelier.undo(); }
+      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) { e.preventDefault(); atelier.redo(); }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [atelier]);
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header activeTab={activeTab} onTabChange={setActiveTab} />
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-3 focus:py-2 focus:bg-iron focus:text-ash focus:rounded-control">
+        Aller au contenu
+      </a>
+      <TopBar
+        page={page}
+        onNavigate={navigate}
+        onOpenParams={() => setParamsOpen((o) => !o)}
+        paramsOpen={paramsOpen}
+        onSelectItem={(item, stats) => { atelier.selectItem(item, stats); if (page !== 'atelier') navigate('atelier'); }}
+        currentItemName={atelier.item?.name}
+      />
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 space-y-6">
-        {activeTab === 'theory' && <TheoryGuide />}
-
-        {activeTab === 'simulator' && (
-          <>
-            <section className="bg-dofus-panel border border-dofus-gold/20 rounded-xl p-5">
-              <ItemSelector selectedItem={item} onSelect={selectItem} />
-            </section>
-
-            {item && (
-              <>
-                <div className="flex items-center gap-4 bg-dofus-panel border border-dofus-gold/20 rounded-xl p-4">
-                  {item.imgUrl && (
-                    <img
-                      src={item.imgUrl}
-                      alt={item.name}
-                      className="w-14 h-14 rounded-lg border border-dofus-gold/30 bg-dofus-dark"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-xl font-bold text-white">{item.name}</h2>
-                    <p className="text-sm text-gray-400">
-                      {item.typeName} &middot; Niveau {item.level}
-                    </p>
-                  </div>
-                  {mode === 'simulation' && (
-                    <span className="ml-auto text-xs px-3 py-1 rounded-full bg-exo/20 text-exo border border-exo/30 font-medium" title="Issue SC/SN/EC choisie manuellement : aucun modèle probabiliste avant la phase 3">
-                      Mode Simulation (issue manuelle)
-                    </span>
-                  )}
-                </div>
-
-                <ActionBar
-                  canUndo={canUndo}
-                  canRedo={canRedo}
-                  hasItem={!!item}
-                  mode={mode}
-                  onUndo={undo}
-                  onRedo={redo}
-                  onReset={resetToPerfect}
-                  onSave={handleSave}
-                  onToggleMode={toggleMode}
-                />
-
-                <PoolSummary budget={budget} residualPool={residualPool} showResidual={mode === 'simulation'} />
-
-                <section className="bg-dofus-panel border border-dofus-gold/20 rounded-xl p-5">
-                  <StatsSimulator
-                    stats={stats}
-                    remainingBudget={budget.remainingBudget}
-                    mode={mode}
-                    onUpdate={updateStat}
-                    onApplyRune={applyRune}
-                    onDrawRune={drawAndApplyRune}
-                    estimateRune={estimateRune}
-                    onAddExo={addExo}
-                    onRemoveExo={removeExo}
-                  />
-                </section>
-
-                {mode === 'simulation' && <SimulationLog log={simulationLog} onClear={clearLog} />}
-              </>
-            )}
-
-            {!item && (
-              <div className="text-center py-20 text-gray-500">
-                <p className="text-lg">Recherche un item pour commencer la simulation</p>
-                <p className="text-sm mt-2">Tape le nom d'un item Dofus dans la barre de recherche ci-dessus</p>
-              </div>
-            )}
-          </>
-        )}
+      <main id="main" className="flex-1">
+        {page === 'atelier' && <AtelierPage atelier={atelier} />}
+        {page === 'montecarlo' && <MonteCarloPage atelier={atelier} />}
+        {page === 'savoir' && <KnowledgePage />}
       </main>
 
-      <footer className="text-center py-4 text-xs text-gray-600 border-t border-dofus-gold/10">
-        Simulateur FM &mdash; Données DofusDB figées (dataset local, non officiel)
+      <footer className="px-4 sm:px-7 py-4 text-xs text-ash-3 border-t border-iron-edge/60 flex flex-wrap gap-x-4 gap-y-1">
+        <span>La Forge — reconstruction traçable de la forgemagie DOFUS 3. La formule du serveur est secrète : toute probabilité affichée est un modèle.</span>
+        <span className="ml-auto">Données d'objets DofusDB (dataset local). Icônes d'objets : assets Ankama, usage communautaire.</span>
       </footer>
+
+      <ParamsDrawer open={paramsOpen} onClose={() => setParamsOpen(false)} />
     </div>
   );
 }
