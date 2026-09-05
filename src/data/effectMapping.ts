@@ -110,7 +110,7 @@ export const EFFECT_MAPPING: Record<number, RuneInfo> = {
   },
   114: {
     statName: 'Dommages Terre',
-    weightPerPoint: 20,
+    weightPerPoint: 5,
     isForgemeable: true,
     runeNormal: 1,
     runePa: 3,
@@ -118,7 +118,7 @@ export const EFFECT_MAPPING: Record<number, RuneInfo> = {
   },
   116: {
     statName: 'Dommages Neutre',
-    weightPerPoint: 20,
+    weightPerPoint: 5,
     isForgemeable: true,
     runeNormal: 1,
     runePa: 3,
@@ -126,7 +126,7 @@ export const EFFECT_MAPPING: Record<number, RuneInfo> = {
   },
   120: {
     statName: 'Dommages Eau',
-    weightPerPoint: 20,
+    weightPerPoint: 5,
     isForgemeable: true,
     runeNormal: 1,
     runePa: 3,
@@ -134,7 +134,7 @@ export const EFFECT_MAPPING: Record<number, RuneInfo> = {
   },
   122: {
     statName: 'Dommages Air',
-    weightPerPoint: 20,
+    weightPerPoint: 5,
     isForgemeable: true,
     runeNormal: 1,
     runePa: 3,
@@ -142,7 +142,7 @@ export const EFFECT_MAPPING: Record<number, RuneInfo> = {
   },
   136: {
     statName: 'Dommages Feu',
-    weightPerPoint: 20,
+    weightPerPoint: 5,
     isForgemeable: true,
     runeNormal: 1,
     runePa: 3,

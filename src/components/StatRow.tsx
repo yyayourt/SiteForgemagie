@@ -98,19 +98,20 @@ export function StatRow({ stat, poolRemaining, mode, onUpdate, onApplyRune, onRe
               type="number"
               value={stat.currentValue}
               min={0}
-              max={absoluteMax === Infinity ? undefined : absoluteMax}
+              max={maxReachable}
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10);
                 if (!isNaN(val)) {
-                  const clamped = absoluteMax === Infinity ? val : Math.min(val, absoluteMax);
+                  // Clamp au max atteignable par le puits (pas juste la règle des 101)
+                  const clamped = Math.min(val, maxReachable);
                   onUpdate(stat.effectId, Math.max(0, clamped));
                 }
               }}
               className={`w-16 text-center bg-dofus-dark border border-dofus-gold/20 rounded px-1 py-1 text-sm font-mono ${style.text} focus:outline-none focus:border-dofus-gold`}
             />
             <button
-              onClick={() => onUpdate(stat.effectId, stat.currentValue + 1)}
-              disabled={stat.currentValue >= absoluteMax}
+              onClick={() => onUpdate(stat.effectId, Math.min(stat.currentValue + 1, maxReachable))}
+              disabled={stat.currentValue >= maxReachable}
               className="w-7 h-7 rounded bg-dofus-panel-light border border-dofus-gold/20 text-white hover:bg-dofus-gold/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-bold"
             >+</button>
           </div>
@@ -118,14 +119,14 @@ export function StatRow({ stat, poolRemaining, mode, onUpdate, onApplyRune, onRe
             <div className="flex gap-1">
               {runeValues.map((val, i) => {
                 const runeLabel = i === 0 ? '' : i === 1 ? 'Pa' : 'Ra';
-                const wouldExceedCap = stat.currentValue + val > absoluteMax;
+                const wouldExceedCap = stat.currentValue + val > maxReachable;
                 return (
                   <button
                     key={val}
-                    onClick={() => onUpdate(stat.effectId, stat.currentValue + val)}
+                    onClick={() => onUpdate(stat.effectId, Math.min(stat.currentValue + val, maxReachable))}
                     disabled={wouldExceedCap}
                     className="text-xs px-2 py-1 rounded bg-dofus-panel-light border border-dofus-gold/15 text-dofus-gold-light hover:bg-dofus-gold/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    title={wouldExceedCap ? `Cap atteint (+${absoluteMax - stat.baseMax} max)` : `+${val} (Rune ${runeLabel || 'normale'})`}
+                    title={wouldExceedCap ? `Puits insuffisant (max ~${maxReachable})` : `+${val} (Rune ${runeLabel || 'normale'})`}
                   >
                     +{val}{runeLabel && <span className="ml-0.5 opacity-60">{runeLabel}</span>}
                   </button>

@@ -2,8 +2,15 @@ import type { SimulatedStat, PoolResult } from '../types';
 import { STAT_CAPS } from '../data/statCaps';
 
 /**
- * Limite maximale du poids combiné des overs + exos sur un item.
- * C'est LA règle fondamentale de la forgemagie Dofus.
+ * Valeur de référence pour la règle des 101 en forgemagie Dofus.
+ *
+ * ATTENTION : la règle des 101 s'applique PAR LIGNE DE STAT, pas en cumul global.
+ * Chaque ligne (over ou exo) est indépendante : un item peut avoir exo PA (100p)
+ * + exo PM (90p) + over vita (101p) sans enfreindre la règle.
+ *
+ * Cette constante est utilisée ici uniquement comme indicateur visuel
+ * (overExoBudgetRemaining) pour l'affichage, PAS comme contrainte mécanique.
+ * Les vrais caps par ligne sont dans STAT_CAPS (maxOverOrExo).
  */
 export const OVER_EXO_BUDGET = 101;
 

@@ -102,8 +102,13 @@ export function simulationReducer(
 
     case 'APPLY_RUNE': {
       const { result } = action;
+      // Safety clamp : toutes les stats respectent le max théorique (règle des 101)
+      const clampedStats = result.newStats.map((s) => {
+        const max = getStatAbsoluteMax(s);
+        return s.currentValue > max ? { ...s, currentValue: max } : s;
+      });
       return {
-        ...pushHistory(state, result.newStats),
+        ...pushHistory(state, clampedStats),
         simulationLog: [...state.simulationLog, result.logEntry],
         logCounter: state.logCounter + 1,
       };

@@ -6,6 +6,7 @@ import type {
   SimulationResult,
 } from '../types';
 import { EFFECT_MAPPING } from '../data/effectMapping';
+import { getStatAbsoluteMax } from '../data/statCaps';
 import { computeItemPool } from './poolCalculator';
 
 /**
@@ -16,9 +17,9 @@ import { computeItemPool } from './poolCalculator';
  * - SN (Succès Neutre)   : la rune passe, mais une autre stat perd du poids équivalent
  * - EC (Échec Critique)   : la rune ne passe pas, une stat random perd du poids
  *
- * Le puits influence fortement les probabilités :
- * - Plus le puits est positif → plus de chances de SC
- * - Plus le puits est négatif → plus de chances de EC
+ * Note : les probabilités SC/SN/EC et le recul utilisent un modèle simplifié.
+ * Voir les commentaires de computeOutcomeProbabilities() et applyRecoil()
+ * pour les détails et les écarts avec la théorie FM communautaire.
  */
 
 /**
@@ -31,7 +32,13 @@ const EXO_HEAVY_THRESHOLD = 30;
 /**
  * Calcule les taux de SC/SN/EC en fonction du ratio puits/poids de rune.
  *
- * Cas spécial : pour les runes exo lourdes (PA, PM, PO, Invocations),
+ * ⚠ MODÈLE SIMPLIFIÉ — Ne reflète pas les mécaniques exactes de Dofus.
+ * En théorie FM communautaire, le puits n'influence PAS directement les probabilités
+ * de SC/SN/EC. Les taux dépendraient plutôt de la densité de l'item et du type de rune.
+ * Ankama ne publie aucune formule officielle.
+ * Ce modèle utilise le ratio puits/rune comme approximation plausible pour la simulation.
+ *
+ * Cas spécial CONFIRMÉ : pour les runes exo lourdes (PA, PM, PO, Invocations),
  * le taux est fixe : 1% SC, 0% SN, 99% EC.
  */
 export function computeOutcomeProbabilities(
@@ -129,6 +136,14 @@ export function pickRecoilTarget(
 /**
  * Applique le recul : retire du poids sur la stat victime.
  * Retourne le nombre de points effectivement perdus.
+ *
+ * ⚠ MODÈLE SIMPLIFIÉ :
+ * - En EC, le recul appliqué = 50% du poids de la rune. Ce ratio n'est pas
+ *   confirmé par la théorie FM (certains guides parlent de perte totale, d'autres partielle).
+ * - Le puits n'absorbe PAS le recul ici (le recul touche toujours une stat visible).
+ *   En théorie FM, certains guides suggèrent que le puits peut absorber une partie
+ *   du recul (SN avec puits positif = aucune stat visible ne baisse). Ce point
+ *   reste débattu dans la communauté.
  */
 function applyRecoil(
   stats: SimulatedStat[],
@@ -214,22 +229,22 @@ export function simulateRune(
 
   switch (outcome) {
     case 'SC': {
-      // La rune passe, aucun recul
-      newStats = newStats.map((s) =>
-        s.effectId === targetEffectId
-          ? { ...s, currentValue: s.currentValue + runeValue }
-          : s
-      );
+      // La rune passe, aucun recul — clamp au max théorique (règle des 101)
+      newStats = newStats.map((s) => {
+        if (s.effectId !== targetEffectId) return s;
+        const max = getStatAbsoluteMax(s);
+        return { ...s, currentValue: Math.min(s.currentValue + runeValue, max) };
+      });
       break;
     }
 
     case 'SN': {
-      // La rune passe, mais recul sur une autre stat
-      newStats = newStats.map((s) =>
-        s.effectId === targetEffectId
-          ? { ...s, currentValue: s.currentValue + runeValue }
-          : s
-      );
+      // La rune passe, mais recul sur une autre stat — clamp au max théorique
+      newStats = newStats.map((s) => {
+        if (s.effectId !== targetEffectId) return s;
+        const max = getStatAbsoluteMax(s);
+        return { ...s, currentValue: Math.min(s.currentValue + runeValue, max) };
+      });
 
       const victim = pickRecoilTarget(newStats, targetEffectId);
       if (victim) {
