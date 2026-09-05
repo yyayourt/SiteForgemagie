@@ -59,7 +59,14 @@ export function testParams(overrides: DeepPartial<EngineParams> = {}): EnginePar
     densities: (overrides.densities as EngineParams['densities']) ?? base.densities,
     lossSelection: { ...base.lossSelection, ...overrides.lossSelection },
     residualPool: { ...base.residualPool, ...overrides.residualPool },
-    transcendence: { ...base.transcendence, ...overrides.transcendence },
+    transcendence: {
+      ...base.transcendence,
+      ...overrides.transcendence,
+      successRateByRank: {
+        ...base.transcendence.successRateByRank,
+        ...(overrides.transcendence?.successRateByRank ?? {}),
+      },
+    } as EngineParams['transcendence'],
   };
 }
 

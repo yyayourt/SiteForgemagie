@@ -5,7 +5,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { computeBrisage, lineCrushingWeight } from '../logic/brisage/brisage';
-import { getBrisageParams, type BrisageParams } from '../data/params';
+import { getBrisageParams, getDensity, type BrisageParams } from '../data/params';
+import { getRuneTiers } from '../data/dataset';
 import { CHAR } from './engine/helpers';
 
 /** Poids d'une rune normale = valeur × densité (Force 1×1, Sagesse 1×3, PA 1×100, Vi 5×0,2, Pod 10×0,25) */
@@ -127,5 +128,17 @@ describe('computeBrisage avec focus', () => {
   it('returns no yield when the focus line is absent', () => {
     const r = computeBrisage({ level: 200, lines, coefficientPercent: 100, runeUnitWeights: UNITS, focusCharacteristicId: CHAR.PA }, params());
     expect(r.yields).toEqual([]);
+  });
+});
+
+describe('invariant Pods : brisage.podsDivisor = poids d\'une Rune Pod (+10 × densities.40)', () => {
+  it('holds for the values of empirical_params.json and data/rune-tiers.json', () => {
+    const podRune = getRuneTiers(CHAR.PODS)?.normal;
+    expect(podRune).toBeDefined();
+    expect(podRune!.value).toBe(10);
+    const density = getDensity(CHAR.PODS);
+    expect(density).toBeDefined();
+    expect(podRune!.value * density!).toBeCloseTo(2.5, 9);
+    expect(getBrisageParams().podsDivisor).toBeCloseTo(podRune!.value * density!, 9);
   });
 });

@@ -19,12 +19,12 @@ const TIER_LABELS = {
 };
 
 const REFUSAL_LABELS: Record<string, string> = {
-  item_locked: 'objet verrouillé',
+  item_locked: 'objet transcendé (devblog 2.58) : plus de forgemagie',
   line_locked: 'ligne verrouillée',
   no_density: 'densité inconnue',
   over_cap_exceeded: "plafond d'over/exo dépassé",
   transcendence_requires_clean_item: 'transcendance : over/exo présent',
-  transcendence_line_already_locked: 'transcendance : ligne déjà verrouillée',
+  transcendence_rate_not_certain: 'transcendance : taux de réussite < 100 % (phase 3)',
 };
 
 export function SimulationLog({ log, onClear }: Props) {

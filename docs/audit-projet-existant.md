@@ -233,7 +233,7 @@ Valeurs de runes (`runeNormal / runePa / runeRa` = 1/3/10, Vita 5/15/50, Ini et 
 | R12 | Proba du jet : uniforme indépendante par ligne | `poolCalculator.ts:102-119` | fait | `INCONNU` (loi de craft non documentée) ; hors périmètre FM | Faussée en plus par le bug `to = 0` (§3.4). |
 | R13 | « Une rune normale = 1 poids, Pa = 3, Ra = 10 » | `TheoryGuide.tsx:292` | fait | **faux** en général (Ra Sa = 30, Ra Do = 200, Ra Vi = 10) | Confusion valeur / poids. |
 | R14 | « Ces valeurs proviennent de milliers de tests communautaires » | `TheoryGuide.tsx:139-141` | fait | non sourcé | Les docs n'ont retrouvé **aucun** dataset public reproductible. |
-| R15 | Transcendance : « requiert 0 over/exo » | `TheoryGuide.tsx` | fait | `SOURCE PRIMAIRE` (devblog 2.72) | Correct mais incomplet (100 % SC, verrouillage, plafond 101 non mentionnés). |
+| R15 | Transcendance : « requiert 0 over/exo » | `TheoryGuide.tsx` | fait | `HYPOTHÈSE COMMUNAUTAIRE` (wiki) ; le verrou de l'objet est `SOURCE PRIMAIRE` (devblog **2.58**, pas 2.72 — voir `docs/knowledge/errata.md`) | Incomplet : verrouillage de l'objet (FM + orbes) et plafond non mentionnés. |
 | R16 | « Impossible d'avoir 2 lignes de la même stat » | `TheoryGuide.tsx:366` | fait | `HYPOTHÈSE COMMUNAUTAIRE` | Plausible, non sourcé. |
 | R17 | Potions, orbes régénérants, brisage, malus (÷2), reliquat fractionnaire | — | — | **absents** | Modules exigés par `CLAUDE.md`. |
 

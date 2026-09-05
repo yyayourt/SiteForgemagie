@@ -3,7 +3,8 @@
  * l'issue SC/SN/EC est fournie par l'appelant.
  */
 export { applyRune, withRuneApplied } from './applyRune';
-export { applyTranscendenceRune } from './transcendence';
+export { applyTranscendenceRune, type TranscendenceRune } from './transcendence';
+export { applyRegenerationOrb, type OrbResult } from './orb';
 export { applyLoss } from './losses';
 export {
   getLossSelectionStrategy,

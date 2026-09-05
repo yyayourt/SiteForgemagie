@@ -34,8 +34,8 @@ export type LossSelectionStrategyName =
   | 'uniform'
   | 'weighted_by_weight'
   | 'weighted_by_value_times_weight';
-export type TranscendenceLockScope = 'line' | 'item';
 export type NonPositiveLineContribution = 'skip' | 'offset';
+export type TranscendenceRank = 'Ta' | 'Pata' | 'Rata';
 
 export const PARAMS_META = {
   schemaVersion: paramsJson.schemaVersion,
@@ -51,7 +51,11 @@ export const EC_LOSS_FACTOR_PARAM = p.ecLossFactor as ParamEntry<number>;
 export const LOSS_STRATEGY_PARAM = p.lossSelection.strategy as ParamEntry<LossSelectionStrategyName>;
 export const PRIORITIZE_OVER_EXO_PARAM = p.lossSelection.prioritizeOverExo as ParamEntry<boolean>;
 export const RESIDUAL_RESET_PARAM = p.residualPool.resetOnEquipOrMarket as ParamEntry<boolean>;
-export const TRANSCENDENCE_LOCK_SCOPE_PARAM = p.transcendence.lockScope as ParamEntry<TranscendenceLockScope>;
+export const RESIDUAL_VISIBLE_PARAM = p.residualPool.visibleInClient as ParamEntry<boolean>;
+export const TRANSCENDENCE_REFUSE_OVER_EXO_PARAM = p.transcendence.refuseIfOverOrExo as ParamEntry<boolean>;
+export const TRANSCENDENCE_SUCCESS_RATE_PARAM = p.transcendence.successRateByRank as ParamEntry<
+  Record<TranscendenceRank, number>
+>;
 
 /** Poids maximal d'over/exo (HYPOTHÈSE COMMUNAUTAIRE, défaut 101). */
 export const OVER_CAP_WEIGHT: number = OVER_CAP_WEIGHT_PARAM.value;
@@ -94,9 +98,13 @@ export interface EngineParams {
   };
   residualPool: {
     resetOnEquipOrMarket: boolean;
+    /** Informatif (CONTRADICTION) : le client affiche-t-il le reliquat ? Sans effet sur le moteur. */
+    visibleInClient: boolean;
   };
   transcendence: {
-    lockScope: TranscendenceLockScope;
+    /** HYPOTHÈSE COMMUNAUTAIRE : refus si over/exo présent. Le verrou de l'objet n'est PAS ici (SOURCE PRIMAIRE, en dur). */
+    refuseIfOverOrExo: boolean;
+    successRateByRank: Record<TranscendenceRank, number>;
   };
 }
 
@@ -112,9 +120,11 @@ export function getEngineParams(): EngineParams {
     },
     residualPool: {
       resetOnEquipOrMarket: RESIDUAL_RESET_PARAM.value,
+      visibleInClient: RESIDUAL_VISIBLE_PARAM.value,
     },
     transcendence: {
-      lockScope: TRANSCENDENCE_LOCK_SCOPE_PARAM.value,
+      refuseIfOverOrExo: TRANSCENDENCE_REFUSE_OVER_EXO_PARAM.value,
+      successRateByRank: { ...TRANSCENDENCE_SUCCESS_RATE_PARAM.value },
     },
   };
 }

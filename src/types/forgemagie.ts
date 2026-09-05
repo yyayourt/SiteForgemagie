@@ -20,7 +20,7 @@ export interface ItemLine {
   baseMax: number;
   /** Ligne absente du patron de l'objet, ajoutée par forgemagie. */
   isExo: boolean;
-  /** Ligne verrouillée par une rune de transcendance (devblog 2.72). */
+  /** Ligne verrouillée (objet transcendé, devblog 2.58 : toutes les lignes le sont). */
   isLocked: boolean;
 }
 
@@ -31,7 +31,10 @@ export interface ForgemagieItemState {
   lines: ItemLine[];
   /** Reliquat serveur, nombre ≥ 0, fractions conservées. */
   residualPool: number;
-  /** Objet entièrement verrouillé (transcendance avec lockScope = item). */
+  /**
+   * Objet verrouillé par une rune de transcendance : plus de forgemagie ni de
+   * réinitialisation par orbe (SOURCE PRIMAIRE, devblog 2.58).
+   */
   itemLocked: boolean;
 }
 
@@ -62,7 +65,7 @@ export type RefusalReason =
   | 'no_density'
   | 'over_cap_exceeded'
   | 'transcendence_requires_clean_item'
-  | 'transcendence_line_already_locked';
+  | 'transcendence_rate_not_certain';
 
 /** Résultat de applyRune / applyTranscendenceRune. */
 export interface ApplyRuneResult {

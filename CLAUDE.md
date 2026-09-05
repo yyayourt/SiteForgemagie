@@ -22,7 +22,7 @@ Reproduire aussi fidèlement que possible la logique **serveur** de la Forgemagi
 
 - Poids/densité des runes visibles dans l'infobulle en jeu depuis la 2.58 → `SOURCE PRIMAIRE` (à réextraire depuis DofusDB/DDC/client, et à distinguer de `realWeight` et de `weight`).
 - Reliquat = perte − rune, purgé à l'équipement/HDV → confirmation communautaire (JeuxOnLine), formule serveur exacte `INCONNU`.
-- Règles des runes de transcendance → devblog 2.72 (`SOURCE PRIMAIRE`).
+- Règles des runes de transcendance → devblog 2.58 (`SOURCE PRIMAIRE`, dofus.com/fr/mmorpg/actualites/devblog/billets/1255546) : objet verrouillé, plus de FM ni d'orbe. Le devblog 2.72 concerne le migrateur d'objets, pas la transcendance.
 - Formule de brisage → dépôts open source (`KamelAkar/Calculateur_Brisage_Dofus`, `Icksir/crushing-calculator`), à recouper.
 - Bornes officielles SC : minimum 15 % en FM normale, jusqu'à 1 % pour exo PA/PM/PO (`SOURCE PRIMAIRE`).
 - Orbes régénérants : reset à un jet de craft aléatoire, purge over/exo/reliquat (`HYPOTHÈSE COMMUNAUTAIRE`, à confirmer).

@@ -1,0 +1,11 @@
+# Errata des rapports de `docs/knowledge/`
+
+Les trois rapports de ce dossier sont conservés tels quels (règle : ne pas modifier les documents sources). Les corrections établies depuis leur rédaction sont consignées ici.
+
+| Date | Rapport concerné | Affirmation d'origine | Correction | Statut de la correction |
+|---|---|---|---|---|
+| 2026-09-05 | `Reconstruction_…` (TL;DR, PARTIE 10, PARTIE 13 ligne K, tableau final) ; `audit-forgemagie-dofus3.md` §2 et §13 ; ancien `CLAUDE.md` | Les règles des runes de transcendance sont attribuées au **devblog 2.72** | La source primaire est le **devblog de la mise à jour 2.58** (https://www.dofus.com/fr/mmorpg/actualites/devblog/billets/1255546) : un objet ayant reçu une rune de transcendance ne peut plus être forgemagé **ni réinitialisé par un orbe**. Le devblog 2.72 concerne le **migrateur d'objets** (modification rétroactive des exemplaires existants), pas la définition des runes de transcendance. | `SOURCE PRIMAIRE` (verrou objet + orbes, codé en dur dans `src/logic/engine/transcendence.ts` et `orb.ts`). Le refus si over/exo et le taux par rang restent `HYPOTHÈSE COMMUNAUTAIRE` (`empirical_params.json → transcendence`). |
+| 2026-09-05 | `Reconstruction_…` PARTIE 10 (formulation « verrouille l'objet ») vs décision de projet du 2026-09-05 (« ligne verrouillée ») | Verrou par ligne envisagé en phase 2 | Verrou de l'**objet entier**, conformément au devblog 2.58 ; le paramètre `transcendence.lockScope` créé provisoirement a été supprimé. | `SOURCE PRIMAIRE` |
+| 2026-09-05 | `Reverse-Engineering_…` §A (« le reliquat lui-même n'est pas exposé au client », 2.x) | Reliquat invisible côté client | Un guide 2026 affirme que le reliquat est affiché dans l'onglet de forgemagie du client Unity. Non tranché. | `CONTRADICTION` (`empirical_params.json → residualPool.visibleInClient`), à vérifier en jeu |
+
+Données client à l'appui (dataset DofusDB 3.6.10.11, `data/dataset.json → transcendenceRunes`) : chaque rune de transcendance porte l'effet **2825 « Empêche les futures forgemagies »**, l'effet 2826 (libellé vide) et l'effet **2827 « … % de chances de réussite »** dont la valeur est renvoyée à 0 par l'API. Les taux par rang (Ta / Pata / Rata) sont donc à extraire du client, pas de l'API.

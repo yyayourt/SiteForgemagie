@@ -72,7 +72,7 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
           </span>
         )}
         {stat.isLocked && (
-          <span className="text-xs px-1.5 py-0.5 rounded font-bold bg-dofus-gold/20 text-dofus-gold" title="Ligne verrouillée par une rune de transcendance (devblog 2.72)">
+          <span className="text-xs px-1.5 py-0.5 rounded font-bold bg-dofus-gold/20 text-dofus-gold" title="Objet transcendé : plus de forgemagie ni d'orbe (devblog 2.58)">
             🔒
           </span>
         )}
