@@ -1,0 +1,6576 @@
+{
+ "meta": {
+  "source": "DofusDB (api.dofusdb.fr) — données dataminées tierces, non officielles",
+  "gameVersion": "3.6.10.11",
+  "extractedAt": "2026-09-05T10:51:48.477Z",
+  "script": "scripts/extract-dataset.ts",
+  "counts": {
+   "effects": 111,
+   "characteristics": 121,
+   "itemTypes": 239,
+   "runes": 105,
+   "transcendenceRunes": 81,
+   "potions": 8,
+   "orbs": 8,
+   "items": 3371
+  },
+  "notes": [
+   "Aucun champ de densité/poids de forgemagie n'existe dans l'API (/items, /effects, /characteristics vérifiés).",
+   "Le pourcentage de dommages conservés par les potions (50/65/80/85 %) n'apparaît pas dans leurs effets : INCONNU côté données.",
+   "Le champ `enhanceable` est vrai sur des ressources non forgeables : il n'est pas un critère fiable.",
+   "Les objets sont sélectionnés par super-type (1, 2, 3, 4, 5, 7, 10, 11, 13), pas par `enhanceable`."
+  ]
+ },
+ "effects": [
+  {
+   "effectId": 111,
+   "characteristicId": 1,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "PA"
+  },
+  {
+   "effectId": 112,
+   "characteristicId": 16,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages"
+  },
+  {
+   "effectId": 115,
+   "characteristicId": 18,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Critique"
+  },
+  {
+   "effectId": 116,
+   "characteristicId": 19,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Portée"
+  },
+  {
+   "effectId": 117,
+   "characteristicId": 19,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Portée"
+  },
+  {
+   "effectId": 118,
+   "characteristicId": 10,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Force"
+  },
+  {
+   "effectId": 119,
+   "characteristicId": 14,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Agilité"
+  },
+  {
+   "effectId": 122,
+   "characteristicId": 39,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "Échecs Critiques"
+  },
+  {
+   "effectId": 123,
+   "characteristicId": 13,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Chance"
+  },
+  {
+   "effectId": 124,
+   "characteristicId": 12,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Sagesse"
+  },
+  {
+   "effectId": 125,
+   "characteristicId": 11,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Vitalité"
+  },
+  {
+   "effectId": 126,
+   "characteristicId": 15,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Intelligence"
+  },
+  {
+   "effectId": 128,
+   "characteristicId": 23,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "PM"
+  },
+  {
+   "effectId": 138,
+   "characteristicId": 25,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Puissance"
+  },
+  {
+   "effectId": 145,
+   "characteristicId": 16,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Dommages"
+  },
+  {
+   "effectId": 152,
+   "characteristicId": 13,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Chance"
+  },
+  {
+   "effectId": 153,
+   "characteristicId": 11,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Vitalité"
+  },
+  {
+   "effectId": 154,
+   "characteristicId": 14,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Agilité"
+  },
+  {
+   "effectId": 155,
+   "characteristicId": 15,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Intelligence"
+  },
+  {
+   "effectId": 156,
+   "characteristicId": 12,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Sagesse"
+  },
+  {
+   "effectId": 157,
+   "characteristicId": 10,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Force"
+  },
+  {
+   "effectId": 158,
+   "characteristicId": 40,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Pods"
+  },
+  {
+   "effectId": 160,
+   "characteristicId": 27,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Esquive PA"
+  },
+  {
+   "effectId": 161,
+   "characteristicId": 28,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Esquive PM"
+  },
+  {
+   "effectId": 162,
+   "characteristicId": 27,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Esquive PA"
+  },
+  {
+   "effectId": 163,
+   "characteristicId": 28,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Esquive PM"
+  },
+  {
+   "effectId": 165,
+   "characteristicId": 16,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Dommages"
+  },
+  {
+   "effectId": 168,
+   "characteristicId": 1,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-PA"
+  },
+  {
+   "effectId": 169,
+   "characteristicId": 23,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-PM"
+  },
+  {
+   "effectId": 171,
+   "characteristicId": 18,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Critique"
+  },
+  {
+   "effectId": 172,
+   "characteristicId": 20,
+   "bonusType": -1,
+   "category": 2,
+   "labelFr": "-Réduction Magique"
+  },
+  {
+   "effectId": 173,
+   "characteristicId": 21,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-Réduction Physique"
+  },
+  {
+   "effectId": 174,
+   "characteristicId": 44,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Initiative"
+  },
+  {
+   "effectId": 175,
+   "characteristicId": 44,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Initiative"
+  },
+  {
+   "effectId": 176,
+   "characteristicId": 48,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Prospection"
+  },
+  {
+   "effectId": 177,
+   "characteristicId": 48,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Prospection"
+  },
+  {
+   "effectId": 178,
+   "characteristicId": 49,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Soins"
+  },
+  {
+   "effectId": 179,
+   "characteristicId": 49,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Soins"
+  },
+  {
+   "effectId": 182,
+   "characteristicId": 26,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Invocations"
+  },
+  {
+   "effectId": 183,
+   "characteristicId": 20,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "Réduction Magique"
+  },
+  {
+   "effectId": 184,
+   "characteristicId": 21,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "Réduction Physique"
+  },
+  {
+   "effectId": 186,
+   "characteristicId": 25,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Puissance"
+  },
+  {
+   "effectId": 210,
+   "characteristicId": 33,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "% Résistance Terre"
+  },
+  {
+   "effectId": 211,
+   "characteristicId": 35,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "% Résistance Eau"
+  },
+  {
+   "effectId": 212,
+   "characteristicId": 36,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "% Résistance Air"
+  },
+  {
+   "effectId": 213,
+   "characteristicId": 34,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "% Résistance Feu"
+  },
+  {
+   "effectId": 214,
+   "characteristicId": 37,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "% Résistance Neutre"
+  },
+  {
+   "effectId": 215,
+   "characteristicId": 33,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-% Résistance Terre"
+  },
+  {
+   "effectId": 216,
+   "characteristicId": 35,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-% Résistance Eau"
+  },
+  {
+   "effectId": 217,
+   "characteristicId": 36,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-% Résistance Air"
+  },
+  {
+   "effectId": 218,
+   "characteristicId": 34,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-% Résistance Feu"
+  },
+  {
+   "effectId": 219,
+   "characteristicId": 37,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-% Résistance Neutre"
+  },
+  {
+   "effectId": 220,
+   "characteristicId": 50,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Renvoyés"
+  },
+  {
+   "effectId": 225,
+   "characteristicId": 70,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Pièges"
+  },
+  {
+   "effectId": 226,
+   "characteristicId": 69,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Puissance Pièges"
+  },
+  {
+   "effectId": 240,
+   "characteristicId": 54,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "Résistances Terre"
+  },
+  {
+   "effectId": 241,
+   "characteristicId": 56,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "Résistances Eau"
+  },
+  {
+   "effectId": 242,
+   "characteristicId": 57,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "Résistances Air"
+  },
+  {
+   "effectId": 243,
+   "characteristicId": 55,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "Résistances Feu"
+  },
+  {
+   "effectId": 244,
+   "characteristicId": 58,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "Résistances Neutre"
+  },
+  {
+   "effectId": 245,
+   "characteristicId": 54,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-Résistances Terre"
+  },
+  {
+   "effectId": 246,
+   "characteristicId": 56,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-Résistances Eau"
+  },
+  {
+   "effectId": 247,
+   "characteristicId": 57,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-Résistances Air"
+  },
+  {
+   "effectId": 248,
+   "characteristicId": 55,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-Résistances Feu"
+  },
+  {
+   "effectId": 249,
+   "characteristicId": 58,
+   "bonusType": -1,
+   "category": 1,
+   "labelFr": "-Résistances Neutre"
+  },
+  {
+   "effectId": 410,
+   "characteristicId": 82,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Retrait PA"
+  },
+  {
+   "effectId": 411,
+   "characteristicId": 82,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Retrait PA"
+  },
+  {
+   "effectId": 412,
+   "characteristicId": 83,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Retrait PM"
+  },
+  {
+   "effectId": 413,
+   "characteristicId": 83,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Retrait PM"
+  },
+  {
+   "effectId": 414,
+   "characteristicId": 84,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Poussée"
+  },
+  {
+   "effectId": 415,
+   "characteristicId": 84,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Dommages Poussée"
+  },
+  {
+   "effectId": 416,
+   "characteristicId": 85,
+   "bonusType": 1,
+   "category": 1,
+   "labelFr": "Résistances Poussée"
+  },
+  {
+   "effectId": 417,
+   "characteristicId": 85,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Résistances Poussée"
+  },
+  {
+   "effectId": 418,
+   "characteristicId": 86,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Critiques"
+  },
+  {
+   "effectId": 419,
+   "characteristicId": 86,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Dommages Critiques"
+  },
+  {
+   "effectId": 420,
+   "characteristicId": 87,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Résistances Critiques"
+  },
+  {
+   "effectId": 421,
+   "characteristicId": 87,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Résistances Critiques"
+  },
+  {
+   "effectId": 422,
+   "characteristicId": 88,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Terre"
+  },
+  {
+   "effectId": 423,
+   "characteristicId": 88,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Dommages Terre"
+  },
+  {
+   "effectId": 424,
+   "characteristicId": 89,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Feu"
+  },
+  {
+   "effectId": 425,
+   "characteristicId": 89,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Dommages Feu"
+  },
+  {
+   "effectId": 426,
+   "characteristicId": 90,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Eau"
+  },
+  {
+   "effectId": 427,
+   "characteristicId": 90,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Dommages Eau"
+  },
+  {
+   "effectId": 428,
+   "characteristicId": 91,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Air"
+  },
+  {
+   "effectId": 429,
+   "characteristicId": 91,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Dommages Air"
+  },
+  {
+   "effectId": 430,
+   "characteristicId": 92,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Dommages Neutre"
+  },
+  {
+   "effectId": 431,
+   "characteristicId": 92,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Dommages Neutre"
+  },
+  {
+   "effectId": 752,
+   "characteristicId": 78,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Fuite"
+  },
+  {
+   "effectId": 753,
+   "characteristicId": 79,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Tacle"
+  },
+  {
+   "effectId": 754,
+   "characteristicId": 78,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Fuite"
+  },
+  {
+   "effectId": 755,
+   "characteristicId": 79,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Tacle"
+  },
+  {
+   "effectId": 1166,
+   "characteristicId": 106,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Puissance Glyphes"
+  },
+  {
+   "effectId": 1174,
+   "characteristicId": 108,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Empêche les gains d'expérience"
+  },
+  {
+   "effectId": 2800,
+   "characteristicId": 125,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Dommages mêlée"
+  },
+  {
+   "effectId": 2801,
+   "characteristicId": 125,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Dommages mêlée"
+  },
+  {
+   "effectId": 2802,
+   "characteristicId": 124,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Résistance mêlée"
+  },
+  {
+   "effectId": 2803,
+   "characteristicId": 124,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Résistance mêlée"
+  },
+  {
+   "effectId": 2804,
+   "characteristicId": 120,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Dommages distance"
+  },
+  {
+   "effectId": 2805,
+   "characteristicId": 120,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Dommages distance"
+  },
+  {
+   "effectId": 2806,
+   "characteristicId": 121,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Résistance distance"
+  },
+  {
+   "effectId": 2807,
+   "characteristicId": 121,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Résistance distance"
+  },
+  {
+   "effectId": 2808,
+   "characteristicId": 122,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Dommages d'armes"
+  },
+  {
+   "effectId": 2809,
+   "characteristicId": 122,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Dommages d'armes"
+  },
+  {
+   "effectId": 2810,
+   "characteristicId": 142,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Résistance aux armes"
+  },
+  {
+   "effectId": 2811,
+   "characteristicId": 142,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Résistance aux armes"
+  },
+  {
+   "effectId": 2812,
+   "characteristicId": 123,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Dommages aux sorts"
+  },
+  {
+   "effectId": 2813,
+   "characteristicId": 123,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Dommages aux sorts"
+  },
+  {
+   "effectId": 2814,
+   "characteristicId": 141,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-% Résistance aux sorts"
+  },
+  {
+   "effectId": 2815,
+   "characteristicId": 141,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "% Résistance aux sorts"
+  },
+  {
+   "effectId": 2990,
+   "characteristicId": 26,
+   "bonusType": -1,
+   "category": 0,
+   "labelFr": "-Invocations"
+  },
+  {
+   "effectId": 4055,
+   "characteristicId": 200,
+   "bonusType": 1,
+   "category": 0,
+   "labelFr": "Empêche d'obtenir du butin"
+  }
+ ],
+ "characteristics": [
+  {
+   "id": 1,
+   "keyword": "actionPoints",
+   "nameFr": "PA"
+  },
+  {
+   "id": 3,
+   "keyword": "statsPoints",
+   "nameFr": "Points de caractéristiques"
+  },
+  {
+   "id": 4,
+   "keyword": "spellsPoints",
+   "nameFr": "Points de sorts"
+  },
+  {
+   "id": 5,
+   "keyword": "level",
+   "nameFr": "Niveau"
+  },
+  {
+   "id": 10,
+   "keyword": "strength",
+   "nameFr": "Force"
+  },
+  {
+   "id": 11,
+   "keyword": "vitality",
+   "nameFr": "Vitalité"
+  },
+  {
+   "id": 12,
+   "keyword": "wisdom",
+   "nameFr": "Sagesse"
+  },
+  {
+   "id": 13,
+   "keyword": "chance",
+   "nameFr": "Chance"
+  },
+  {
+   "id": 14,
+   "keyword": "agility",
+   "nameFr": "Agilité"
+  },
+  {
+   "id": 15,
+   "keyword": "intelligence",
+   "nameFr": "Intelligence"
+  },
+  {
+   "id": 16,
+   "keyword": "allDamageBonus",
+   "nameFr": "Dommages"
+  },
+  {
+   "id": 17,
+   "keyword": "damageFactor",
+   "nameFr": ""
+  },
+  {
+   "id": 18,
+   "keyword": "criticalHit",
+   "nameFr": "Critique"
+  },
+  {
+   "id": 19,
+   "keyword": "range",
+   "nameFr": "Portée"
+  },
+  {
+   "id": 20,
+   "keyword": "magicalReduction",
+   "nameFr": "Réduction des dégats magiques"
+  },
+  {
+   "id": 21,
+   "keyword": "physicalReduction",
+   "nameFr": "Réduction des dégats physiques"
+  },
+  {
+   "id": 22,
+   "keyword": "experienceBoost",
+   "nameFr": "Boost : expérience"
+  },
+  {
+   "id": 23,
+   "keyword": "movementPoints",
+   "nameFr": "PM"
+  },
+  {
+   "id": 24,
+   "keyword": "invisibility",
+   "nameFr": "Invisibilité"
+  },
+  {
+   "id": 25,
+   "keyword": "damagePercent",
+   "nameFr": "Puissance"
+  },
+  {
+   "id": 26,
+   "keyword": "maxSummonedCreaturesBoost",
+   "nameFr": "Invocation"
+  },
+  {
+   "id": 27,
+   "keyword": "DodgeApLostProbability",
+   "nameFr": "Esquive PA"
+  },
+  {
+   "id": 28,
+   "keyword": "DodgeMpLostProbability",
+   "nameFr": "Esquive PM"
+  },
+  {
+   "id": 29,
+   "keyword": "energyPoints",
+   "nameFr": "Points d'énergie"
+  },
+  {
+   "id": 30,
+   "keyword": "alignementValue",
+   "nameFr": "Valeur d'alignement"
+  },
+  {
+   "id": 31,
+   "keyword": "weaponDamagePercent",
+   "nameFr": "Maitrise d'arme"
+  },
+  {
+   "id": 32,
+   "keyword": "physicalDamageBonus",
+   "nameFr": "Bonus aux dommages physiques"
+  },
+  {
+   "id": 33,
+   "keyword": "earthElementResistPercent",
+   "nameFr": "Terre (%)"
+  },
+  {
+   "id": 34,
+   "keyword": "fireElementResistPercent",
+   "nameFr": "Feu (%)"
+  },
+  {
+   "id": 35,
+   "keyword": "waterElementResistPercent",
+   "nameFr": "Eau (%)"
+  },
+  {
+   "id": 36,
+   "keyword": "airElementResistPercent",
+   "nameFr": "Air (%)"
+  },
+  {
+   "id": 37,
+   "keyword": "neutralElementResistPercent",
+   "nameFr": "Neutre (%)"
+  },
+  {
+   "id": 39,
+   "keyword": "criticalMiss",
+   "nameFr": "Echec critique"
+  },
+  {
+   "id": 40,
+   "keyword": "weight",
+   "nameFr": "Pods"
+  },
+  {
+   "id": 41,
+   "keyword": "restrictionOnPlayer",
+   "nameFr": "Restriction sur l'acteur"
+  },
+  {
+   "id": 42,
+   "keyword": "restrictionOnOthers",
+   "nameFr": "Restriction sur les autres"
+  },
+  {
+   "id": 43,
+   "keyword": "alignementSide",
+   "nameFr": "Alignement"
+  },
+  {
+   "id": 44,
+   "keyword": "initiative",
+   "nameFr": "Initiative"
+  },
+  {
+   "id": 45,
+   "keyword": "shopPercentReduction",
+   "nameFr": "Pourcentage de remise en magasin"
+  },
+  {
+   "id": 46,
+   "keyword": "alignementRank",
+   "nameFr": "Rang d'alignement"
+  },
+  {
+   "id": 47,
+   "keyword": "maxEnergyPoints",
+   "nameFr": "Maximum de points d'énergie"
+  },
+  {
+   "id": 48,
+   "keyword": "magicFind",
+   "nameFr": "Prospection"
+  },
+  {
+   "id": 49,
+   "keyword": "healBonus",
+   "nameFr": "Soins"
+  },
+  {
+   "id": 50,
+   "keyword": "reflectDamage",
+   "nameFr": "Renvoi"
+  },
+  {
+   "id": 51,
+   "keyword": "energyLoose",
+   "nameFr": "Perte d'énergie"
+  },
+  {
+   "id": 52,
+   "keyword": "honourPoints",
+   "nameFr": "Points d'honneur"
+  },
+  {
+   "id": 53,
+   "keyword": "disgracePoints",
+   "nameFr": "Points de déshonneur"
+  },
+  {
+   "id": 54,
+   "keyword": "earthElementReduction",
+   "nameFr": "Terre (fixe)"
+  },
+  {
+   "id": 55,
+   "keyword": "fireElementReduction",
+   "nameFr": "Feu (fixe)"
+  },
+  {
+   "id": 56,
+   "keyword": "waterElementReduction",
+   "nameFr": "Eau (fixe)"
+  },
+  {
+   "id": 57,
+   "keyword": "airElementReduction",
+   "nameFr": "Air (fixe)"
+  },
+  {
+   "id": 58,
+   "keyword": "neutralElementReduction",
+   "nameFr": "Neutre (fixe)"
+  },
+  {
+   "id": 69,
+   "keyword": "trapDamageBonusPercent",
+   "nameFr": "Puissance Pièges"
+  },
+  {
+   "id": 70,
+   "keyword": "trapDamageBonus",
+   "nameFr": "Dommages Pièges"
+  },
+  {
+   "id": 71,
+   "keyword": "fakeSkillForStates",
+   "nameFr": "État"
+  },
+  {
+   "id": 72,
+   "keyword": "soulCaptureBonus",
+   "nameFr": "Bonus de capture d'âme"
+  },
+  {
+   "id": 73,
+   "keyword": "rideXPBonus",
+   "nameFr": "Bonus d'expérience de monture"
+  },
+  {
+   "id": 74,
+   "keyword": "confusion",
+   "nameFr": "Confusion"
+  },
+  {
+   "id": 75,
+   "keyword": "permanentDamagePercent",
+   "nameFr": "Érosion"
+  },
+  {
+   "id": 76,
+   "keyword": "unlucky",
+   "nameFr": "Poisse"
+  },
+  {
+   "id": 77,
+   "keyword": "maximizeRoll",
+   "nameFr": "Maximise les effets aléatories"
+  },
+  {
+   "id": 78,
+   "keyword": "tackleEvade",
+   "nameFr": "Fuite"
+  },
+  {
+   "id": 79,
+   "keyword": "tackleBlock",
+   "nameFr": "Tacle"
+  },
+  {
+   "id": 80,
+   "keyword": "allianceAutoAgressRange",
+   "nameFr": "Rayon d'auto aggression JcJ"
+  },
+  {
+   "id": 81,
+   "keyword": "allianceAutoAgressResist",
+   "nameFr": "Esquive auto aggression JcJ"
+  },
+  {
+   "id": 82,
+   "keyword": "apReduction",
+   "nameFr": "Retrait PA"
+  },
+  {
+   "id": 83,
+   "keyword": "mpReduction",
+   "nameFr": "Retrait PM"
+  },
+  {
+   "id": 84,
+   "keyword": "pushDamageBonus",
+   "nameFr": "Poussée"
+  },
+  {
+   "id": 85,
+   "keyword": "pushDamageReduction",
+   "nameFr": "Poussée (fixe)"
+  },
+  {
+   "id": 86,
+   "keyword": "criticalDamageBonus",
+   "nameFr": "Critiques"
+  },
+  {
+   "id": 87,
+   "keyword": "criticalDamageReduction",
+   "nameFr": "Critiques (fixe)"
+  },
+  {
+   "id": 88,
+   "keyword": "earthDamageBonus",
+   "nameFr": "Terre"
+  },
+  {
+   "id": 89,
+   "keyword": "fireDamageBonus",
+   "nameFr": "Feu"
+  },
+  {
+   "id": 90,
+   "keyword": "waterDamageBonus",
+   "nameFr": "Eau"
+  },
+  {
+   "id": 91,
+   "keyword": "airDamageBonus",
+   "nameFr": "Air"
+  },
+  {
+   "id": 92,
+   "keyword": "neutralDamageBonus",
+   "nameFr": "Neutre"
+  },
+  {
+   "id": 93,
+   "keyword": "maxBomb",
+   "nameFr": "Nombre max d'invocations de bombes"
+  },
+  {
+   "id": 94,
+   "keyword": "bombComboBonus",
+   "nameFr": "Bonus de combo de bombe"
+  },
+  {
+   "id": 95,
+   "keyword": "maxLifePoints",
+   "nameFr": "Bonus vitalité (n'enlève pas de PV quand dissipé)"
+  },
+  {
+   "id": 96,
+   "keyword": "shield",
+   "nameFr": "Bouclier"
+  },
+  {
+   "id": 97,
+   "keyword": "hitPointLoss",
+   "nameFr": "Malus de vie temporaire"
+  },
+  {
+   "id": 98,
+   "keyword": "damagePercentSpell",
+   "nameFr": "Bonus de dommage aux sorts (%)"
+  },
+  {
+   "id": 99,
+   "keyword": "extraScale",
+   "nameFr": "Taille (fixe)"
+  },
+  {
+   "id": 100,
+   "keyword": "passTurn",
+   "nameFr": "PasseSonTour"
+  },
+  {
+   "id": 101,
+   "keyword": "resistPercent",
+   "nameFr": "Pourcentage de résistance aux dommages"
+  },
+  {
+   "id": 102,
+   "keyword": "curPermanentDamage",
+   "nameFr": "Érosion"
+  },
+  {
+   "id": 103,
+   "keyword": "weaponPower",
+   "nameFr": "Bonus de puissance pour les armes"
+  },
+  {
+   "id": 104,
+   "keyword": "incomingPercentDamageMultiplicator",
+   "nameFr": "Multiplication des dommages reçus"
+  },
+  {
+   "id": 105,
+   "keyword": "incomingPercentHealMultiplicator",
+   "nameFr": "Multiplication des dommages reçus en soins"
+  },
+  {
+   "id": 106,
+   "keyword": "glyphPower",
+   "nameFr": "Bonus de puissance pour les glyphes"
+  },
+  {
+   "id": 107,
+   "keyword": "dealtDamageMultiplier",
+   "nameFr": "Multiplicateur de dommages"
+  },
+  {
+   "id": 108,
+   "keyword": "stopXP",
+   "nameFr": "Blocage de gains d'expérience"
+  },
+  {
+   "id": 109,
+   "keyword": "hunter",
+   "nameFr": ""
+  },
+  {
+   "id": 110,
+   "keyword": "runePower",
+   "nameFr": "Bonus de puissance pour les runes"
+  },
+  {
+   "id": 120,
+   "keyword": "dealtDamageMultiplierDistance",
+   "nameFr": "Distance (%)"
+  },
+  {
+   "id": 121,
+   "keyword": "receivedDamageMultiplierDistance",
+   "nameFr": "Distance (%)"
+  },
+  {
+   "id": 122,
+   "keyword": "dealtDamageMultiplierWeapon",
+   "nameFr": "Armes (%)"
+  },
+  {
+   "id": 123,
+   "keyword": "dealtDamageMultiplierSpells",
+   "nameFr": "Sorts (%)"
+  },
+  {
+   "id": 124,
+   "keyword": "receivedDamageMultiplierMelee",
+   "nameFr": "Mêlée (%)"
+  },
+  {
+   "id": 125,
+   "keyword": "dealtDamageMultiplierMelee",
+   "nameFr": "Mêlée (%)"
+  },
+  {
+   "id": 126,
+   "keyword": "agilityInitialPercent",
+   "nameFr": "Agilité %"
+  },
+  {
+   "id": 127,
+   "keyword": "strengthInitialPercent",
+   "nameFr": "Force %"
+  },
+  {
+   "id": 128,
+   "keyword": "chanceInitialPercent",
+   "nameFr": "Chance %"
+  },
+  {
+   "id": 129,
+   "keyword": "intelligenceInitialPercent",
+   "nameFr": "Intelligence %"
+  },
+  {
+   "id": 130,
+   "keyword": "vitalityInitialPercent",
+   "nameFr": "Vitalité %"
+  },
+  {
+   "id": 131,
+   "keyword": "wisdomInitialPercent",
+   "nameFr": "Sagesse %"
+  },
+  {
+   "id": 132,
+   "keyword": "tackleBlockInitialPercent",
+   "nameFr": "Tacle %"
+  },
+  {
+   "id": 133,
+   "keyword": "tackleEvadeInitialPercent",
+   "nameFr": "Fuite %"
+  },
+  {
+   "id": 134,
+   "keyword": "actionPointsInitialPercent",
+   "nameFr": "PA %"
+  },
+  {
+   "id": 135,
+   "keyword": "movementPointsInitialPercent",
+   "nameFr": "PM %"
+  },
+  {
+   "id": 136,
+   "keyword": "apAttackInitialPercent",
+   "nameFr": "Retrait PA %"
+  },
+  {
+   "id": 137,
+   "keyword": "mpAttackInitialPercent",
+   "nameFr": "Retrait PM %"
+  },
+  {
+   "id": 138,
+   "keyword": "dodgeApLostProbabilityInitialPercent",
+   "nameFr": "Esquive PA %"
+  },
+  {
+   "id": 139,
+   "keyword": "dodgeMpLostProbabilityInitialPercent",
+   "nameFr": "Esquive PM %"
+  },
+  {
+   "id": 140,
+   "keyword": "extraScalePercent",
+   "nameFr": "Scale"
+  },
+  {
+   "id": 141,
+   "keyword": "receivedDamageMultiplierSpells",
+   "nameFr": "Sorts (%)"
+  },
+  {
+   "id": 142,
+   "keyword": "receivedDamageMultiplierWeapon",
+   "nameFr": "Armes (%)"
+  },
+  {
+   "id": 143,
+   "keyword": "dealtHealMultiplier",
+   "nameFr": "Multiplicateur de soins"
+  },
+  {
+   "id": 150,
+   "keyword": "allDamageMultiplier",
+   "nameFr": "Multiplicateur sur tous les dégâts"
+  },
+  {
+   "id": 158,
+   "keyword": "pushDamagePercent",
+   "nameFr": "Poussée %"
+  },
+  {
+   "id": 199,
+   "keyword": "StopDrop",
+   "nameFr": "Blocage de drop"
+  }
+ ],
+ "itemSuperTypes": [
+  {
+   "id": 1,
+   "nameFr": "Amulette"
+  },
+  {
+   "id": 2,
+   "nameFr": "Arme"
+  },
+  {
+   "id": 3,
+   "nameFr": "Anneau"
+  },
+  {
+   "id": 4,
+   "nameFr": "Ceinture"
+  },
+  {
+   "id": 5,
+   "nameFr": "Bottes"
+  },
+  {
+   "id": 6,
+   "nameFr": "Consommable"
+  },
+  {
+   "id": 7,
+   "nameFr": "Bouclier"
+  },
+  {
+   "id": 9,
+   "nameFr": "Ressource"
+  },
+  {
+   "id": 10,
+   "nameFr": "Chapeau"
+  },
+  {
+   "id": 11,
+   "nameFr": "Cape"
+  },
+  {
+   "id": 12,
+   "nameFr": "Familier"
+  },
+  {
+   "id": 13,
+   "nameFr": "Dofus / Trophée / Prysmaradite"
+  },
+  {
+   "id": 14,
+   "nameFr": "Objet de quête"
+  },
+  {
+   "id": 15,
+   "nameFr": "Mutation"
+  },
+  {
+   "id": 16,
+   "nameFr": "Nourriture"
+  },
+  {
+   "id": 17,
+   "nameFr": "Bénédiction"
+  },
+  {
+   "id": 18,
+   "nameFr": "Malédiction"
+  },
+  {
+   "id": 19,
+   "nameFr": "Bonus de jeu de rôle"
+  },
+  {
+   "id": 20,
+   "nameFr": "Suiveur"
+  },
+  {
+   "id": 22,
+   "nameFr": "Cosmétiques"
+  },
+  {
+   "id": 23,
+   "nameFr": "Compagnon"
+  },
+  {
+   "id": 25,
+   "nameFr": "Costume"
+  },
+  {
+   "id": 26,
+   "nameFr": "Certificat"
+  },
+  {
+   "id": 27,
+   "nameFr": "Certificat de monture"
+  },
+  {
+   "id": 69,
+   "nameFr": "Équipement de percepteur"
+  },
+  {
+   "id": 70,
+   "nameFr": "Consommables de combat"
+  }
+ ],
+ "itemTypes": [
+  {
+   "id": 1,
+   "superTypeId": 1,
+   "nameFr": "Amulette"
+  },
+  {
+   "id": 2,
+   "superTypeId": 2,
+   "nameFr": "Arc"
+  },
+  {
+   "id": 3,
+   "superTypeId": 2,
+   "nameFr": "Baguette"
+  },
+  {
+   "id": 4,
+   "superTypeId": 2,
+   "nameFr": "Bâton"
+  },
+  {
+   "id": 5,
+   "superTypeId": 2,
+   "nameFr": "Dague"
+  },
+  {
+   "id": 6,
+   "superTypeId": 2,
+   "nameFr": "Épée"
+  },
+  {
+   "id": 7,
+   "superTypeId": 2,
+   "nameFr": "Marteau"
+  },
+  {
+   "id": 8,
+   "superTypeId": 2,
+   "nameFr": "Pelle"
+  },
+  {
+   "id": 9,
+   "superTypeId": 3,
+   "nameFr": "Anneau"
+  },
+  {
+   "id": 10,
+   "superTypeId": 4,
+   "nameFr": "Ceinture"
+  },
+  {
+   "id": 11,
+   "superTypeId": 5,
+   "nameFr": "Bottes"
+  },
+  {
+   "id": 12,
+   "superTypeId": 6,
+   "nameFr": "Potion"
+  },
+  {
+   "id": 13,
+   "superTypeId": 6,
+   "nameFr": "Parchemin d'expérience"
+  },
+  {
+   "id": 14,
+   "superTypeId": 6,
+   "nameFr": "Objet de dons"
+  },
+  {
+   "id": 15,
+   "superTypeId": 9,
+   "nameFr": "Ressource diverse"
+  },
+  {
+   "id": 16,
+   "superTypeId": 10,
+   "nameFr": "Chapeau"
+  },
+  {
+   "id": 17,
+   "superTypeId": 11,
+   "nameFr": "Cape"
+  },
+  {
+   "id": 18,
+   "superTypeId": 12,
+   "nameFr": "Familier"
+  },
+  {
+   "id": 19,
+   "superTypeId": 2,
+   "nameFr": "Hache"
+  },
+  {
+   "id": 20,
+   "superTypeId": 2,
+   "nameFr": "Outil"
+  },
+  {
+   "id": 21,
+   "superTypeId": 2,
+   "nameFr": "Pioche"
+  },
+  {
+   "id": 22,
+   "superTypeId": 2,
+   "nameFr": "Faux"
+  },
+  {
+   "id": 23,
+   "superTypeId": 13,
+   "nameFr": "Dofus"
+  },
+  {
+   "id": 24,
+   "superTypeId": 14,
+   "nameFr": "Divers"
+  },
+  {
+   "id": 25,
+   "superTypeId": 6,
+   "nameFr": "Document"
+  },
+  {
+   "id": 26,
+   "superTypeId": 9,
+   "nameFr": "Potion de forgemagie"
+  },
+  {
+   "id": 27,
+   "superTypeId": 15,
+   "nameFr": "Objet de Mutation"
+  },
+  {
+   "id": 28,
+   "superTypeId": 16,
+   "nameFr": "Nourriture boost"
+  },
+  {
+   "id": 29,
+   "superTypeId": 17,
+   "nameFr": "Bénédiction"
+  },
+  {
+   "id": 30,
+   "superTypeId": 18,
+   "nameFr": "Malédiction"
+  },
+  {
+   "id": 31,
+   "superTypeId": 19,
+   "nameFr": "Roleplay Buffs"
+  },
+  {
+   "id": 32,
+   "superTypeId": 20,
+   "nameFr": "Personnage suiveur"
+  },
+  {
+   "id": 33,
+   "superTypeId": 6,
+   "nameFr": "Pain"
+  },
+  {
+   "id": 34,
+   "superTypeId": 9,
+   "nameFr": "Céréale"
+  },
+  {
+   "id": 35,
+   "superTypeId": 9,
+   "nameFr": "Fleur"
+  },
+  {
+   "id": 36,
+   "superTypeId": 9,
+   "nameFr": "Plante"
+  },
+  {
+   "id": 37,
+   "superTypeId": 6,
+   "nameFr": "Bière"
+  },
+  {
+   "id": 38,
+   "superTypeId": 9,
+   "nameFr": "Bois"
+  },
+  {
+   "id": 39,
+   "superTypeId": 9,
+   "nameFr": "Minerai"
+  },
+  {
+   "id": 40,
+   "superTypeId": 9,
+   "nameFr": "Alliage"
+  },
+  {
+   "id": 41,
+   "superTypeId": 9,
+   "nameFr": "Poisson"
+  },
+  {
+   "id": 42,
+   "superTypeId": 6,
+   "nameFr": "Friandise"
+  },
+  {
+   "id": 43,
+   "superTypeId": 6,
+   "nameFr": "Potion de téléportation"
+  },
+  {
+   "id": 46,
+   "superTypeId": 9,
+   "nameFr": "Fruit"
+  },
+  {
+   "id": 47,
+   "superTypeId": 9,
+   "nameFr": "Os"
+  },
+  {
+   "id": 48,
+   "superTypeId": 9,
+   "nameFr": "Poudre"
+  },
+  {
+   "id": 49,
+   "superTypeId": 6,
+   "nameFr": "Poisson comestible"
+  },
+  {
+   "id": 50,
+   "superTypeId": 9,
+   "nameFr": "Pierre précieuse"
+  },
+  {
+   "id": 51,
+   "superTypeId": 9,
+   "nameFr": "Pierre brute"
+  },
+  {
+   "id": 53,
+   "superTypeId": 9,
+   "nameFr": "Plume"
+  },
+  {
+   "id": 54,
+   "superTypeId": 9,
+   "nameFr": "Poil"
+  },
+  {
+   "id": 55,
+   "superTypeId": 9,
+   "nameFr": "Étoffe"
+  },
+  {
+   "id": 56,
+   "superTypeId": 9,
+   "nameFr": "Cuir"
+  },
+  {
+   "id": 57,
+   "superTypeId": 9,
+   "nameFr": "Laine"
+  },
+  {
+   "id": 58,
+   "superTypeId": 9,
+   "nameFr": "Graine"
+  },
+  {
+   "id": 59,
+   "superTypeId": 9,
+   "nameFr": "Peau"
+  },
+  {
+   "id": 60,
+   "superTypeId": 9,
+   "nameFr": "Huile"
+  },
+  {
+   "id": 61,
+   "superTypeId": 9,
+   "nameFr": "Peluche"
+  },
+  {
+   "id": 63,
+   "superTypeId": 9,
+   "nameFr": "Viande"
+  },
+  {
+   "id": 65,
+   "superTypeId": 9,
+   "nameFr": "Queue"
+  },
+  {
+   "id": 66,
+   "superTypeId": 9,
+   "nameFr": "Métaria"
+  },
+  {
+   "id": 68,
+   "superTypeId": 9,
+   "nameFr": "Légume"
+  },
+  {
+   "id": 69,
+   "superTypeId": 6,
+   "nameFr": "Viande comestible"
+  },
+  {
+   "id": 70,
+   "superTypeId": 9,
+   "nameFr": "Teinture"
+  },
+  {
+   "id": 71,
+   "superTypeId": 9,
+   "nameFr": "Matériel d'alchimie"
+  },
+  {
+   "id": 74,
+   "superTypeId": 6,
+   "nameFr": "Fée d'artifice"
+  },
+  {
+   "id": 75,
+   "superTypeId": 6,
+   "nameFr": "Parchemin de sortilège"
+  },
+  {
+   "id": 76,
+   "superTypeId": 6,
+   "nameFr": "Parchemin de caractéristique"
+  },
+  {
+   "id": 78,
+   "superTypeId": 9,
+   "nameFr": "Rune de forgemagie"
+  },
+  {
+   "id": 79,
+   "superTypeId": 6,
+   "nameFr": "Boisson"
+  },
+  {
+   "id": 80,
+   "superTypeId": 6,
+   "nameFr": "Objet de mission"
+  },
+  {
+   "id": 82,
+   "superTypeId": 7,
+   "nameFr": "Bouclier"
+  },
+  {
+   "id": 83,
+   "superTypeId": 70,
+   "nameFr": "Pierre d'âme"
+  },
+  {
+   "id": 84,
+   "superTypeId": 9,
+   "nameFr": "Clef"
+  },
+  {
+   "id": 85,
+   "superTypeId": 6,
+   "nameFr": "Pierre d'âme pleine"
+  },
+  {
+   "id": 87,
+   "superTypeId": 6,
+   "nameFr": "Parchemin de recherche"
+  },
+  {
+   "id": 88,
+   "superTypeId": 6,
+   "nameFr": "Pierre magique"
+  },
+  {
+   "id": 89,
+   "superTypeId": 6,
+   "nameFr": "Cadeau"
+  },
+  {
+   "id": 94,
+   "superTypeId": 6,
+   "nameFr": "Objet utilisable"
+  },
+  {
+   "id": 95,
+   "superTypeId": 9,
+   "nameFr": "Planche"
+  },
+  {
+   "id": 96,
+   "superTypeId": 9,
+   "nameFr": "Écorce"
+  },
+  {
+   "id": 97,
+   "superTypeId": 27,
+   "nameFr": "Certificat de Dragodinde"
+  },
+  {
+   "id": 98,
+   "superTypeId": 9,
+   "nameFr": "Racine"
+  },
+  {
+   "id": 99,
+   "superTypeId": 70,
+   "nameFr": "Filet de capture"
+  },
+  {
+   "id": 100,
+   "superTypeId": 6,
+   "nameFr": "Sac de ressources"
+  },
+  {
+   "id": 103,
+   "superTypeId": 9,
+   "nameFr": "Patte"
+  },
+  {
+   "id": 104,
+   "superTypeId": 9,
+   "nameFr": "Aile"
+  },
+  {
+   "id": 105,
+   "superTypeId": 9,
+   "nameFr": "Œuf"
+  },
+  {
+   "id": 106,
+   "superTypeId": 9,
+   "nameFr": "Oreille"
+  },
+  {
+   "id": 107,
+   "superTypeId": 9,
+   "nameFr": "Carapace"
+  },
+  {
+   "id": 108,
+   "superTypeId": 9,
+   "nameFr": "Bourgeon"
+  },
+  {
+   "id": 109,
+   "superTypeId": 9,
+   "nameFr": "Œil"
+  },
+  {
+   "id": 110,
+   "superTypeId": 9,
+   "nameFr": "Gelée"
+  },
+  {
+   "id": 111,
+   "superTypeId": 9,
+   "nameFr": "Coquille"
+  },
+  {
+   "id": 112,
+   "superTypeId": 6,
+   "nameFr": "Prisme"
+  },
+  {
+   "id": 113,
+   "superTypeId": 22,
+   "nameFr": "Objet vivant"
+  },
+  {
+   "id": 114,
+   "superTypeId": 2,
+   "nameFr": "Arme magique"
+  },
+  {
+   "id": 119,
+   "superTypeId": 9,
+   "nameFr": "Champignon"
+  },
+  {
+   "id": 121,
+   "superTypeId": 12,
+   "nameFr": "Montilier"
+  },
+  {
+   "id": 125,
+   "superTypeId": 9,
+   "nameFr": "Souvenir"
+  },
+  {
+   "id": 126,
+   "superTypeId": 14,
+   "nameFr": "Quêtes principales"
+  },
+  {
+   "id": 127,
+   "superTypeId": 14,
+   "nameFr": "Quêtes de temple"
+  },
+  {
+   "id": 128,
+   "superTypeId": 14,
+   "nameFr": "Avis de recherche"
+  },
+  {
+   "id": 129,
+   "superTypeId": 14,
+   "nameFr": "Alignement"
+  },
+  {
+   "id": 131,
+   "superTypeId": 14,
+   "nameFr": "Événements"
+  },
+  {
+   "id": 132,
+   "superTypeId": 14,
+   "nameFr": "Archipel de Vulkania"
+  },
+  {
+   "id": 133,
+   "superTypeId": 14,
+   "nameFr": "Astrub"
+  },
+  {
+   "id": 136,
+   "superTypeId": 14,
+   "nameFr": "Camps des Bworks et des Gobelins"
+  },
+  {
+   "id": 137,
+   "superTypeId": 14,
+   "nameFr": "Cania"
+  },
+  {
+   "id": 139,
+   "superTypeId": 14,
+   "nameFr": "Île de Frigost"
+  },
+  {
+   "id": 140,
+   "superTypeId": 14,
+   "nameFr": "Île d'Otomaï"
+  },
+  {
+   "id": 141,
+   "superTypeId": 14,
+   "nameFr": "Île de Nowel"
+  },
+  {
+   "id": 142,
+   "superTypeId": 14,
+   "nameFr": "Incarnam"
+  },
+  {
+   "id": 143,
+   "superTypeId": 14,
+   "nameFr": "Montagne des Koalaks"
+  },
+  {
+   "id": 144,
+   "superTypeId": 14,
+   "nameFr": "Pandala"
+  },
+  {
+   "id": 146,
+   "superTypeId": 14,
+   "nameFr": "Royaume d'Amakna"
+  },
+  {
+   "id": 147,
+   "superTypeId": 14,
+   "nameFr": "Krosmoz"
+  },
+  {
+   "id": 148,
+   "superTypeId": 14,
+   "nameFr": "Jetons"
+  },
+  {
+   "id": 149,
+   "superTypeId": 14,
+   "nameFr": "Île de Moon"
+  },
+  {
+   "id": 150,
+   "superTypeId": 14,
+   "nameFr": "Îles des Wabbits"
+  },
+  {
+   "id": 151,
+   "superTypeId": 13,
+   "nameFr": "Trophée"
+  },
+  {
+   "id": 152,
+   "superTypeId": 9,
+   "nameFr": "Galet"
+  },
+  {
+   "id": 153,
+   "superTypeId": 9,
+   "nameFr": "Nowel"
+  },
+  {
+   "id": 154,
+   "superTypeId": 9,
+   "nameFr": "Emballage"
+  },
+  {
+   "id": 155,
+   "superTypeId": 14,
+   "nameFr": "Sufokia"
+  },
+  {
+   "id": 156,
+   "superTypeId": 14,
+   "nameFr": "Almanax"
+  },
+  {
+   "id": 157,
+   "superTypeId": 6,
+   "nameFr": "Figurine"
+  },
+  {
+   "id": 164,
+   "superTypeId": 9,
+   "nameFr": "Vêtement"
+  },
+  {
+   "id": 165,
+   "superTypeId": 6,
+   "nameFr": "Potion de conquête"
+  },
+  {
+   "id": 166,
+   "superTypeId": 6,
+   "nameFr": "Mimibiote"
+  },
+  {
+   "id": 167,
+   "superTypeId": 9,
+   "nameFr": "Essence de gardien de donjon"
+  },
+  {
+   "id": 168,
+   "superTypeId": 14,
+   "nameFr": "Justiciers"
+  },
+  {
+   "id": 169,
+   "superTypeId": 23,
+   "nameFr": "Compagnon"
+  },
+  {
+   "id": 171,
+   "superTypeId": 14,
+   "nameFr": "Dimensions Divines"
+  },
+  {
+   "id": 172,
+   "superTypeId": 6,
+   "nameFr": "Coffre"
+  },
+  {
+   "id": 173,
+   "superTypeId": 6,
+   "nameFr": "Parchemin d'attitude"
+  },
+  {
+   "id": 174,
+   "superTypeId": 9,
+   "nameFr": "Carte"
+  },
+  {
+   "id": 175,
+   "superTypeId": 9,
+   "nameFr": "Fragment de carte"
+  },
+  {
+   "id": 176,
+   "superTypeId": 6,
+   "nameFr": "Boîte de fragments"
+  },
+  {
+   "id": 179,
+   "superTypeId": 9,
+   "nameFr": "Préparation"
+  },
+  {
+   "id": 183,
+   "superTypeId": 9,
+   "nameFr": "Substrat"
+  },
+  {
+   "id": 184,
+   "superTypeId": 6,
+   "nameFr": "Conteneur"
+  },
+  {
+   "id": 185,
+   "superTypeId": 9,
+   "nameFr": "Sève"
+  },
+  {
+   "id": 187,
+   "superTypeId": 6,
+   "nameFr": "Viande primitive"
+  },
+  {
+   "id": 188,
+   "superTypeId": 6,
+   "nameFr": "Parchemin d'émoticônes"
+  },
+  {
+   "id": 189,
+   "superTypeId": 9,
+   "nameFr": "Orbe de forgemagie"
+  },
+  {
+   "id": 195,
+   "superTypeId": 9,
+   "nameFr": "Matériel d'exploration"
+  },
+  {
+   "id": 196,
+   "superTypeId": 27,
+   "nameFr": "Certificat de Muldo"
+  },
+  {
+   "id": 197,
+   "superTypeId": 9,
+   "nameFr": "Caution"
+  },
+  {
+   "id": 198,
+   "superTypeId": 14,
+   "nameFr": "Saharach"
+  },
+  {
+   "id": 199,
+   "superTypeId": 25,
+   "nameFr": "Costume"
+  },
+  {
+   "id": 200,
+   "superTypeId": 6,
+   "nameFr": "Parchemin de titre"
+  },
+  {
+   "id": 201,
+   "superTypeId": 14,
+   "nameFr": "Nimotopia"
+  },
+  {
+   "id": 202,
+   "superTypeId": 14,
+   "nameFr": "Sidimote"
+  },
+  {
+   "id": 203,
+   "superTypeId": 26,
+   "nameFr": "Objet invisible"
+  },
+  {
+   "id": 205,
+   "superTypeId": 14,
+   "nameFr": "Tours de la Fratrie"
+  },
+  {
+   "id": 206,
+   "superTypeId": 6,
+   "nameFr": "Potion de monture"
+  },
+  {
+   "id": 207,
+   "superTypeId": 27,
+   "nameFr": "Certificat de Volkorne"
+  },
+  {
+   "id": 209,
+   "superTypeId": 9,
+   "nameFr": "Nourriture pour familier"
+  },
+  {
+   "id": 211,
+   "superTypeId": 9,
+   "nameFr": "Rune de transcendance"
+  },
+  {
+   "id": 213,
+   "superTypeId": 14,
+   "nameFr": "Île de Pwâk"
+  },
+  {
+   "id": 214,
+   "superTypeId": 6,
+   "nameFr": "Potion d'attitude"
+  },
+  {
+   "id": 215,
+   "superTypeId": 14,
+   "nameFr": "Archipel des Écailles"
+  },
+  {
+   "id": 216,
+   "superTypeId": 6,
+   "nameFr": "Bourse"
+  },
+  {
+   "id": 217,
+   "superTypeId": 13,
+   "nameFr": "Prysmaradite"
+  },
+  {
+   "id": 218,
+   "superTypeId": 6,
+   "nameFr": "Popoche de Havre-Sac"
+  },
+  {
+   "id": 219,
+   "superTypeId": 9,
+   "nameFr": "Ressource des Songes"
+  },
+  {
+   "id": 220,
+   "superTypeId": 14,
+   "nameFr": "Eliocalypse"
+  },
+  {
+   "id": 222,
+   "superTypeId": 6,
+   "nameFr": "Parchemin d'ornement"
+  },
+  {
+   "id": 225,
+   "superTypeId": 14,
+   "nameFr": "Temporis"
+  },
+  {
+   "id": 226,
+   "superTypeId": 6,
+   "nameFr": "Objet utilisable de Temporis"
+  },
+  {
+   "id": 228,
+   "superTypeId": 9,
+   "nameFr": "Liquide"
+  },
+  {
+   "id": 229,
+   "superTypeId": 9,
+   "nameFr": "Ressource de combat"
+  },
+  {
+   "id": 230,
+   "superTypeId": 9,
+   "nameFr": "Obsolète"
+  },
+  {
+   "id": 231,
+   "superTypeId": 9,
+   "nameFr": "Rabmablague"
+  },
+  {
+   "id": 232,
+   "superTypeId": 9,
+   "nameFr": "Haïku"
+  },
+  {
+   "id": 233,
+   "superTypeId": 9,
+   "nameFr": "Rune astrale"
+  },
+  {
+   "id": 236,
+   "superTypeId": 6,
+   "nameFr": "Mots de haïku"
+  },
+  {
+   "id": 241,
+   "superTypeId": 9,
+   "nameFr": "Ressource de Temporis"
+  },
+  {
+   "id": 242,
+   "superTypeId": 14,
+   "nameFr": "Atoll des Possédés"
+  },
+  {
+   "id": 245,
+   "superTypeId": 6,
+   "nameFr": "Ressource obsolète"
+  },
+  {
+   "id": 246,
+   "superTypeId": 22,
+   "nameFr": "Chapeau d'apparat"
+  },
+  {
+   "id": 247,
+   "superTypeId": 22,
+   "nameFr": "Cape d'apparat"
+  },
+  {
+   "id": 248,
+   "superTypeId": 22,
+   "nameFr": "Bouclier d'apparat"
+  },
+  {
+   "id": 249,
+   "superTypeId": 22,
+   "nameFr": "Familier d'apparat"
+  },
+  {
+   "id": 250,
+   "superTypeId": 22,
+   "nameFr": "Montilier d'apparat"
+  },
+  {
+   "id": 251,
+   "superTypeId": 22,
+   "nameFr": "Arme d'apparat"
+  },
+  {
+   "id": 252,
+   "superTypeId": 22,
+   "nameFr": "Objet divers d'apparat"
+  },
+  {
+   "id": 253,
+   "superTypeId": 14,
+   "nameFr": "Cauchemar des Ravageurs"
+  },
+  {
+   "id": 254,
+   "superTypeId": 14,
+   "nameFr": "Bonta & Brakmar"
+  },
+  {
+   "id": 258,
+   "superTypeId": 9,
+   "nameFr": "Gravure de forgemagie"
+  },
+  {
+   "id": 259,
+   "superTypeId": 6,
+   "nameFr": "Bouataklône"
+  },
+  {
+   "id": 260,
+   "superTypeId": 14,
+   "nameFr": "Forêt Maléfique"
+  },
+  {
+   "id": 262,
+   "superTypeId": 9,
+   "nameFr": "Matériel de mégaltération"
+  },
+  {
+   "id": 266,
+   "superTypeId": 9,
+   "nameFr": "Ressource des Anomalies Temporelles"
+  },
+  {
+   "id": 268,
+   "superTypeId": 14,
+   "nameFr": "Expéditions"
+  },
+  {
+   "id": 271,
+   "superTypeId": 2,
+   "nameFr": "Lance"
+  },
+  {
+   "id": 272,
+   "superTypeId": 14,
+   "nameFr": "Archipel de Valonia"
+  },
+  {
+   "id": 273,
+   "superTypeId": 69,
+   "nameFr": "Fers de Percepteur"
+  },
+  {
+   "id": 274,
+   "superTypeId": 69,
+   "nameFr": "Cuirasses de Percepteur"
+  },
+  {
+   "id": 275,
+   "superTypeId": 69,
+   "nameFr": "Bannière de Percepteur"
+  },
+  {
+   "id": 276,
+   "superTypeId": 69,
+   "nameFr": "Poignards de Percepteur"
+  },
+  {
+   "id": 277,
+   "superTypeId": 69,
+   "nameFr": "Tunique de Percepteur"
+  },
+  {
+   "id": 278,
+   "superTypeId": 9,
+   "nameFr": "Ressource de Percepteur"
+  },
+  {
+   "id": 279,
+   "superTypeId": 69,
+   "nameFr": "Coffres de Percepteur"
+  },
+  {
+   "id": 280,
+   "superTypeId": 69,
+   "nameFr": "Sacoches de Percepteur"
+  },
+  {
+   "id": 284,
+   "superTypeId": 6,
+   "nameFr": "Relique d'Incarnation"
+  },
+  {
+   "id": 287,
+   "superTypeId": 14,
+   "nameFr": "Porte-signe de Compagnon"
+  },
+  {
+   "id": 289,
+   "superTypeId": 14,
+   "nameFr": "Idoles de Quêtes"
+  },
+  {
+   "id": 297,
+   "superTypeId": 6,
+   "nameFr": "Globe de lumière"
+  },
+  {
+   "id": 299,
+   "superTypeId": 25,
+   "nameFr": "Épaulière"
+  },
+  {
+   "id": 300,
+   "superTypeId": 25,
+   "nameFr": "Ailes"
+  },
+  {
+   "id": 301,
+   "superTypeId": 6,
+   "nameFr": "Monture domptée"
+  },
+  {
+   "id": 302,
+   "superTypeId": 6,
+   "nameFr": "Tatouage de la Foire du Trool"
+  },
+  {
+   "id": 303,
+   "superTypeId": 6,
+   "nameFr": "Ballon"
+  },
+  {
+   "id": 304,
+   "superTypeId": 6,
+   "nameFr": "Panoplie d'apparat"
+  },
+  {
+   "id": 305,
+   "superTypeId": 14,
+   "nameFr": "Foire du Trool"
+  },
+  {
+   "id": 306,
+   "superTypeId": 6,
+   "nameFr": "Visage"
+  },
+  {
+   "id": 307,
+   "superTypeId": 14,
+   "nameFr": "Pierre d'âme spéciale"
+  },
+  {
+   "id": 308,
+   "superTypeId": 14,
+   "nameFr": "Pierre d'âme spéciale pleine"
+  },
+  {
+   "id": 309,
+   "superTypeId": 9,
+   "nameFr": "Pierre d'âme spéciale non transformée"
+  },
+  {
+   "id": 310,
+   "superTypeId": 6,
+   "nameFr": "Éklâme"
+  },
+  {
+   "id": 311,
+   "superTypeId": 12,
+   "nameFr": "Monture"
+  },
+  {
+   "id": 312,
+   "superTypeId": 9,
+   "nameFr": "Ressource de quête"
+  },
+  {
+   "id": 314,
+   "superTypeId": 6,
+   "nameFr": "Consommable obsolète des Songes"
+  },
+  {
+   "id": 315,
+   "superTypeId": 9,
+   "nameFr": "Ressource de raid"
+  },
+  {
+   "id": 322,
+   "superTypeId": 6,
+   "nameFr": "Éclats"
+  },
+  {
+   "id": 323,
+   "superTypeId": 9,
+   "nameFr": "Makina"
+  },
+  {
+   "id": 324,
+   "superTypeId": 22,
+   "nameFr": "Monture d'apparat"
+  },
+  {
+   "id": 325,
+   "superTypeId": 14,
+   "nameFr": "La source - l'héritage des Dofus"
+  },
+  {
+   "id": 326,
+   "superTypeId": 9,
+   "nameFr": "Carburant d'enclos"
+  },
+  {
+   "id": 327,
+   "superTypeId": 6,
+   "nameFr": "Âme de gardien de donjon"
+  },
+  {
+   "id": 328,
+   "superTypeId": 6,
+   "nameFr": "Âme d'archimonstre"
+  },
+  {
+   "id": 329,
+   "superTypeId": 6,
+   "nameFr": "Corps"
+  },
+  {
+   "id": 330,
+   "superTypeId": 6,
+   "nameFr": "Poses"
+  },
+  {
+   "id": 331,
+   "superTypeId": 12,
+   "nameFr": "Dragodinde"
+  },
+  {
+   "id": 332,
+   "superTypeId": 12,
+   "nameFr": "Muldo"
+  },
+  {
+   "id": 333,
+   "superTypeId": 12,
+   "nameFr": "Volkorne"
+  },
+  {
+   "id": 334,
+   "superTypeId": 14,
+   "nameFr": "Jetons événementiels"
+  }
+ ],
+ "runes": [
+  {
+   "id": 1519,
+   "nameFr": "Rune Fo",
+   "level": 1,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 118,
+     "characteristicId": 10,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 1521,
+   "nameFr": "Rune Sa",
+   "level": 15,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 124,
+     "characteristicId": 12,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 1522,
+   "nameFr": "Rune Ine",
+   "level": 1,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 126,
+     "characteristicId": 15,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 1523,
+   "nameFr": "Rune Vi",
+   "level": 1,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 125,
+     "characteristicId": 11,
+     "value": 5
+    }
+   ]
+  },
+  {
+   "id": 1524,
+   "nameFr": "Rune Age",
+   "level": 1,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 119,
+     "characteristicId": 14,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 1525,
+   "nameFr": "Rune Cha",
+   "level": 1,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 123,
+     "characteristicId": 13,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 1545,
+   "nameFr": "Rune Pa Fo",
+   "level": 5,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 118,
+     "characteristicId": 10,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 1546,
+   "nameFr": "Rune Pa Sa",
+   "level": 20,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 124,
+     "characteristicId": 12,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 1547,
+   "nameFr": "Rune Pa Ine",
+   "level": 5,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 126,
+     "characteristicId": 15,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 1548,
+   "nameFr": "Rune Pa Vi",
+   "level": 5,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 125,
+     "characteristicId": 11,
+     "value": 15
+    }
+   ]
+  },
+  {
+   "id": 1549,
+   "nameFr": "Rune Pa Age",
+   "level": 5,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 119,
+     "characteristicId": 14,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 1550,
+   "nameFr": "Rune Pa Cha",
+   "level": 5,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 123,
+     "characteristicId": 13,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 1551,
+   "nameFr": "Rune Ra Fo",
+   "level": 10,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 118,
+     "characteristicId": 10,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 1552,
+   "nameFr": "Rune Ra Sa",
+   "level": 25,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 124,
+     "characteristicId": 12,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 1553,
+   "nameFr": "Rune Ra Ine",
+   "level": 10,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 126,
+     "characteristicId": 15,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 1554,
+   "nameFr": "Rune Ra Vi",
+   "level": 10,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 125,
+     "characteristicId": 11,
+     "value": 50
+    }
+   ]
+  },
+  {
+   "id": 1555,
+   "nameFr": "Rune Ra Age",
+   "level": 10,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 119,
+     "characteristicId": 14,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 1556,
+   "nameFr": "Rune Ra Cha",
+   "level": 10,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 123,
+     "characteristicId": 13,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 1557,
+   "nameFr": "Rune Ga Pa",
+   "level": 100,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 111,
+     "characteristicId": 1,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 1558,
+   "nameFr": "Rune Ga Pme",
+   "level": 95,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 128,
+     "characteristicId": 23,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7433,
+   "nameFr": "Rune Cri",
+   "level": 80,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 115,
+     "characteristicId": 18,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7434,
+   "nameFr": "Rune So",
+   "level": 80,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 178,
+     "characteristicId": 49,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7435,
+   "nameFr": "Rune Do",
+   "level": 50,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 112,
+     "characteristicId": 16,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7436,
+   "nameFr": "Rune Pui",
+   "level": 15,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 138,
+     "characteristicId": 25,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7437,
+   "nameFr": "Rune Do Ren",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 220,
+     "characteristicId": 50,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7438,
+   "nameFr": "Rune Po",
+   "level": 90,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 117,
+     "characteristicId": 19,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7442,
+   "nameFr": "Rune Invo",
+   "level": 85,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 182,
+     "characteristicId": 26,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7443,
+   "nameFr": "Rune Pod",
+   "level": 1,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 158,
+     "characteristicId": 40,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 7444,
+   "nameFr": "Rune Pa Pod",
+   "level": 5,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 158,
+     "characteristicId": 40,
+     "value": 30
+    }
+   ]
+  },
+  {
+   "id": 7445,
+   "nameFr": "Rune Ra Pod",
+   "level": 10,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 158,
+     "characteristicId": 40,
+     "value": 100
+    }
+   ]
+  },
+  {
+   "id": 7446,
+   "nameFr": "Rune Do Pi",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 225,
+     "characteristicId": 70,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7447,
+   "nameFr": "Rune Per Pi",
+   "level": 15,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 226,
+     "characteristicId": 69,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7448,
+   "nameFr": "Rune Ini",
+   "level": 1,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 174,
+     "characteristicId": 44,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 7449,
+   "nameFr": "Rune Pa Ini",
+   "level": 5,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 174,
+     "characteristicId": 44,
+     "value": 30
+    }
+   ]
+  },
+  {
+   "id": 7450,
+   "nameFr": "Rune Ra Ini",
+   "level": 10,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 174,
+     "characteristicId": 44,
+     "value": 100
+    }
+   ]
+  },
+  {
+   "id": 7451,
+   "nameFr": "Rune Prospe",
+   "level": 15,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 176,
+     "characteristicId": 48,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7452,
+   "nameFr": "Rune Ré Feu",
+   "level": 30,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 243,
+     "characteristicId": 55,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7453,
+   "nameFr": "Rune Ré Air",
+   "level": 30,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 242,
+     "characteristicId": 57,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7454,
+   "nameFr": "Rune Ré Eau",
+   "level": 30,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 241,
+     "characteristicId": 56,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7455,
+   "nameFr": "Rune Ré Terre",
+   "level": 30,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 240,
+     "characteristicId": 54,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7456,
+   "nameFr": "Rune Ré Neutre",
+   "level": 30,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 244,
+     "characteristicId": 58,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7457,
+   "nameFr": "Rune Ré Per Feu",
+   "level": 75,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 213,
+     "characteristicId": 34,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7458,
+   "nameFr": "Rune Ré Per Air",
+   "level": 75,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 212,
+     "characteristicId": 36,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7459,
+   "nameFr": "Rune Ré Per Terre",
+   "level": 75,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 210,
+     "characteristicId": 33,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7460,
+   "nameFr": "Rune Ré Per Neutre",
+   "level": 75,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 214,
+     "characteristicId": 37,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 7508,
+   "nameFr": "Rune de Signature",
+   "level": 100,
+   "realWeight": 5,
+   "effects": []
+  },
+  {
+   "id": 7560,
+   "nameFr": "Rune Ré Per Eau",
+   "level": 75,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 211,
+     "characteristicId": 35,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 10057,
+   "nameFr": "Rune de chasse",
+   "level": 10,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 795,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 10613,
+   "nameFr": "Rune Pa Do Pi",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 225,
+     "characteristicId": 70,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 10615,
+   "nameFr": "Rune Pa Per Pi",
+   "level": 20,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 226,
+     "characteristicId": 69,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 10616,
+   "nameFr": "Rune Ra Per Pi",
+   "level": 25,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 226,
+     "characteristicId": 69,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 10618,
+   "nameFr": "Rune Pa Pui",
+   "level": 20,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 138,
+     "characteristicId": 25,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 10619,
+   "nameFr": "Rune Ra Pui",
+   "level": 25,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 138,
+     "characteristicId": 25,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 10662,
+   "nameFr": "Rune Pa Prospe",
+   "level": 20,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 176,
+     "characteristicId": 48,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11637,
+   "nameFr": "Rune Fui",
+   "level": 55,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 752,
+     "characteristicId": 78,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11638,
+   "nameFr": "Rune Pa Fui",
+   "level": 60,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 752,
+     "characteristicId": 78,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11639,
+   "nameFr": "Rune Tac",
+   "level": 55,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 753,
+     "characteristicId": 79,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11640,
+   "nameFr": "Rune Pa Tac",
+   "level": 60,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 753,
+     "characteristicId": 79,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11641,
+   "nameFr": "Rune Ré Pa",
+   "level": 65,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 160,
+     "characteristicId": 27,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11642,
+   "nameFr": "Rune Pa Ré Pa",
+   "level": 70,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 160,
+     "characteristicId": 27,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11643,
+   "nameFr": "Rune Ré Pme",
+   "level": 65,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 161,
+     "characteristicId": 28,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11644,
+   "nameFr": "Rune Pa Ré Pme",
+   "level": 70,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 161,
+     "characteristicId": 28,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11645,
+   "nameFr": "Rune Ret Pa",
+   "level": 65,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 410,
+     "characteristicId": 82,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11646,
+   "nameFr": "Rune Pa Ret Pa",
+   "level": 70,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 410,
+     "characteristicId": 82,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11647,
+   "nameFr": "Rune Ret Pme",
+   "level": 65,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 412,
+     "characteristicId": 83,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11648,
+   "nameFr": "Rune Pa Ret Pme",
+   "level": 70,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 412,
+     "characteristicId": 83,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11649,
+   "nameFr": "Rune Do Pou",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 414,
+     "characteristicId": 84,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11650,
+   "nameFr": "Rune Pa Do Pou",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 414,
+     "characteristicId": 84,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11651,
+   "nameFr": "Rune Ré Pou",
+   "level": 30,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 416,
+     "characteristicId": 85,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11652,
+   "nameFr": "Rune Pa Ré Pou",
+   "level": 35,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 416,
+     "characteristicId": 85,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11653,
+   "nameFr": "Rune Do Cri",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 418,
+     "characteristicId": 86,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11654,
+   "nameFr": "Rune Pa Do Cri",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 418,
+     "characteristicId": 86,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11655,
+   "nameFr": "Rune Ré Cri",
+   "level": 30,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 420,
+     "characteristicId": 87,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11656,
+   "nameFr": "Rune Pa Ré Cri",
+   "level": 35,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 420,
+     "characteristicId": 87,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11657,
+   "nameFr": "Rune Do Terre",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 422,
+     "characteristicId": 88,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11658,
+   "nameFr": "Rune Pa Do Terre",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 422,
+     "characteristicId": 88,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11659,
+   "nameFr": "Rune Do Feu",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 424,
+     "characteristicId": 89,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11660,
+   "nameFr": "Rune Pa Do Feu",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 424,
+     "characteristicId": 89,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11661,
+   "nameFr": "Rune Do Eau",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 426,
+     "characteristicId": 90,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11662,
+   "nameFr": "Rune Pa Do Eau",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 426,
+     "characteristicId": 90,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11663,
+   "nameFr": "Rune Do Air",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 428,
+     "characteristicId": 91,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11664,
+   "nameFr": "Rune Pa Do Air",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 428,
+     "characteristicId": 91,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 11665,
+   "nameFr": "Rune Do Neutre",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 430,
+     "characteristicId": 92,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 11666,
+   "nameFr": "Rune Pa Do Neutre",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 430,
+     "characteristicId": 92,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 18719,
+   "nameFr": "Rune Do Per Mé",
+   "level": 50,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2800,
+     "characteristicId": 125,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 18720,
+   "nameFr": "Rune Do Per Di",
+   "level": 50,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2804,
+     "characteristicId": 120,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 18721,
+   "nameFr": "Rune Do Per Ar",
+   "level": 50,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2808,
+     "characteristicId": 122,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 18722,
+   "nameFr": "Rune Do Per So",
+   "level": 50,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2812,
+     "characteristicId": 123,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 18723,
+   "nameFr": "Rune Ré Per Mé",
+   "level": 50,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2803,
+     "characteristicId": 124,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 18724,
+   "nameFr": "Rune Ré Per Di",
+   "level": 50,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2807,
+     "characteristicId": 121,
+     "value": 1
+    }
+   ]
+  },
+  {
+   "id": 19337,
+   "nameFr": "Rune Pa So",
+   "level": 90,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 178,
+     "characteristicId": 49,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 19338,
+   "nameFr": "Rune Pa Ré Air",
+   "level": 35,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 242,
+     "characteristicId": 57,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 19339,
+   "nameFr": "Rune Pa Ré Eau",
+   "level": 35,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 241,
+     "characteristicId": 56,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 19340,
+   "nameFr": "Rune Pa Ré Feu",
+   "level": 35,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 243,
+     "characteristicId": 55,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 19341,
+   "nameFr": "Rune Pa Ré Neutre",
+   "level": 35,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 244,
+     "characteristicId": 58,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 19342,
+   "nameFr": "Rune Pa Ré Terre",
+   "level": 35,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 240,
+     "characteristicId": 54,
+     "value": 3
+    }
+   ]
+  },
+  {
+   "id": 29683,
+   "nameFr": "Rune Ra Ré Pou",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 416,
+     "characteristicId": 85,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 29684,
+   "nameFr": "Rune Ra Do Pou",
+   "level": 50,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 414,
+     "characteristicId": 84,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 30695,
+   "nameFr": "Rune Ra Ré Terre",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 240,
+     "characteristicId": 54,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 30696,
+   "nameFr": "Rune Ra Ré Neutre",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 244,
+     "characteristicId": 58,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 30697,
+   "nameFr": "Rune Ra Ré Feu",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 243,
+     "characteristicId": 55,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 30698,
+   "nameFr": "Rune Ra Ré Eau",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 241,
+     "characteristicId": 56,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 30699,
+   "nameFr": "Rune Ra Ré Cri",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 420,
+     "characteristicId": 87,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 30700,
+   "nameFr": "Rune Ra Ré Air",
+   "level": 40,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 242,
+     "characteristicId": 57,
+     "value": 10
+    }
+   ]
+  },
+  {
+   "id": 30942,
+   "nameFr": "Rune Pa Do Ren",
+   "level": 45,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 220,
+     "characteristicId": 50,
+     "value": 3
+    }
+   ]
+  }
+ ],
+ "transcendenceRunes": [
+  {
+   "id": 20492,
+   "nameFr": "Rune Ta Ine",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 126,
+     "characteristicId": 15,
+     "value": 10
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20556,
+   "nameFr": "Rune Pata Ine",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 126,
+     "characteristicId": 15,
+     "value": 15
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20557,
+   "nameFr": "Rune Rata Ine",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 126,
+     "characteristicId": 15,
+     "value": 20
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20558,
+   "nameFr": "Rune Ta Fo",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 118,
+     "characteristicId": 10,
+     "value": 10
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20559,
+   "nameFr": "Rune Pata Fo",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 118,
+     "characteristicId": 10,
+     "value": 15
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20560,
+   "nameFr": "Rune Rata Fo",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 118,
+     "characteristicId": 10,
+     "value": 20
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20561,
+   "nameFr": "Rune Ta Age",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 119,
+     "characteristicId": 14,
+     "value": 10
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20562,
+   "nameFr": "Rune Pata Age",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 119,
+     "characteristicId": 14,
+     "value": 15
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20563,
+   "nameFr": "Rune Rata Age",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 119,
+     "characteristicId": 14,
+     "value": 20
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20564,
+   "nameFr": "Rune Ta Cha",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 123,
+     "characteristicId": 13,
+     "value": 10
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20565,
+   "nameFr": "Rune Pata Cha",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 123,
+     "characteristicId": 13,
+     "value": 15
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20566,
+   "nameFr": "Rune Rata Cha",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 123,
+     "characteristicId": 13,
+     "value": 20
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20567,
+   "nameFr": "Rune Ta Vi",
+   "level": 124,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 125,
+     "characteristicId": 11,
+     "value": 50
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20568,
+   "nameFr": "Rune Pata Vi",
+   "level": 146,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 125,
+     "characteristicId": 11,
+     "value": 75
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20569,
+   "nameFr": "Rune Rata Vi",
+   "level": 168,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 125,
+     "characteristicId": 11,
+     "value": 100
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20570,
+   "nameFr": "Rune Ta Ini",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 174,
+     "characteristicId": 44,
+     "value": 100
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20571,
+   "nameFr": "Rune Pata Ini",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 174,
+     "characteristicId": 44,
+     "value": 150
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20572,
+   "nameFr": "Rune Rata Ini",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 174,
+     "characteristicId": 44,
+     "value": 200
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20573,
+   "nameFr": "Rune Ta Pod",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 158,
+     "characteristicId": 40,
+     "value": 100
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20574,
+   "nameFr": "Rune Pata Pod",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 158,
+     "characteristicId": 40,
+     "value": 200
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20575,
+   "nameFr": "Rune Rata Pod",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 158,
+     "characteristicId": 40,
+     "value": 400
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20576,
+   "nameFr": "Rune Ta Pui",
+   "level": 124,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 138,
+     "characteristicId": 25,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20577,
+   "nameFr": "Rune Pata Pui",
+   "level": 146,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 138,
+     "characteristicId": 25,
+     "value": 9
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20578,
+   "nameFr": "Rune Rata Pui",
+   "level": 168,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 138,
+     "characteristicId": 25,
+     "value": 12
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20579,
+   "nameFr": "Rune Ta Ré Pou",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 416,
+     "characteristicId": 85,
+     "value": 9
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20580,
+   "nameFr": "Rune Pata Ré Pou",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 416,
+     "characteristicId": 85,
+     "value": 12
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20581,
+   "nameFr": "Rune Ta Ré Cri",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 420,
+     "characteristicId": 87,
+     "value": 9
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20582,
+   "nameFr": "Rune Pata Ré Cri",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 420,
+     "characteristicId": 87,
+     "value": 12
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20583,
+   "nameFr": "Rune Ta Do Pou",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 414,
+     "characteristicId": 84,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20584,
+   "nameFr": "Rune Pata Do Pou",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 414,
+     "characteristicId": 84,
+     "value": 8
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20585,
+   "nameFr": "Rune Ta Do Cri",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 418,
+     "characteristicId": 86,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20586,
+   "nameFr": "Rune Pata Do Cri",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 418,
+     "characteristicId": 86,
+     "value": 8
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20596,
+   "nameFr": "Rune Ta Do Terre",
+   "level": 144,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 422,
+     "characteristicId": 88,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20597,
+   "nameFr": "Rune Pata Do Terre",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 422,
+     "characteristicId": 88,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20598,
+   "nameFr": "Rune Rata Do Terre",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 422,
+     "characteristicId": 88,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20599,
+   "nameFr": "Rune Ta Do Feu",
+   "level": 144,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 424,
+     "characteristicId": 89,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20600,
+   "nameFr": "Rune Pata Do Feu",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 424,
+     "characteristicId": 89,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20601,
+   "nameFr": "Rune Rata Do Feu",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 424,
+     "characteristicId": 89,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20602,
+   "nameFr": "Rune Ta Do Eau",
+   "level": 144,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 426,
+     "characteristicId": 90,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20603,
+   "nameFr": "Rune Pata Do Eau",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 426,
+     "characteristicId": 90,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20604,
+   "nameFr": "Rune Rata Do Eau",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 426,
+     "characteristicId": 90,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20605,
+   "nameFr": "Rune Ta Do Air",
+   "level": 144,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 428,
+     "characteristicId": 91,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20606,
+   "nameFr": "Rune Pata Do Air",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 428,
+     "characteristicId": 91,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20607,
+   "nameFr": "Rune Rata Do Air",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 428,
+     "characteristicId": 91,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20608,
+   "nameFr": "Rune Ta Do Neutre",
+   "level": 144,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 430,
+     "characteristicId": 92,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20609,
+   "nameFr": "Rune Pata Do Neutre",
+   "level": 166,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 430,
+     "characteristicId": 92,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20610,
+   "nameFr": "Rune Rata Do Neutre",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 430,
+     "characteristicId": 92,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20611,
+   "nameFr": "Rune Ta Ré Per Di",
+   "level": 200,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2807,
+     "characteristicId": 121,
+     "value": 1
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20612,
+   "nameFr": "Rune Ta Ré Per Mé",
+   "level": 200,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2803,
+     "characteristicId": 124,
+     "value": 1
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20613,
+   "nameFr": "Rune Ta Do Per So",
+   "level": 200,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2812,
+     "characteristicId": 123,
+     "value": 1
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20614,
+   "nameFr": "Rune Ta Do Per Ar",
+   "level": 200,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2808,
+     "characteristicId": 122,
+     "value": 1
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20615,
+   "nameFr": "Rune Ta Do Per Di",
+   "level": 200,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2804,
+     "characteristicId": 120,
+     "value": 1
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20616,
+   "nameFr": "Rune Ta Do Per Mé",
+   "level": 200,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 2800,
+     "characteristicId": 125,
+     "value": 1
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20617,
+   "nameFr": "Rune Ta Fui",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 752,
+     "characteristicId": 78,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20618,
+   "nameFr": "Rune Pata Fui",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 752,
+     "characteristicId": 78,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20619,
+   "nameFr": "Rune Rata Fui",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 752,
+     "characteristicId": 78,
+     "value": 8
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20620,
+   "nameFr": "Rune Ta Tac",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 753,
+     "characteristicId": 79,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20621,
+   "nameFr": "Rune Pata Tac",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 753,
+     "characteristicId": 79,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20622,
+   "nameFr": "Rune Rata Tac",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 753,
+     "characteristicId": 79,
+     "value": 8
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20623,
+   "nameFr": "Rune Ta Ré Pa",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 160,
+     "characteristicId": 27,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20624,
+   "nameFr": "Rune Pata Ré Pa",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 160,
+     "characteristicId": 27,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20625,
+   "nameFr": "Rune Rata Ré Pa",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 160,
+     "characteristicId": 27,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20626,
+   "nameFr": "Rune Ta Ré Pme",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 161,
+     "characteristicId": 28,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20627,
+   "nameFr": "Rune Pata Ré Pme",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 161,
+     "characteristicId": 28,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20628,
+   "nameFr": "Rune Rata Ré Pme",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 161,
+     "characteristicId": 28,
+     "value": 6
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20629,
+   "nameFr": "Rune Ta Ret Pa",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 410,
+     "characteristicId": 82,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20630,
+   "nameFr": "Rune Pata Ret Pa",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 410,
+     "characteristicId": 82,
+     "value": 3
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20631,
+   "nameFr": "Rune Rata Ret Pa",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 410,
+     "characteristicId": 82,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20632,
+   "nameFr": "Rune Ta Ret Pme",
+   "level": 104,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 412,
+     "characteristicId": 83,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20633,
+   "nameFr": "Rune Pata Ret Pme",
+   "level": 126,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 412,
+     "characteristicId": 83,
+     "value": 3
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20634,
+   "nameFr": "Rune Rata Ret Pme",
+   "level": 148,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 412,
+     "characteristicId": 83,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20635,
+   "nameFr": "Rune Ta Ré Per Terre",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 210,
+     "characteristicId": 33,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20636,
+   "nameFr": "Rune Ta Ré Per Feu",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 213,
+     "characteristicId": 34,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20637,
+   "nameFr": "Rune Ta Ré Per Eau",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 211,
+     "characteristicId": 35,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20638,
+   "nameFr": "Rune Ta Ré Per Air",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 212,
+     "characteristicId": 36,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20639,
+   "nameFr": "Rune Ta Ré Per Neutre",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 214,
+     "characteristicId": 37,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20640,
+   "nameFr": "Rune Ta Cri",
+   "level": 164,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 115,
+     "characteristicId": 18,
+     "value": 1
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20641,
+   "nameFr": "Rune Pata Cri",
+   "level": 188,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 115,
+     "characteristicId": 18,
+     "value": 2
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20642,
+   "nameFr": "Rune Ta So",
+   "level": 124,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 178,
+     "characteristicId": 49,
+     "value": 4
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20643,
+   "nameFr": "Rune Pata So",
+   "level": 146,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 178,
+     "characteristicId": 49,
+     "value": 7
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": 20644,
+   "nameFr": "Rune Rata So",
+   "level": 168,
+   "realWeight": 1,
+   "effects": [
+    {
+     "effectId": 178,
+     "characteristicId": 49,
+     "value": 10
+    },
+    {
+     "effectId": 2825,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2826,
+     "characteristicId": 0,
+     "value": 0
+    },
+    {
+     "effectId": 2827,
+     "characteristicId": 0,
+     "value": 0
+    }
+   ]
+  }
+ ],
+ "potions": [
+  {
+   "id": 1333,
+   "nameFr": "Potion d'Étincelle",
+   "level": 20,
+   "descriptionFr": "Grâce au pouvoir de l'Étincelle, les dommages neutres infligés par une arme sont définitivement transformés en dégâts associés à l'élément Feu. L'enchantement provoque une forte diminution des dommages de base. Le vol de vie n'est pas modifié par cette potion.",
+   "rawEffects": [
+    {
+     "effectId": 700,
+     "from": 14,
+     "to": 55
+    }
+   ]
+  },
+  {
+   "id": 1335,
+   "nameFr": "Potion de Crachin",
+   "level": 20,
+   "descriptionFr": "Grâce au pouvoir du Crachin, les dommages neutres infligés par une arme sont définitivement transformés en dégâts associés à l'élément Eau. L'enchantement provoque une forte diminution des dommages de base. Le vol de vie n'est pas modifié par cette potion.",
+   "rawEffects": [
+    {
+     "effectId": 700,
+     "from": 14,
+     "to": 53
+    }
+   ]
+  },
+  {
+   "id": 1337,
+   "nameFr": "Potion de Courant d'Air",
+   "level": 20,
+   "descriptionFr": "Grâce au pouvoir du Courant d'Air, les dommages neutres infligés par une arme sont définitivement transformés en dégâts associés à l'élément Air. L'enchantement provoque une forte diminution des dommages de base. Le vol de vie n'est pas modifié par cette potion.",
+   "rawEffects": [
+    {
+     "effectId": 700,
+     "from": 14,
+     "to": 56
+    }
+   ]
+  },
+  {
+   "id": 1338,
+   "nameFr": "Potion de Secousse",
+   "level": 20,
+   "descriptionFr": "Grâce au pouvoir de la Secousse, les dommages neutres infligés par une arme sont définitivement transformés en dégâts associés à l'élément Terre. L'enchantement provoque une forte diminution des dommages de base. Le vol de vie n'est pas modifié par cette potion.",
+   "rawEffects": [
+    {
+     "effectId": 700,
+     "from": 14,
+     "to": 54
+    }
+   ]
+  },
+  {
+   "id": 1345,
+   "nameFr": "Potion d'Incendie",
+   "level": 80,
+   "descriptionFr": "Grâce au pouvoir de l'Incendie, les dommages neutres infligés par une arme sont définitivement transformés en dégâts associés à l'élément Feu. L'enchantement provoque une faible diminution des dommages de base. Le vol de vie n'est pas modifié par cette potion.",
+   "rawEffects": [
+    {
+     "effectId": 700,
+     "from": 14,
+     "to": 55
+    }
+   ]
+  },
+  {
+   "id": 1346,
+   "nameFr": "Potion de Tsunami",
+   "level": 80,
+   "descriptionFr": "Grâce au pouvoir du Tsunami, les dommages neutres infligés par une arme sont définitivement transformés en dégâts associés à l'élément Eau. L'enchantement provoque une faible diminution des dommages de base. Le vol de vie n'est pas modifié par cette potion.",
+   "rawEffects": [
+    {
+     "effectId": 700,
+     "from": 14,
+     "to": 53
+    }
+   ]
+  },
+  {
+   "id": 1347,
+   "nameFr": "Potion d'Ouragan",
+   "level": 80,
+   "descriptionFr": "Grâce au pouvoir de l'Ouragan, les dommages neutres infligés par une arme sont définitivement transformés en dégâts associés à l'élément Air. L'enchantement provoque une faible diminution des dommages de base. Le vol de vie n'est pas modifié par cette potion.",
+   "rawEffects": [
+    {
+     "effectId": 700,
+     "from": 14,
+     "to": 56
+    }
+   ]
+  },
+  {
+   "id": 1348,
+   "nameFr": "Potion de Séisme",
+   "level": 80,
+   "descriptionFr": "Grâce au pouvoir du Séisme, les dommages neutres infligés par une arme sont définitivement transformés en dégâts associés à l'élément Terre. L'enchantement provoque une faible diminution des dommages de base. Le vol de vie n'est pas modifié par cette potion.",
+   "rawEffects": [
+    {
+     "effectId": 700,
+     "from": 14,
+     "to": 54
+    }
+   ]
+  }
+ ],
+ "orbs": [
+  {
+   "id": 17272,
+   "nameFr": "Orbe régénérant mineur",
+   "level": 60,
+   "descriptionFr": "Utilisé lors d'une session de forgemagie, cet orbe permet de réinitialiser les caractéristiques d'un objet.",
+   "rawEffects": [
+    {
+     "effectId": 1185,
+     "from": 0,
+     "to": 0
+    }
+   ]
+  },
+  {
+   "id": 17273,
+   "nameFr": "Orbe régénérant",
+   "level": 120,
+   "descriptionFr": "Utilisé lors d'une session de forgemagie, cet orbe permet de réinitialiser les caractéristiques d'un objet.",
+   "rawEffects": [
+    {
+     "effectId": 1185,
+     "from": 0,
+     "to": 0
+    }
+   ]
+  },
+  {
+   "id": 17274,
+   "nameFr": "Orbe régénérant majeur",
+   "level": 180,
+   "descriptionFr": "Utilisé lors d'une session de forgemagie, cet orbe permet de réinitialiser les caractéristiques d'un objet.",
+   "rawEffects": [
+    {
+     "effectId": 1185,
+     "from": 0,
+     "to": 0
+    }
+   ]
+  },
+  {
+   "id": 17275,
+   "nameFr": "Orbe régénérant magistral",
+   "level": 200,
+   "descriptionFr": "Utilisé lors d'une session de forgemagie, cet orbe permet de réinitialiser les caractéristiques d'un objet.",
+   "rawEffects": [
+    {
+     "effectId": 1185,
+     "from": 0,
+     "to": 0
+    }
+   ]
+  },
+  {
+   "id": 27493,
+   "nameFr": "Orbe régénérant magistral (lié)",
+   "level": 200,
+   "descriptionFr": "Utilisé lors d'une session de forgemagie, cet orbe permet de réinitialiser les caractéristiques d'un objet.",
+   "rawEffects": [
+    {
+     "effectId": 981,
+     "from": 0,
+     "to": 0
+    },
+    {
+     "effectId": 1185,
+     "from": 0,
+     "to": 0
+    }
+   ]
+  },
+  {
+   "id": 27494,
+   "nameFr": "Orbe régénérant majeur (lié)",
+   "level": 180,
+   "descriptionFr": "Utilisé lors d'une session de forgemagie, cet orbe permet de réinitialiser les caractéristiques d'un objet.",
+   "rawEffects": [
+    {
+     "effectId": 981,
+     "from": 0,
+     "to": 0
+    },
+    {
+     "effectId": 1185,
+     "from": 0,
+     "to": 0
+    }
+   ]
+  },
+  {
+   "id": 27495,
+   "nameFr": "Orbe régénérant (lié)",
+   "level": 120,
+   "descriptionFr": "Utilisé lors d'une session de forgemagie, cet orbe permet de réinitialiser les caractéristiques d'un objet.",
+   "rawEffects": [
+    {
+     "effectId": 981,
+     "from": 0,
+     "to": 0
+    },
+    {
+     "effectId": 1185,
+     "from": 0,
+     "to": 0
+    }
+   ]
+  },
+  {
+   "id": 27496,
+   "nameFr": "Orbe régénérant mineur (lié)",
+   "level": 60,
+   "descriptionFr": "Utilisé lors d'une session de forgemagie, cet orbe permet de réinitialiser les caractéristiques d'un objet.",
+   "rawEffects": [
+    {
+     "effectId": 981,
+     "from": 0,
+     "to": 0
+    },
+    {
+     "effectId": 1185,
+     "from": 0,
+     "to": 0
+    }
+   ]
+  }
+ ]
+}

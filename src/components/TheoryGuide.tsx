@@ -47,10 +47,16 @@ function Badge({ label, color }: { label: string; color: string }) {
 
 // ─── Tableau des caps par catégorie ──────────────────────────────────────────
 
+const STATUS_BADGE: Record<string, string> = {
+  'SOURCE PRIMAIRE': 'bg-green-900/40 text-green-300',
+  'MODÈLE EMPIRIQUE': 'bg-blue-900/40 text-blue-300',
+  'HYPOTHÈSE COMMUNAUTAIRE': 'bg-dofus-dark text-gray-400',
+  CONTRADICTION: 'bg-yellow-900/40 text-yellow-300',
+  INCONNU: 'bg-red-900/40 text-red-300',
+};
+
 function CapsTable({ category }: { category: StatCapCategory }) {
-  const entries = Object.entries(STAT_CAPS).filter(
-    ([, cap]) => cap.category === category
-  );
+  const entries = STAT_CAPS.filter((cap) => cap.category === category);
 
   if (entries.length === 0) return null;
 
@@ -61,45 +67,32 @@ function CapsTable({ category }: { category: StatCapCategory }) {
           <tr className="bg-dofus-dark text-gray-400 text-left">
             <th className="px-4 py-2 font-medium">Caractéristique</th>
             <th className="px-4 py-2 font-medium text-center">Poids / pt</th>
-            <th className="px-4 py-2 font-medium text-center">Max over/exo</th>
-            <th className="px-4 py-2 font-medium text-center">Statut</th>
+            <th className="px-4 py-2 font-medium text-center">Max over/exo (dérivé)</th>
+            <th className="px-4 py-2 font-medium text-center">Statut du poids</th>
             <th className="px-4 py-2 font-medium hidden md:table-cell">Note</th>
           </tr>
         </thead>
         <tbody>
-          {entries.map(([effectId, cap]) => {
-            const isAbsoluteCap = cap.hardCapOne || cap.absoluteMax !== undefined;
-            return (
-              <tr
-                key={effectId}
-                className="border-t border-dofus-gold/10 hover:bg-dofus-dark/50 transition-colors"
-              >
-                <td className="px-4 py-2.5 font-medium text-white">{cap.statName}</td>
-                <td className="px-4 py-2.5 text-center font-mono text-gray-300">
-                  {cap.weightPerPoint}
-                </td>
-                <td className="px-4 py-2.5 text-center font-mono font-bold">
-                  {cap.hardCapOne ? (
-                    <span className="text-red-400">+1 max absolu</span>
-                  ) : (
-                    <span className="text-over">+{cap.maxOverOrExo}</span>
-                  )}
-                </td>
-                <td className="px-4 py-2.5 text-center">
-                  {cap.hardCapOne ? (
-                    <Badge label="IMPOSSIBLE ×2" color="bg-red-900/40 text-red-300" />
-                  ) : isAbsoluteCap ? (
-                    <Badge label="Cap absolu" color="bg-yellow-900/40 text-yellow-300" />
-                  ) : (
-                    <Badge label="Règle 101" color="bg-dofus-dark text-gray-400" />
-                  )}
-                </td>
-                <td className="px-4 py-2.5 text-xs text-gray-500 hidden md:table-cell max-w-xs">
-                  {cap.absoluteMaxReason ?? cap.note ?? '—'}
-                </td>
-              </tr>
-            );
-          })}
+          {entries.map((cap) => (
+            <tr
+              key={cap.characteristicId}
+              className="border-t border-dofus-gold/10 hover:bg-dofus-dark/50 transition-colors"
+            >
+              <td className="px-4 py-2.5 font-medium text-white">{cap.statName}</td>
+              <td className="px-4 py-2.5 text-center font-mono text-gray-300">
+                {cap.weightPerPoint}
+              </td>
+              <td className="px-4 py-2.5 text-center font-mono font-bold">
+                <span className="text-over">+{cap.maxOverOrExo}</span>
+              </td>
+              <td className="px-4 py-2.5 text-center">
+                <Badge label={cap.status} color={STATUS_BADGE[cap.status] ?? 'bg-dofus-dark text-gray-400'} />
+              </td>
+              <td className="px-4 py-2.5 text-xs text-gray-500 hidden md:table-cell max-w-xs">
+                {cap.note || '—'}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
@@ -185,7 +178,7 @@ export function TheoryGuide() {
         </p>
         <div className="space-y-2">
           {CATEGORY_ORDER.map((cat) => {
-            const count = Object.values(STAT_CAPS).filter((c) => c.category === cat).length;
+            const count = STAT_CAPS.filter((c) => c.category === cat).length;
             const isOpen = openCategory === cat;
             return (
               <div key={cat} className="border border-dofus-gold/15 rounded-lg overflow-hidden">

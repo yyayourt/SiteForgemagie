@@ -5,41 +5,35 @@ import type {
   SimLogEntry,
   SimulationResult,
 } from '../types';
-import { EFFECT_MAPPING } from '../data/effectMapping';
+import { getRuneTiers } from '../data/dataset';
+import { getDensity } from '../data/params';
 import { getStatAbsoluteMax } from '../data/statCaps';
 import { computeItemPool } from './poolCalculator';
 
 /**
- * Moteur de simulation de forgemagie fidèle aux mécaniques Dofus.
+ * ⚠ MOTEUR PROVISOIRE — À JETER (docs/audit-projet-existant.md §2.4, §3.3 R4–R9).
  *
- * 3 résultats possibles :
- * - SC (Succès Critique) : la rune passe, aucune perte sur les autres stats
- * - SN (Succès Neutre)   : la rune passe, mais une autre stat perd du poids équivalent
- * - EC (Échec Critique)   : la rune ne passe pas, une stat random perd du poids
- *
- * Note : les probabilités SC/SN/EC et le recul utilisent un modèle simplifié.
- * Voir les commentaires de computeOutcomeProbabilities() et applyRecoil()
- * pour les détails et les écarts avec la théorie FM communautaire.
+ * Les probabilités SC/SN/EC, le recul en EC (50 % du poids), la loi de sélection de la
+ * ligne perdue et l'absence d'absorption par le reliquat sont des modèles INVENTÉS,
+ * sans source, et contredisent la borne primaire « SC ≥ 15 % en FM normale ».
+ * En phase 1 (dataset), ce fichier n'est modifié que pour compiler avec la nouvelle
+ * couche données (clé characteristicId, densités et paliers de runes issus des
+ * fichiers de référence). Il sera remplacé par le moteur paramétrable en phase 2.
  */
 
 /**
- * Seuil de poids à partir duquel une rune exo a un comportement spécial :
- * 1% de SC, 0% de SN, 99% de EC.
- * Concerne PA (100), PM (90), PO (51), Invocations (30).
+ * ⚠ INCONNU, codé en dur à titre provisoire (à migrer dans empirical_params.json en phase 2).
+ * Seuil de poids à partir duquel une rune exo suit 1 % SC / 0 % SN / 99 % EC.
  */
 const EXO_HEAVY_THRESHOLD = 30;
 
 /**
- * Calcule les taux de SC/SN/EC en fonction du ratio puits/poids de rune.
+ * Calcule les taux de SC/SN/EC en fonction du ratio budget/poids de rune.
  *
- * ⚠ MODÈLE SIMPLIFIÉ — Ne reflète pas les mécaniques exactes de Dofus.
- * En théorie FM communautaire, le puits n'influence PAS directement les probabilités
- * de SC/SN/EC. Les taux dépendraient plutôt de la densité de l'item et du type de rune.
- * Ankama ne publie aucune formule officielle.
- * Ce modèle utilise le ratio puits/rune comme approximation plausible pour la simulation.
- *
- * Cas spécial CONFIRMÉ : pour les runes exo lourdes (PA, PM, PO, Invocations),
- * le taux est fixe : 1% SC, 0% SN, 99% EC.
+ * ⚠ FORMULE INVENTÉE (statut INCONNU). Ne reflète pas les mécaniques de DOFUS.
+ * Seul le « 1 % SC pour un exo PA/PM/PO » est SOURCE PRIMAIRE (tutoriel Ankama) ;
+ * le partage 0 % SN / 99 % EC, le seuil de 30 et l'inclusion des Invocations ne
+ * sont pas établis.
  */
 export function computeOutcomeProbabilities(
   poolRemaining: number,
@@ -59,20 +53,13 @@ export function computeOutcomeProbabilities(
   let pEC: number;
 
   if (ratio >= 0) {
-    // Puits positif : la rune devrait passer facilement
-    // SC entre 50% (ratio=0) et 90% (ratio très élevé)
     pSC = Math.min(50 + ratio * 5, 90) / 100;
-    // EC minimal à 5%, descend quand ratio augmente
     pEC = Math.max(5 - ratio * 0.5, 1) / 100;
   } else {
-    // Puits négatif : on force contre le reliquat
-    // SC descend avec le puits négatif, minimum 5%
     pSC = Math.max(50 + ratio * 5, 5) / 100;
-    // EC augmente, max 50%
     pEC = Math.min(10 - ratio * 3, 50) / 100;
   }
 
-  // SN = le reste
   const pSN = Math.max(0, 1 - pSC - pEC);
 
   return { pSC, pSN, pEC };
@@ -91,28 +78,23 @@ export function rollOutcome(pSC: number, pSN: number): RuneOutcome {
 /**
  * Choisit une stat victime du recul.
  *
- * Priorité réaliste Dofus :
- * 1. Les stats en OVER (au-dessus du jet parfait) sont ciblées en premier
- * 2. Sinon, pondération par le poids actuel de chaque ligne
- *
- * Exclut la stat ciblée par la rune et les stats à 0.
+ * ⚠ Priorité over/exo = HYPOTHÈSE COMMUNAUTAIRE ; pondération ∝ valeur × poids =
+ * modèle C parmi A/B/C/D, INCONNU (à rendre interchangeable en phase 2).
  */
 export function pickRecoilTarget(
   stats: SimulatedStat[],
-  excludeEffectId: number
+  excludeCharacteristicId: number
 ): SimulatedStat | null {
   const candidates = stats.filter(
-    (s) => s.effectId !== excludeEffectId && s.currentValue > 0 && s.isForgemeable
+    (s) => s.characteristicId !== excludeCharacteristicId && s.currentValue > 0 && s.isForgemeable
   );
 
   if (candidates.length === 0) return null;
 
-  // Priorité : stats over (au-dessus de baseMax ou exo avec value > 0)
   const overCandidates = candidates.filter(
     (s) => s.isExo || s.currentValue > s.baseMax
   );
 
-  // Si des stats sont en over, cibler parmi elles en priorité
   const pool = overCandidates.length > 0 ? overCandidates : candidates;
 
   const totalWeight = pool.reduce(
@@ -135,128 +117,108 @@ export function pickRecoilTarget(
 
 /**
  * Applique le recul : retire du poids sur la stat victime.
- * Retourne le nombre de points effectivement perdus.
- *
- * ⚠ MODÈLE SIMPLIFIÉ :
- * - En EC, le recul appliqué = 50% du poids de la rune. Ce ratio n'est pas
- *   confirmé par la théorie FM (certains guides parlent de perte totale, d'autres partielle).
- * - Le puits n'absorbe PAS le recul ici (le recul touche toujours une stat visible).
- *   En théorie FM, certains guides suggèrent que le puits peut absorber une partie
- *   du recul (SN avec puits positif = aucune stat visible ne baisse). Ce point
- *   reste débattu dans la communauté.
+ * ⚠ Arrondi ceil() et absence d'absorption par le reliquat : INCONNU / contraire aux docs.
  */
 function applyRecoil(
   stats: SimulatedStat[],
-  victimEffectId: number,
+  victimCharacteristicId: number,
   weightToLose: number
 ): { newStats: SimulatedStat[]; pointsLost: number } {
+  const victim = stats.find((s) => s.characteristicId === victimCharacteristicId);
+  const pointsLost =
+    victim && victim.weightPerPoint > 0
+      ? Math.min(Math.ceil(weightToLose / victim.weightPerPoint), victim.currentValue)
+      : 0;
+
   return {
-    newStats: stats.map((s) => {
-      if (s.effectId !== victimEffectId) return s;
-
-      const pointsToLose =
-        s.weightPerPoint > 0
-          ? Math.ceil(weightToLose / s.weightPerPoint)
-          : 0;
-      const actualLoss = Math.min(pointsToLose, s.currentValue);
-
-      return { ...s, currentValue: s.currentValue - actualLoss };
-    }),
-    pointsLost: (() => {
-      const victim = stats.find((s) => s.effectId === victimEffectId);
-      if (!victim || victim.weightPerPoint <= 0) return 0;
-      const pointsToLose = Math.ceil(weightToLose / victim.weightPerPoint);
-      return Math.min(pointsToLose, victim.currentValue);
-    })(),
+    newStats: stats.map((s) =>
+      s.characteristicId === victimCharacteristicId
+        ? { ...s, currentValue: s.currentValue - pointsLost }
+        : s
+    ),
+    pointsLost,
   };
 }
 
 /**
- * Résout la valeur d'une rune en fonction de son tier.
+ * Valeur ajoutée par une rune d'un palier donné, d'après data/rune-tiers.json.
+ * Repli sur le palier inférieur si le palier demandé n'existe pas ; 0 si aucune rune.
  */
-export function getRuneValue(effectId: number, tier: RuneTier): number {
-  const mapping = EFFECT_MAPPING[effectId];
-  if (!mapping) return 0;
+export function getRuneValue(characteristicId: number, tier: RuneTier): number {
+  const tiers = getRuneTiers(characteristicId);
+  if (!tiers) return 0;
 
   switch (tier) {
     case 'normal':
-      return mapping.runeNormal ?? 1;
+      return tiers.normal?.value ?? 0;
     case 'pa':
-      return mapping.runePa ?? mapping.runeNormal ?? 1;
+      return tiers.pa?.value ?? tiers.normal?.value ?? 0;
     case 'ra':
-      return mapping.runeRa ?? mapping.runePa ?? mapping.runeNormal ?? 1;
+      return tiers.ra?.value ?? tiers.pa?.value ?? tiers.normal?.value ?? 0;
   }
 }
 
 /**
- * Simule l'application d'une rune sur un item.
- * C'est la fonction principale du moteur.
+ * Simule l'application d'une rune sur un item (moteur provisoire, voir en-tête).
  */
 export function simulateRune(
   stats: SimulatedStat[],
-  targetEffectId: number,
+  targetCharacteristicId: number,
   tier: RuneTier,
   logId: number
 ): SimulationResult {
-  const targetStat = stats.find((s) => s.effectId === targetEffectId);
+  const targetStat = stats.find((s) => s.characteristicId === targetCharacteristicId);
   if (!targetStat) {
-    throw new Error(`Stat ${targetEffectId} not found`);
+    throw new Error(`Stat ${targetCharacteristicId} not found`);
   }
 
-  const mapping = EFFECT_MAPPING[targetEffectId];
-  if (!mapping) {
-    throw new Error(`No mapping for effectId ${targetEffectId}`);
+  const density = getDensity(targetCharacteristicId);
+  if (density === undefined) {
+    throw new Error(`No density for characteristic ${targetCharacteristicId}`);
   }
 
-  const runeValue = getRuneValue(targetEffectId, tier);
-  const runeWeight = runeValue * mapping.weightPerPoint;
+  const runeValue = getRuneValue(targetCharacteristicId, tier);
+  const runeWeight = runeValue * density;
 
-  // Calcul du puits actuel
   const pool = computeItemPool(stats);
 
-  // Calcul des probabilités (gère le cas spécial exo lourd)
   const { pSC, pSN } = computeOutcomeProbabilities(
     pool.poolRemaining,
     runeWeight,
     targetStat.isExo
   );
 
-  // Tirage aléatoire
   const outcome = rollOutcome(pSC, pSN);
 
   let newStats = [...stats.map((s) => ({ ...s }))];
   let sideEffect: SimLogEntry['sideEffect'] = undefined;
 
+  const applyGain = (list: SimulatedStat[]) =>
+    list.map((s) => {
+      if (s.characteristicId !== targetCharacteristicId) return s;
+      const max = getStatAbsoluteMax(s);
+      return { ...s, currentValue: Math.min(s.currentValue + runeValue, max) };
+    });
+
   switch (outcome) {
     case 'SC': {
-      // La rune passe, aucun recul — clamp au max théorique (règle des 101)
-      newStats = newStats.map((s) => {
-        if (s.effectId !== targetEffectId) return s;
-        const max = getStatAbsoluteMax(s);
-        return { ...s, currentValue: Math.min(s.currentValue + runeValue, max) };
-      });
+      newStats = applyGain(newStats);
       break;
     }
 
     case 'SN': {
-      // La rune passe, mais recul sur une autre stat — clamp au max théorique
-      newStats = newStats.map((s) => {
-        if (s.effectId !== targetEffectId) return s;
-        const max = getStatAbsoluteMax(s);
-        return { ...s, currentValue: Math.min(s.currentValue + runeValue, max) };
-      });
-
-      const victim = pickRecoilTarget(newStats, targetEffectId);
+      newStats = applyGain(newStats);
+      const victim = pickRecoilTarget(newStats, targetCharacteristicId);
       if (victim) {
         const { newStats: afterRecoil, pointsLost } = applyRecoil(
           newStats,
-          victim.effectId,
+          victim.characteristicId,
           runeWeight
         );
         newStats = afterRecoil;
         sideEffect = {
           affectedStatName: victim.statName,
-          affectedEffectId: victim.effectId,
+          affectedCharacteristicId: victim.characteristicId,
           pointsLost,
         };
       }
@@ -264,19 +226,18 @@ export function simulateRune(
     }
 
     case 'EC': {
-      // La rune ne passe pas + recul réduit sur une autre stat
-      const victim = pickRecoilTarget(newStats, targetEffectId);
+      const victim = pickRecoilTarget(newStats, targetCharacteristicId);
       if (victim) {
-        const recoilWeight = runeWeight * 0.5; // EC = 50% du poids perdu
+        const recoilWeight = runeWeight * 0.5; // ⚠ INVENTÉ (audit R7)
         const { newStats: afterRecoil, pointsLost } = applyRecoil(
           newStats,
-          victim.effectId,
+          victim.characteristicId,
           recoilWeight
         );
         newStats = afterRecoil;
         sideEffect = {
           affectedStatName: victim.statName,
-          affectedEffectId: victim.effectId,
+          affectedCharacteristicId: victim.characteristicId,
           pointsLost,
         };
       }
@@ -284,13 +245,12 @@ export function simulateRune(
     }
   }
 
-  // Calcul du puits après
   const poolAfter = computeItemPool(newStats);
 
   const logEntry: SimLogEntry = {
     id: logId,
     targetStatName: targetStat.statName,
-    targetEffectId,
+    targetCharacteristicId,
     runeTier: tier,
     runeValue,
     runeWeight,

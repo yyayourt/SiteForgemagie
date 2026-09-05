@@ -3,7 +3,8 @@ import type { Item, SimulatedStat, RuneTier } from '../types';
 import { simulationReducer, initialState } from '../logic/statsReducer';
 import { computeItemPool } from '../logic/poolCalculator';
 import { simulateRune } from '../logic/runeSimulator';
-import { EFFECT_MAPPING } from '../data/effectMapping';
+import { getCharacteristicName } from '../data/dataset';
+import { getDensity } from '../data/params';
 
 /**
  * Hook principal de simulation de forgemagie.
@@ -22,26 +23,26 @@ export function useSimulation() {
   );
 
   const updateStat = useCallback(
-    (effectId: number, newValue: number) => {
-      dispatch({ type: 'UPDATE_STAT', effectId, newValue });
+    (characteristicId: number, newValue: number) => {
+      dispatch({ type: 'UPDATE_STAT', characteristicId, newValue });
     },
     []
   );
 
   const addExo = useCallback(
-    (effectId: number) => {
-      const mapping = EFFECT_MAPPING[effectId];
-      if (!mapping) return;
+    (characteristicId: number) => {
+      const density = getDensity(characteristicId);
+      if (density === undefined) return;
 
       const exoStat: SimulatedStat = {
-        effectId,
-        statName: mapping.statName,
+        characteristicId,
+        statName: getCharacteristicName(characteristicId),
         baseMin: 0,
         baseMax: 0,
         currentValue: 1,
-        weightPerPoint: mapping.weightPerPoint,
+        weightPerPoint: density,
         isExo: true,
-        isForgemeable: mapping.isForgemeable,
+        isForgemeable: true,
       };
 
       dispatch({ type: 'ADD_EXO', stat: exoStat });
@@ -50,8 +51,8 @@ export function useSimulation() {
   );
 
   const removeExo = useCallback(
-    (effectId: number) => {
-      dispatch({ type: 'REMOVE_EXO', effectId });
+    (characteristicId: number) => {
+      dispatch({ type: 'REMOVE_EXO', characteristicId });
     },
     []
   );
@@ -73,10 +74,10 @@ export function useSimulation() {
   }, []);
 
   const applyRune = useCallback(
-    (targetEffectId: number, tier: RuneTier) => {
+    (targetCharacteristicId: number, tier: RuneTier) => {
       const result = simulateRune(
         state.stats,
-        targetEffectId,
+        targetCharacteristicId,
         tier,
         state.logCounter + 1
       );

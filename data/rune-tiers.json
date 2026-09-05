@@ -1,0 +1,689 @@
+{
+ "meta": {
+  "gameVersion": "3.6.10.11",
+  "extractedAt": "2026-09-05T10:51:48.477Z",
+  "derivedFrom": "dataset.json → runes (typeId 78), palier déduit du nom"
+ },
+ "tiers": {
+  "1": {
+   "nameFr": "PA",
+   "normal": {
+    "runeId": 1557,
+    "nameFr": "Rune Ga Pa",
+    "value": 1
+   }
+  },
+  "10": {
+   "nameFr": "Force",
+   "normal": {
+    "runeId": 1519,
+    "nameFr": "Rune Fo",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 1545,
+    "nameFr": "Rune Pa Fo",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 1551,
+    "nameFr": "Rune Ra Fo",
+    "value": 10
+   }
+  },
+  "11": {
+   "nameFr": "Vitalité",
+   "normal": {
+    "runeId": 1523,
+    "nameFr": "Rune Vi",
+    "value": 5
+   },
+   "pa": {
+    "runeId": 1548,
+    "nameFr": "Rune Pa Vi",
+    "value": 15
+   },
+   "ra": {
+    "runeId": 1554,
+    "nameFr": "Rune Ra Vi",
+    "value": 50
+   }
+  },
+  "12": {
+   "nameFr": "Sagesse",
+   "normal": {
+    "runeId": 1521,
+    "nameFr": "Rune Sa",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 1546,
+    "nameFr": "Rune Pa Sa",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 1552,
+    "nameFr": "Rune Ra Sa",
+    "value": 10
+   }
+  },
+  "13": {
+   "nameFr": "Chance",
+   "normal": {
+    "runeId": 1525,
+    "nameFr": "Rune Cha",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 1550,
+    "nameFr": "Rune Pa Cha",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 1556,
+    "nameFr": "Rune Ra Cha",
+    "value": 10
+   }
+  },
+  "14": {
+   "nameFr": "Agilité",
+   "normal": {
+    "runeId": 1524,
+    "nameFr": "Rune Age",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 1549,
+    "nameFr": "Rune Pa Age",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 1555,
+    "nameFr": "Rune Ra Age",
+    "value": 10
+   }
+  },
+  "15": {
+   "nameFr": "Intelligence",
+   "normal": {
+    "runeId": 1522,
+    "nameFr": "Rune Ine",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 1547,
+    "nameFr": "Rune Pa Ine",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 1553,
+    "nameFr": "Rune Ra Ine",
+    "value": 10
+   }
+  },
+  "16": {
+   "nameFr": "Dommages",
+   "normal": {
+    "runeId": 7435,
+    "nameFr": "Rune Do",
+    "value": 1
+   }
+  },
+  "18": {
+   "nameFr": "Critique",
+   "normal": {
+    "runeId": 7433,
+    "nameFr": "Rune Cri",
+    "value": 1
+   }
+  },
+  "19": {
+   "nameFr": "Portée",
+   "normal": {
+    "runeId": 7438,
+    "nameFr": "Rune Po",
+    "value": 1
+   }
+  },
+  "23": {
+   "nameFr": "PM",
+   "normal": {
+    "runeId": 1558,
+    "nameFr": "Rune Ga Pme",
+    "value": 1
+   }
+  },
+  "25": {
+   "nameFr": "Puissance",
+   "normal": {
+    "runeId": 7436,
+    "nameFr": "Rune Pui",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 10618,
+    "nameFr": "Rune Pa Pui",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 10619,
+    "nameFr": "Rune Ra Pui",
+    "value": 10
+   }
+  },
+  "26": {
+   "nameFr": "Invocation",
+   "normal": {
+    "runeId": 7442,
+    "nameFr": "Rune Invo",
+    "value": 1
+   }
+  },
+  "27": {
+   "nameFr": "Esquive PA",
+   "normal": {
+    "runeId": 11641,
+    "nameFr": "Rune Ré Pa",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11642,
+    "nameFr": "Rune Pa Ré Pa",
+    "value": 3
+   }
+  },
+  "28": {
+   "nameFr": "Esquive PM",
+   "normal": {
+    "runeId": 11643,
+    "nameFr": "Rune Ré Pme",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11644,
+    "nameFr": "Rune Pa Ré Pme",
+    "value": 3
+   }
+  },
+  "33": {
+   "nameFr": "Terre (%)",
+   "normal": {
+    "runeId": 7459,
+    "nameFr": "Rune Ré Per Terre",
+    "value": 1
+   }
+  },
+  "34": {
+   "nameFr": "Feu (%)",
+   "normal": {
+    "runeId": 7457,
+    "nameFr": "Rune Ré Per Feu",
+    "value": 1
+   }
+  },
+  "35": {
+   "nameFr": "Eau (%)",
+   "normal": {
+    "runeId": 7560,
+    "nameFr": "Rune Ré Per Eau",
+    "value": 1
+   }
+  },
+  "36": {
+   "nameFr": "Air (%)",
+   "normal": {
+    "runeId": 7458,
+    "nameFr": "Rune Ré Per Air",
+    "value": 1
+   }
+  },
+  "37": {
+   "nameFr": "Neutre (%)",
+   "normal": {
+    "runeId": 7460,
+    "nameFr": "Rune Ré Per Neutre",
+    "value": 1
+   }
+  },
+  "40": {
+   "nameFr": "Pods",
+   "normal": {
+    "runeId": 7443,
+    "nameFr": "Rune Pod",
+    "value": 10
+   },
+   "pa": {
+    "runeId": 7444,
+    "nameFr": "Rune Pa Pod",
+    "value": 30
+   },
+   "ra": {
+    "runeId": 7445,
+    "nameFr": "Rune Ra Pod",
+    "value": 100
+   }
+  },
+  "44": {
+   "nameFr": "Initiative",
+   "normal": {
+    "runeId": 7448,
+    "nameFr": "Rune Ini",
+    "value": 10
+   },
+   "pa": {
+    "runeId": 7449,
+    "nameFr": "Rune Pa Ini",
+    "value": 30
+   },
+   "ra": {
+    "runeId": 7450,
+    "nameFr": "Rune Ra Ini",
+    "value": 100
+   }
+  },
+  "48": {
+   "nameFr": "Prospection",
+   "normal": {
+    "runeId": 7451,
+    "nameFr": "Rune Prospe",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 10662,
+    "nameFr": "Rune Pa Prospe",
+    "value": 3
+   }
+  },
+  "49": {
+   "nameFr": "Soins",
+   "normal": {
+    "runeId": 7434,
+    "nameFr": "Rune So",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 19337,
+    "nameFr": "Rune Pa So",
+    "value": 3
+   }
+  },
+  "50": {
+   "nameFr": "Renvoi",
+   "normal": {
+    "runeId": 7437,
+    "nameFr": "Rune Do Ren",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 30942,
+    "nameFr": "Rune Pa Do Ren",
+    "value": 3
+   }
+  },
+  "54": {
+   "nameFr": "Terre (fixe)",
+   "normal": {
+    "runeId": 7455,
+    "nameFr": "Rune Ré Terre",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 19342,
+    "nameFr": "Rune Pa Ré Terre",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 30695,
+    "nameFr": "Rune Ra Ré Terre",
+    "value": 10
+   }
+  },
+  "55": {
+   "nameFr": "Feu (fixe)",
+   "normal": {
+    "runeId": 7452,
+    "nameFr": "Rune Ré Feu",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 19340,
+    "nameFr": "Rune Pa Ré Feu",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 30697,
+    "nameFr": "Rune Ra Ré Feu",
+    "value": 10
+   }
+  },
+  "56": {
+   "nameFr": "Eau (fixe)",
+   "normal": {
+    "runeId": 7454,
+    "nameFr": "Rune Ré Eau",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 19339,
+    "nameFr": "Rune Pa Ré Eau",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 30698,
+    "nameFr": "Rune Ra Ré Eau",
+    "value": 10
+   }
+  },
+  "57": {
+   "nameFr": "Air (fixe)",
+   "normal": {
+    "runeId": 7453,
+    "nameFr": "Rune Ré Air",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 19338,
+    "nameFr": "Rune Pa Ré Air",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 30700,
+    "nameFr": "Rune Ra Ré Air",
+    "value": 10
+   }
+  },
+  "58": {
+   "nameFr": "Neutre (fixe)",
+   "normal": {
+    "runeId": 7456,
+    "nameFr": "Rune Ré Neutre",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 19341,
+    "nameFr": "Rune Pa Ré Neutre",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 30696,
+    "nameFr": "Rune Ra Ré Neutre",
+    "value": 10
+   }
+  },
+  "69": {
+   "nameFr": "Puissance Pièges",
+   "normal": {
+    "runeId": 7447,
+    "nameFr": "Rune Per Pi",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 10615,
+    "nameFr": "Rune Pa Per Pi",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 10616,
+    "nameFr": "Rune Ra Per Pi",
+    "value": 10
+   }
+  },
+  "70": {
+   "nameFr": "Dommages Pièges",
+   "normal": {
+    "runeId": 7446,
+    "nameFr": "Rune Do Pi",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 10613,
+    "nameFr": "Rune Pa Do Pi",
+    "value": 3
+   }
+  },
+  "78": {
+   "nameFr": "Fuite",
+   "normal": {
+    "runeId": 11637,
+    "nameFr": "Rune Fui",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11638,
+    "nameFr": "Rune Pa Fui",
+    "value": 3
+   }
+  },
+  "79": {
+   "nameFr": "Tacle",
+   "normal": {
+    "runeId": 11639,
+    "nameFr": "Rune Tac",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11640,
+    "nameFr": "Rune Pa Tac",
+    "value": 3
+   }
+  },
+  "82": {
+   "nameFr": "Retrait PA",
+   "normal": {
+    "runeId": 11645,
+    "nameFr": "Rune Ret Pa",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11646,
+    "nameFr": "Rune Pa Ret Pa",
+    "value": 3
+   }
+  },
+  "83": {
+   "nameFr": "Retrait PM",
+   "normal": {
+    "runeId": 11647,
+    "nameFr": "Rune Ret Pme",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11648,
+    "nameFr": "Rune Pa Ret Pme",
+    "value": 3
+   }
+  },
+  "84": {
+   "nameFr": "Poussée",
+   "normal": {
+    "runeId": 11649,
+    "nameFr": "Rune Do Pou",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11650,
+    "nameFr": "Rune Pa Do Pou",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 29684,
+    "nameFr": "Rune Ra Do Pou",
+    "value": 10
+   }
+  },
+  "85": {
+   "nameFr": "Poussée (fixe)",
+   "normal": {
+    "runeId": 11651,
+    "nameFr": "Rune Ré Pou",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11652,
+    "nameFr": "Rune Pa Ré Pou",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 29683,
+    "nameFr": "Rune Ra Ré Pou",
+    "value": 10
+   }
+  },
+  "86": {
+   "nameFr": "Critiques",
+   "normal": {
+    "runeId": 11653,
+    "nameFr": "Rune Do Cri",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11654,
+    "nameFr": "Rune Pa Do Cri",
+    "value": 3
+   }
+  },
+  "87": {
+   "nameFr": "Critiques (fixe)",
+   "normal": {
+    "runeId": 11655,
+    "nameFr": "Rune Ré Cri",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11656,
+    "nameFr": "Rune Pa Ré Cri",
+    "value": 3
+   },
+   "ra": {
+    "runeId": 30699,
+    "nameFr": "Rune Ra Ré Cri",
+    "value": 10
+   }
+  },
+  "88": {
+   "nameFr": "Terre",
+   "normal": {
+    "runeId": 11657,
+    "nameFr": "Rune Do Terre",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11658,
+    "nameFr": "Rune Pa Do Terre",
+    "value": 3
+   }
+  },
+  "89": {
+   "nameFr": "Feu",
+   "normal": {
+    "runeId": 11659,
+    "nameFr": "Rune Do Feu",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11660,
+    "nameFr": "Rune Pa Do Feu",
+    "value": 3
+   }
+  },
+  "90": {
+   "nameFr": "Eau",
+   "normal": {
+    "runeId": 11661,
+    "nameFr": "Rune Do Eau",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11662,
+    "nameFr": "Rune Pa Do Eau",
+    "value": 3
+   }
+  },
+  "91": {
+   "nameFr": "Air",
+   "normal": {
+    "runeId": 11663,
+    "nameFr": "Rune Do Air",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11664,
+    "nameFr": "Rune Pa Do Air",
+    "value": 3
+   }
+  },
+  "92": {
+   "nameFr": "Neutre",
+   "normal": {
+    "runeId": 11665,
+    "nameFr": "Rune Do Neutre",
+    "value": 1
+   },
+   "pa": {
+    "runeId": 11666,
+    "nameFr": "Rune Pa Do Neutre",
+    "value": 3
+   }
+  },
+  "120": {
+   "nameFr": "Distance (%)",
+   "normal": {
+    "runeId": 18720,
+    "nameFr": "Rune Do Per Di",
+    "value": 1
+   }
+  },
+  "121": {
+   "nameFr": "Distance (%)",
+   "normal": {
+    "runeId": 18724,
+    "nameFr": "Rune Ré Per Di",
+    "value": 1
+   }
+  },
+  "122": {
+   "nameFr": "Armes (%)",
+   "normal": {
+    "runeId": 18721,
+    "nameFr": "Rune Do Per Ar",
+    "value": 1
+   }
+  },
+  "123": {
+   "nameFr": "Sorts (%)",
+   "normal": {
+    "runeId": 18722,
+    "nameFr": "Rune Do Per So",
+    "value": 1
+   }
+  },
+  "124": {
+   "nameFr": "Mêlée (%)",
+   "normal": {
+    "runeId": 18723,
+    "nameFr": "Rune Ré Per Mé",
+    "value": 1
+   }
+  },
+  "125": {
+   "nameFr": "Mêlée (%)",
+   "normal": {
+    "runeId": 18719,
+    "nameFr": "Rune Do Per Mé",
+    "value": 1
+   }
+  }
+ },
+ "unclassified": [
+  {
+   "runeId": 7508,
+   "nameFr": "Rune de Signature",
+   "reason": "aucun effet lié à une caractéristique"
+  },
+  {
+   "runeId": 10057,
+   "nameFr": "Rune de chasse",
+   "reason": "aucun effet lié à une caractéristique"
+  }
+ ]
+}

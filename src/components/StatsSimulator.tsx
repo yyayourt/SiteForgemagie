@@ -6,10 +6,10 @@ interface Props {
   stats: SimulatedStat[];
   poolRemaining: number;
   mode: AppMode;
-  onUpdate: (effectId: number, newValue: number) => void;
-  onApplyRune: (effectId: number, tier: RuneTier) => void;
-  onAddExo: (effectId: number) => void;
-  onRemoveExo: (effectId: number) => void;
+  onUpdate: (characteristicId: number, newValue: number) => void;
+  onApplyRune: (characteristicId: number, tier: RuneTier) => void;
+  onAddExo: (characteristicId: number) => void;
+  onRemoveExo: (characteristicId: number) => void;
 }
 
 export function StatsSimulator({
@@ -39,7 +39,7 @@ export function StatsSimulator({
       <div className="space-y-2">
         {normalStats.map((stat) => (
           <StatRow
-            key={stat.effectId}
+            key={stat.characteristicId}
             stat={stat}
             poolRemaining={poolRemaining}
             mode={mode}
@@ -57,7 +57,7 @@ export function StatsSimulator({
           </h3>
           {exoStats.map((stat) => (
             <StatRow
-              key={stat.effectId}
+              key={stat.characteristicId}
               stat={stat}
               poolRemaining={poolRemaining}
               mode={mode}

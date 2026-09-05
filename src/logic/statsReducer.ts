@@ -32,7 +32,7 @@ export function simulationReducer(
 
     case 'UPDATE_STAT': {
       const newStats = state.stats.map((s) => {
-        if (s.effectId !== action.effectId) return s;
+        if (s.characteristicId !== action.characteristicId) return s;
         const max = getStatAbsoluteMax(s);
         return { ...s, currentValue: Math.max(0, Math.min(max, action.newValue)) };
       });
@@ -40,7 +40,7 @@ export function simulationReducer(
     }
 
     case 'ADD_EXO': {
-      if (state.stats.some((s) => s.effectId === action.stat.effectId)) {
+      if (state.stats.some((s) => s.characteristicId === action.stat.characteristicId)) {
         return state;
       }
       const newStats = [...state.stats, action.stat];
@@ -49,7 +49,7 @@ export function simulationReducer(
 
     case 'REMOVE_EXO': {
       const newStats = state.stats.filter(
-        (s) => !(s.effectId === action.effectId && s.isExo)
+        (s) => !(s.characteristicId === action.characteristicId && s.isExo)
       );
       return pushHistory(state, newStats);
     }

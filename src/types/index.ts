@@ -1,47 +1,19 @@
-/** Raw effect from DofusDB API */
-export interface DofusDBEffect {
-  effectId: number;
-  from: number;
-  to: number;
-  characteristic: number;
-}
-
-/** Raw item from DofusDB API */
-export interface DofusDBItem {
-  id: number;
-  name: { fr: string; en?: string };
-  level: number;
-  typeId: number;
-  imgUrl?: string;
-  img?: string;
-  effects: DofusDBEffect[];
-}
-
-/** DofusDB API paginated response */
-export interface DofusDBResponse {
-  data: DofusDBItem[];
-  total: number;
-  limit: number;
-  skip: number;
-}
-
-/** Mapped stat info for a rune/effect type */
-export interface RuneInfo {
-  statName: string;
-  weightPerPoint: number;
-  isForgemeable: boolean;
-  runeNormal?: number;   // value added by a normal rune
-  runePa?: number;       // value added by Pa rune
-  runeRa?: number;       // value added by Ra rune
-}
+/**
+ * Types du simulateur.
+ *
+ * Clé d'identification d'une ligne de stat : `characteristicId` (champ `characteristic`
+ * de DofusDB), jamais `effectId` (un même characteristicId a un effectId bonus et un
+ * effectId malus distincts).
+ */
 
 /** A single stat line in the simulation */
 export interface SimulatedStat {
-  effectId: number;
+  characteristicId: number;
   statName: string;
   baseMin: number;
   baseMax: number;
   currentValue: number;
+  /** Densité (poids par point) figée au chargement depuis empirical_params.json */
   weightPerPoint: number;
   isExo: boolean;
   isForgemeable: boolean;
@@ -95,7 +67,7 @@ export interface SimLogEntry {
   id: number;
   /** Stat ciblée */
   targetStatName: string;
-  targetEffectId: number;
+  targetCharacteristicId: number;
   /** Rune utilisée */
   runeTier: RuneTier;
   runeValue: number;
@@ -105,7 +77,7 @@ export interface SimLogEntry {
   /** Détails du recul (si SN ou EC) */
   sideEffect?: {
     affectedStatName: string;
-    affectedEffectId: number;
+    affectedCharacteristicId: number;
     pointsLost: number;
   };
   /** Puits restant après cette action */
@@ -139,9 +111,9 @@ export interface SimulationState {
 /** Actions for the simulation reducer */
 export type SimulationAction =
   | { type: 'SET_ITEM'; item: Item; stats: SimulatedStat[] }
-  | { type: 'UPDATE_STAT'; effectId: number; newValue: number }
+  | { type: 'UPDATE_STAT'; characteristicId: number; newValue: number }
   | { type: 'ADD_EXO'; stat: SimulatedStat }
-  | { type: 'REMOVE_EXO'; effectId: number }
+  | { type: 'REMOVE_EXO'; characteristicId: number }
   | { type: 'RESET_TO_PERFECT' }
   | { type: 'UNDO' }
   | { type: 'REDO' }

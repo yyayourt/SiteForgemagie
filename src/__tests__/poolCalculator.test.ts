@@ -2,9 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { computeItemPool, getStatStatus, computeMaxReachable } from '../logic/poolCalculator';
 import type { SimulatedStat } from '../types';
 
+// Identifiants de caractéristiques DofusDB (data/dataset.json → characteristics)
+const CHAR_PA = 1;
+const CHAR_FORCE = 10;
+const CHAR_VITALITE = 11;
+
 function makeStat(overrides: Partial<SimulatedStat> = {}): SimulatedStat {
   return {
-    effectId: 118,
+    characteristicId: CHAR_FORCE,
     statName: 'Force',
     baseMin: 30,
     baseMax: 50,
@@ -19,8 +24,8 @@ function makeStat(overrides: Partial<SimulatedStat> = {}): SimulatedStat {
 describe('computeItemPool', () => {
   it('returns zero pool when all stats are at perfect', () => {
     const stats = [
-      makeStat({ effectId: 118, baseMax: 50, currentValue: 50, weightPerPoint: 1 }),
-      makeStat({ effectId: 125, baseMax: 300, currentValue: 300, weightPerPoint: 0.2 }),
+      makeStat({ characteristicId: CHAR_FORCE, baseMax: 50, currentValue: 50, weightPerPoint: 1 }),
+      makeStat({ characteristicId: CHAR_VITALITE, baseMax: 300, currentValue: 300, weightPerPoint: 0.2 }),
     ];
     const result = computeItemPool(stats);
     expect(result.poolGained).toBe(0);
@@ -31,7 +36,7 @@ describe('computeItemPool', () => {
 
   it('calculates pool gained when a line is sacrificed', () => {
     const stats = [
-      makeStat({ effectId: 125, baseMax: 500, currentValue: 0, weightPerPoint: 0.2 }),
+      makeStat({ characteristicId: CHAR_VITALITE, baseMax: 500, currentValue: 0, weightPerPoint: 0.2 }),
     ];
     const result = computeItemPool(stats);
     expect(result.poolGained).toBe(500 * 0.2); // 100
@@ -41,7 +46,7 @@ describe('computeItemPool', () => {
 
   it('calculates pool spent on over', () => {
     const stats = [
-      makeStat({ effectId: 118, baseMax: 50, currentValue: 60, weightPerPoint: 1 }),
+      makeStat({ characteristicId: CHAR_FORCE, baseMax: 50, currentValue: 60, weightPerPoint: 1 }),
     ];
     const result = computeItemPool(stats);
     expect(result.poolGained).toBe(0);
@@ -51,8 +56,8 @@ describe('computeItemPool', () => {
 
   it('balances sacrificed lines vs overs', () => {
     const stats = [
-      makeStat({ effectId: 125, baseMax: 500, currentValue: 0, weightPerPoint: 0.2 }), // +100 pool
-      makeStat({ effectId: 118, baseMax: 50, currentValue: 80, weightPerPoint: 1 }), // -30 pool
+      makeStat({ characteristicId: CHAR_VITALITE, baseMax: 500, currentValue: 0, weightPerPoint: 0.2 }), // +100 pool
+      makeStat({ characteristicId: CHAR_FORCE, baseMax: 50, currentValue: 80, weightPerPoint: 1 }), // -30 pool
     ];
     const result = computeItemPool(stats);
     expect(result.poolGained).toBe(100);
@@ -62,8 +67,8 @@ describe('computeItemPool', () => {
 
   it('handles exo stats correctly', () => {
     const stats = [
-      makeStat({ effectId: 125, baseMax: 500, currentValue: 0, weightPerPoint: 0.2 }), // +100 pool
-      makeStat({ effectId: 111, currentValue: 1, weightPerPoint: 100, isExo: true }), // -100 pool
+      makeStat({ characteristicId: CHAR_VITALITE, baseMax: 500, currentValue: 0, weightPerPoint: 0.2 }), // +100 pool
+      makeStat({ characteristicId: CHAR_PA, currentValue: 1, weightPerPoint: 100, isExo: true }), // -100 pool
     ];
     const result = computeItemPool(stats);
     expect(result.poolGained).toBe(100);
@@ -73,7 +78,7 @@ describe('computeItemPool', () => {
 
   it('ignores non-forgeable stats', () => {
     const stats = [
-      makeStat({ effectId: 999, isForgemeable: false, currentValue: 100 }),
+      makeStat({ characteristicId: 999, isForgemeable: false, currentValue: 100 }),
     ];
     const result = computeItemPool(stats);
     expect(result.baseWeight).toBe(0);
@@ -99,46 +104,41 @@ describe('getStatStatus', () => {
   });
 });
 
-describe('computeMaxReachable', () => {
-  it('calculates max reachable from pool (Force effectId=118)', () => {
-    // Force: baseMax=50, cap=101 over → absoluteMax=151. Pool=20 limits to 70.
-    const stat = makeStat({ effectId: 118, currentValue: 50, baseMax: 50, weightPerPoint: 1 });
-    const result = computeMaxReachable(stat, 20);
-    expect(result).toBe(70); // puits limits: 50 + 20/1 = 70 < 151 cap
+describe('computeMaxReachable (plafonds dérivés de empirical_params.json, lecture par ligne)', () => {
+  it('calculates max reachable from pool (Force)', () => {
+    // Force : densité 1, cap 101 → absoluteMax = 151. Budget 20 limite à 70.
+    const stat = makeStat({ characteristicId: CHAR_FORCE, currentValue: 50, baseMax: 50, weightPerPoint: 1 });
+    expect(computeMaxReachable(stat, 20)).toBe(70);
   });
 
-  it('handles fractional weights (Vitalité effectId=125)', () => {
-    // Vitalité: baseMax=300, cap=505 over → absoluteMax=805. Pool=10 limits to 350.
-    const stat = makeStat({ effectId: 125, currentValue: 300, baseMax: 300, weightPerPoint: 0.2 });
-    const result = computeMaxReachable(stat, 10);
-    expect(result).toBe(350); // puits limits: 300 + floor(10/0.2) = 350 < 805 cap
+  it('handles fractional weights (Vitalité)', () => {
+    // Vitalité : densité 0,2, cap 505 → absoluteMax = 805. Budget 10 limite à 350.
+    const stat = makeStat({ characteristicId: CHAR_VITALITE, currentValue: 300, baseMax: 300, weightPerPoint: 0.2 });
+    expect(computeMaxReachable(stat, 10)).toBe(350);
   });
 
   it('returns current value when weight is 0', () => {
     const stat = makeStat({ currentValue: 50, weightPerPoint: 0 });
-    const result = computeMaxReachable(stat, 100);
-    expect(result).toBe(50);
+    expect(computeMaxReachable(stat, 100)).toBe(50);
   });
 
   it('limits max by per-line cap when cap is tighter than pool (Force cap=151)', () => {
-    // Force (effectId=118): baseMax=50, maxOver=101 → absoluteMax=151.
-    // Pool allows +200, but per-line cap limits to 151.
-    const stat = makeStat({ effectId: 118, currentValue: 50, baseMax: 50, weightPerPoint: 1 });
-    const result = computeMaxReachable(stat, 200);
-    expect(result).toBe(151); // per-line cap limits: 50 + 101 = 151
+    const stat = makeStat({ characteristicId: CHAR_FORCE, currentValue: 50, baseMax: 50, weightPerPoint: 1 });
+    expect(computeMaxReachable(stat, 200)).toBe(151); // 50 + floor(101 / 1)
   });
 
-  it('limits exo PA to absoluteMax of 1', () => {
-    // PA exo (effectId=111): absoluteMax=1, weightPerPoint=100
-    const stat = makeStat({ effectId: 111, currentValue: 1, baseMax: 0, weightPerPoint: 100, isExo: true });
-    const result = computeMaxReachable(stat, 200);
-    expect(result).toBe(1); // absoluteMax=1 caps at 1
+  it('limits exo PA to floor(101 / 100) = 1', () => {
+    const stat = makeStat({ characteristicId: CHAR_PA, currentValue: 1, baseMax: 0, weightPerPoint: 100, isExo: true });
+    expect(computeMaxReachable(stat, 200)).toBe(1);
   });
 
-  it('limits exo Vitalité to maxOverOrExo=505', () => {
-    // Exo vitalité (effectId=125): no absoluteMax, maxOverOrExo=505
-    const stat = makeStat({ effectId: 125, currentValue: 100, baseMax: 0, weightPerPoint: 0.2, isExo: true });
-    const result = computeMaxReachable(stat, 10000);
-    expect(result).toBe(505); // per-line cap for exo = maxOverOrExo = 505
+  it('limits exo Vitalité to floor(101 / 0.2) = 505', () => {
+    const stat = makeStat({ characteristicId: CHAR_VITALITE, currentValue: 100, baseMax: 0, weightPerPoint: 0.2, isExo: true });
+    expect(computeMaxReachable(stat, 10000)).toBe(505);
+  });
+
+  it('returns Infinity-bounded max for a characteristic without documented density', () => {
+    const stat = makeStat({ characteristicId: 9999, currentValue: 10, baseMax: 10, weightPerPoint: 1 });
+    expect(computeMaxReachable(stat, 5)).toBe(15); // seul le budget limite
   });
 });
