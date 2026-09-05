@@ -10,19 +10,20 @@
  *   forgemagies » (data/dataset.json, typeId 211).
  *   (Le devblog 2.72 concerne le migrateur d'objets, pas la transcendance.)
  *
- * HYPOTHÈSES COMMUNAUTAIRES (empirical_params.json → transcendence) :
- *   - refuseIfOverOrExo : refus si l'objet possède déjà un over ou un exo (wiki, guides) ;
- *   - successRateByRank : 100 % par rang selon le wiki ; l'effet 2827 « % de chances de
- *     réussite » existe sur chaque rune mais sa valeur n'est pas dans l'API (à extraire du
- *     client). Tant que le taux vaut 100, la rune est appliquée comme un SC garanti.
- *
- * La borne d'over/exo (overCapWeight / overCapScope) s'applique aussi.
- * Les valeurs des runes (Ta / Pata / Rata) viennent du dataset.
+ * NON CERTAIN (empirical_params.json → transcendence), dans l'ordre de vérification :
+ *   1. verrou objet (SOURCE PRIMAIRE ci-dessus) ;
+ *   2. refuseIfExo  — HYPOTHÈSE COMMUNAUTAIRE (JeuxOnLine, relais de l'annonce 2.49) ;
+ *   3. refuseIfOver — HYPOTHÈSE COMMUNAUTAIRE (Millenium, guides) ;
+ *   4. maxCurrentValueByRank — INCONNU (seuils communautaires, à extraire des effets
+ *      2825-2827 du client) ; vide = aucun seuil appliqué ;
+ *   5. successRateByRank — HYPOTHÈSE COMMUNAUTAIRE (100 % selon le wiki) ; un taux < 100
+ *      relève du modèle probabiliste et est refusé explicitement ici ;
+ *   6. application, puis borne d'over/exo (overCapWeight / overCapScope).
  */
 
 import type { EngineParams, TranscendenceRank } from '../../data/params';
 import type { ApplyRuneResult, ForgemagieItemState, Rune } from '../../types/forgemagie';
-import { checkOverCap, hasAnyOverOrExo } from './overCap';
+import { checkOverCap } from './overCap';
 import { getLineDensity, runeWeight } from './weights';
 
 export interface TranscendenceRune extends Rune {
@@ -59,27 +60,39 @@ export function applyTranscendenceRune(
     return refused(state, 'no_density', 0);
   }
   const weight = runeWeight(rune, params);
+  const t = params.transcendence;
 
-  // SOURCE PRIMAIRE (devblog 2.58) : un objet transcendé n'est plus forgemageable,
-  // ce qui inclut une seconde rune de transcendance.
+  // 1. SOURCE PRIMAIRE (devblog 2.58) : un objet transcendé n'est plus forgemageable,
+  //    ce qui inclut une seconde rune de transcendance.
   if (state.itemLocked) return refused(state, 'item_locked', weight);
 
-  // HYPOTHÈSE COMMUNAUTAIRE : interdite si over ou exo déjà présent
-  if (params.transcendence.refuseIfOverOrExo && hasAnyOverOrExo(state.lines)) {
-    return refused(state, 'transcendence_requires_clean_item', weight);
+  // 2. HYPOTHÈSE COMMUNAUTAIRE : refus si un exo est présent
+  if (t.refuseIfExo && state.lines.some((l) => l.isExo && l.value > 0)) {
+    return refused(state, 'transcendence_has_exo', weight);
   }
 
-  const successRate = params.transcendence.successRateByRank[rune.rank];
-  if (successRate !== 100) {
-    // Un taux < 100 relève du modèle probabiliste (phase 3) : refus explicite plutôt
-    // qu'un tirage inventé ici.
+  // 3. HYPOTHÈSE COMMUNAUTAIRE : refus si un over est présent
+  if (t.refuseIfOver && state.lines.some((l) => !l.isExo && l.value > l.baseMax)) {
+    return refused(state, 'transcendence_has_over', weight);
+  }
+
+  // 4. INCONNU : seuil de valeur courante par rang (aucun seuil si non renseigné)
+  const existing = state.lines.find((l) => l.characteristicId === rune.characteristicId);
+  const threshold = t.maxCurrentValueByRank[String(rune.characteristicId)]?.[rune.rank];
+  if (threshold !== undefined && (existing?.value ?? 0) > threshold) {
+    return refused(state, 'transcendence_threshold_exceeded', weight);
+  }
+
+  // 5. HYPOTHÈSE COMMUNAUTAIRE : taux de réussite par rang
+  if (t.successRateByRank[rune.rank] !== 100) {
     return refused(state, 'transcendence_rate_not_certain', weight);
   }
 
+  // 6. Application
   const lines = state.lines.map((l) => ({ ...l }));
-  const existing = lines.find((l) => l.characteristicId === rune.characteristicId);
-  if (existing) {
-    existing.value += rune.value;
+  const target = lines.find((l) => l.characteristicId === rune.characteristicId);
+  if (target) {
+    target.value += rune.value;
   } else {
     lines.push({
       characteristicId: rune.characteristicId,

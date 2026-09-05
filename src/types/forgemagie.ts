@@ -64,7 +64,9 @@ export type RefusalReason =
   | 'line_locked'
   | 'no_density'
   | 'over_cap_exceeded'
-  | 'transcendence_requires_clean_item'
+  | 'transcendence_has_exo'
+  | 'transcendence_has_over'
+  | 'transcendence_threshold_exceeded'
   | 'transcendence_rate_not_certain';
 
 /** Résultat de applyRune / applyTranscendenceRune. */

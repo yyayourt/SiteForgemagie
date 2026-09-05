@@ -30,6 +30,8 @@ function App() {
     redo,
     toggleMode,
     applyRune,
+    drawAndApplyRune,
+    estimateRune,
     clearLog,
   } = useSimulation();
 
@@ -116,6 +118,8 @@ function App() {
                     mode={mode}
                     onUpdate={updateStat}
                     onApplyRune={applyRune}
+                    onDrawRune={drawAndApplyRune}
+                    estimateRune={estimateRune}
                     onAddExo={addExo}
                     onRemoveExo={removeExo}
                   />

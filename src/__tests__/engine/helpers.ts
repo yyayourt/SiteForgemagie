@@ -62,6 +62,8 @@ export function testParams(overrides: DeepPartial<EngineParams> = {}): EnginePar
     transcendence: {
       ...base.transcendence,
       ...overrides.transcendence,
+      maxCurrentValueByRank: (overrides.transcendence?.maxCurrentValueByRank ??
+        base.transcendence.maxCurrentValueByRank) as EngineParams['transcendence']['maxCurrentValueByRank'],
       successRateByRank: {
         ...base.transcendence.successRateByRank,
         ...(overrides.transcendence?.successRateByRank ?? {}),

@@ -2,6 +2,7 @@ import { getStatStatus, computeMaxReachable } from '../logic/planning/weightBudg
 import { getAvailableRuneTiers } from '../data/dataset';
 import { getStatAbsoluteMax } from '../data/statCaps';
 import type { SimulatedStat, AppMode, RuneTier, RuneOutcome } from '../types';
+import type { RuneEstimate } from '../hooks/useSimulation';
 
 interface Props {
   stat: SimulatedStat;
@@ -9,6 +10,10 @@ interface Props {
   mode: AppMode;
   onUpdate: (characteristicId: number, newValue: number) => void;
   onApplyRune?: (characteristicId: number, tier: RuneTier, outcome: RuneOutcome) => void;
+  /** Tirage de l'issue par le MODÈLE probabiliste (paramétré, INCONNU), puis application. */
+  onDrawRune?: (characteristicId: number, tier: RuneTier) => void;
+  /** Estimation du modèle pour affichage ; null si indisponible. */
+  estimateRune?: (characteristicId: number, tier: RuneTier) => RuneEstimate | null;
   onRemoveExo?: (characteristicId: number) => void;
 }
 
@@ -22,18 +27,19 @@ const STATUS_STYLES = {
 
 const TIER_LABELS: Record<RuneTier, string> = { normal: '', pa: 'Pa', ra: 'Ra' };
 
-/** Issues fournies manuellement : aucun modèle probabiliste avant la phase 3. */
+/** Issues fournies manuellement (moteur déterministe). */
 const OUTCOMES: { outcome: RuneOutcome; cls: string; title: string }[] = [
   { outcome: 'SC', cls: 'text-green-400 hover:bg-green-900/40', title: 'Succès critique : la rune passe sans perte' },
   { outcome: 'SN', cls: 'text-yellow-400 hover:bg-yellow-900/40', title: 'Succès neutre : la rune passe, perte = poids de la rune (reliquat consommé en priorité)' },
   { outcome: 'EC', cls: 'text-red-400 hover:bg-red-900/40', title: 'Échec critique : la rune ne passe pas, perte (paramètre ecLossFactor)' },
 ];
 
-export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, onRemoveExo }: Props) {
+const pct = (x: number) => `${Math.round(x * 100)} %`;
+
+export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, onDrawRune, estimateRune, onRemoveExo }: Props) {
   const status = getStatStatus(stat);
   const style = STATUS_STYLES[status];
 
-  // Budget effectif depuis la perspective de cette stat
   const effectiveBudgetForStat =
     stat.currentValue > stat.baseMax
       ? remainingBudget + (stat.currentValue - stat.baseMax) * stat.weightPerPoint
@@ -50,7 +56,6 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
   const currentOver = stat.isExo ? stat.currentValue : Math.max(0, stat.currentValue - stat.baseMax);
   const maxOver = absoluteMax === Infinity ? null : stat.isExo ? absoluteMax : absoluteMax - stat.baseMax;
 
-  // Paliers de runes réellement existants (data/rune-tiers.json)
   const availableTiers = getAvailableRuneTiers(stat.characteristicId).map(({ tier, info }) => ({
     tier,
     label: TIER_LABELS[tier],
@@ -59,7 +64,6 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
 
   return (
     <div className={`${style.bg} border border-dofus-gold/10 rounded-lg px-4 py-3 flex flex-wrap items-center gap-3 transition-colors`}>
-      {/* Stat name + badge */}
       <div className="flex items-center gap-2 min-w-[180px]">
         <span className={`font-medium ${style.text}`}>{stat.statName}</span>
         {style.label && (
@@ -78,7 +82,6 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
         )}
       </div>
 
-      {/* Base range */}
       <div className="text-xs text-gray-500 min-w-[80px]">
         {stat.isExo
           ? 'Exotique'
@@ -87,7 +90,6 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
             : <>Base : {stat.baseMin}–{stat.baseMax}</>}
       </div>
 
-      {/* ── Mode Planning : stepper + quick rune buttons ── */}
       {mode === 'planning' && !stat.isLocked && (
         <>
           <div className="flex items-center gap-1">
@@ -103,9 +105,7 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
               max={maxReachable}
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10);
-                if (!isNaN(val)) {
-                  onUpdate(stat.characteristicId, Math.max(0, Math.min(val, maxReachable)));
-                }
+                if (!isNaN(val)) onUpdate(stat.characteristicId, Math.max(0, Math.min(val, maxReachable)));
               }}
               className={`w-16 text-center bg-dofus-dark border border-dofus-gold/20 rounded px-1 py-1 text-sm font-mono ${style.text} focus:outline-none focus:border-dofus-gold`}
             />
@@ -136,30 +136,51 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
         </>
       )}
 
-      {/* ── Mode Simulation : issue choisie manuellement, moteur déterministe ── */}
       {mode === 'simulation' && onApplyRune && !stat.isLocked && (
         <>
           <div className={`w-16 text-center font-mono text-sm ${style.text} bg-dofus-dark border border-dofus-gold/10 rounded px-1 py-1`}>
             {stat.currentValue}
           </div>
           <div className="flex flex-wrap gap-2">
-            {availableTiers.map(({ tier, label, value }) => (
-              <div key={tier} className="flex items-center rounded border border-dofus-gold/20 bg-dofus-panel-light overflow-hidden">
-                <span className="text-xs px-2 text-dofus-gold-light" title={`Rune +${value}${label ? ' ' + label : ''} — poids ${(value * stat.weightPerPoint).toFixed(1)}`}>
-                  +{value}{label && <span className="ml-0.5 opacity-60">{label}</span>}
-                </span>
-                {OUTCOMES.map(({ outcome, cls, title }) => (
-                  <button
-                    key={outcome}
-                    onClick={() => onApplyRune(stat.characteristicId, tier, outcome)}
-                    className={`text-xs font-mono font-bold px-2 py-1.5 border-l border-dofus-gold/20 transition-colors ${cls}`}
-                    title={title}
-                  >
-                    {outcome}
-                  </button>
-                ))}
-              </div>
-            ))}
+            {availableTiers.map(({ tier, label, value }) => {
+              const estimate = estimateRune?.(stat.characteristicId, tier) ?? null;
+              return (
+                <div key={tier} className="flex flex-col rounded border border-dofus-gold/20 bg-dofus-panel-light overflow-hidden">
+                  <div className="flex items-center">
+                    <span className="text-xs px-2 text-dofus-gold-light" title={`Rune +${value}${label ? ' ' + label : ''} — poids ${(value * stat.weightPerPoint).toFixed(1)}`}>
+                      +{value}{label && <span className="ml-0.5 opacity-60">{label}</span>}
+                    </span>
+                    {OUTCOMES.map(({ outcome, cls, title }) => (
+                      <button
+                        key={outcome}
+                        onClick={() => onApplyRune(stat.characteristicId, tier, outcome)}
+                        className={`text-xs font-mono font-bold px-2 py-1.5 border-l border-dofus-gold/20 transition-colors ${cls}`}
+                        title={`${title} (issue choisie manuellement)`}
+                      >
+                        {outcome}
+                      </button>
+                    ))}
+                    {onDrawRune && estimate && (
+                      <button
+                        onClick={() => onDrawRune(stat.characteristicId, tier)}
+                        className="text-xs px-2 py-1.5 border-l border-dofus-gold/20 text-exo hover:bg-exo/20 transition-colors"
+                        title={`Tirer l'issue avec le MODÈLE « ${estimate.model} » (statut INCONNU : la formule serveur est secrète, ceci n'en est pas une reproduction)`}
+                      >
+                        🎲
+                      </button>
+                    )}
+                  </div>
+                  {estimate && (
+                    <div
+                      className="text-[10px] font-mono px-2 py-0.5 text-gray-500 border-t border-dofus-gold/10"
+                      title={`Estimation du modèle « ${estimate.model} » (empirical_params.json → probability), statut INCONNU. Seules les bornes 15 % / 1 % sont officielles.${estimate.isHeavyExo ? ' Exo lourd : plancher 1 %.' : ''}`}
+                    >
+                      modèle · SC {pct(estimate.pSC)} · SN {pct(estimate.pSN)} · EC {pct(estimate.pEC)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </>
       )}
@@ -168,7 +189,6 @@ export function StatRow({ stat, remainingBudget, mode, onUpdate, onApplyRune, on
         <span className="text-xs text-gray-500">Verrouillée : plus aucune rune possible</span>
       )}
 
-      {/* Weight + max info */}
       <div className="ml-auto flex items-center gap-3 text-xs text-gray-500">
         <span title="Poids de cette ligne">{lineWeight.toFixed(1)}p</span>
         {stat.isForgemeable && maxOver !== null && (

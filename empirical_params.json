@@ -9,7 +9,10 @@
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §7 (borne pratique, confiance B) ; R PARTIE 6 ; guides 2025-2026 (dafous.app, dofustool)",
       "note": "Poids maximal d'over/exo. Existence d'une borne pratique à 101 bien attestée ; formule exacte de validation serveur inconnue.",
-      "bounds": { "min": 1, "max": 500 },
+      "bounds": {
+        "min": 1,
+        "max": 500
+      },
       "default": 101
     },
     "overCapScope": {
@@ -17,7 +20,12 @@
       "status": "CONTRADICTION",
       "source": "A §7 et §13 (nature globale vs par ligne : C-D) ; R PARTIE 6 (« over+exo cumulés ≤ 101 global ») ; AP §3.3 R1",
       "note": "Les deux rapports de docs/knowledge/ se contredisent. per_line : chaque ligne over/exo dispose de son propre plafond overCapWeight. global : la somme des poids over+exo de l'objet est plafonnée. Défaut per_line PROVISOIRE, choisi pour continuité avec le code précédent, pas par preuve.",
-      "bounds": { "enum": ["per_line", "global"] },
+      "bounds": {
+        "enum": [
+          "per_line",
+          "global"
+        ]
+      },
       "default": "per_line"
     },
     "ecLossFactor": {
@@ -25,7 +33,10 @@
       "status": "INCONNU",
       "source": "aucune ; A §5 et R PARTIE 3 décrivent seulement « l'EC n'applique pas le bonus et peut provoquer une perte »",
       "note": "Quantité de poids perdue lors d'un échec critique, exprimée en multiple du poids de la rune. Défaut 1 (= poids de la rune) posé arbitrairement pour faire tourner la simulation ; l'ancien code utilisait 0,5 sans source non plus. Aucune donnée publique ne quantifie la perte en EC.",
-      "bounds": { "min": 0, "max": 10 },
+      "bounds": {
+        "min": 0,
+        "max": 10
+      },
       "default": 1
     },
     "lossSelection": {
@@ -34,7 +45,13 @@
         "status": "INCONNU",
         "source": "A §6 (modèles A–E concurrents, tous C) ; R PARTIE 5 et 16 ; A §15.2 (« bonne approximation, à signaler comme telle »)",
         "note": "Loi de sélection de la ligne qui perd. uniform : équiprobable parmi les lignes admissibles (pseudo-code du PDF) ; weighted_by_weight : ∝ densité unitaire ; weighted_by_value_times_weight : ∝ valeur × densité (« masse magique »). Aucune expérience publiée ne départage ces modèles. Défaut = modèle le plus répandu dans les guides, sans preuve.",
-        "bounds": { "enum": ["uniform", "weighted_by_weight", "weighted_by_value_times_weight"] },
+        "bounds": {
+          "enum": [
+            "uniform",
+            "weighted_by_weight",
+            "weighted_by_value_times_weight"
+          ]
+        },
         "default": "weighted_by_value_times_weight"
       },
       "prioritizeOverExo": {
@@ -42,7 +59,12 @@
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
         "source": "R PARTIE 5 (Tofus, learn-dofus : « over/exo d'abord, puis puits, puis lignes naturelles ») ; A §15.2",
         "note": "Si vrai, les lignes en over ou exotiques sont ciblées avant les lignes naturelles lors d'une perte. Hypothèse forte mais non démontrée expérimentalement.",
-        "bounds": { "enum": [true, false] },
+        "bounds": {
+          "enum": [
+            true,
+            false
+          ]
+        },
         "default": true
       }
     },
@@ -52,7 +74,12 @@
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
         "source": "R PARTIE 2 (JeuxOnLine : « ce puits disparaît s'il est entreposé dans un hôtel de vente » ; Tofus, gamosaurus) ; A §4.2 classe la purge en D (inconnu) ; CLAUDE.md « à confirmer »",
         "note": "Si vrai, le reliquat est remis à 0 quand l'objet est équipé, mis en HDV ou échangé. Les deux rapports divergent sur le niveau de preuve ; à tester (A §17 expérience G).",
-        "bounds": { "enum": [true, false] },
+        "bounds": {
+          "enum": [
+            true,
+            false
+          ]
+        },
         "default": true
       },
       "visibleInClient": {
@@ -60,27 +87,403 @@
         "status": "CONTRADICTION",
         "source": "docs internes (Cadernis via Reverse-Engineering §A : le client ne reçoit que magicPoolStatus, sens de variation, « le reliquat lui-même n'est pas exposé au client ») vs guide 2026 (affirme que le reliquat est affiché dans l'onglet FM du client Unity)",
         "note": "Le reliquat est-il visible en jeu ? Les rapports de docs/knowledge/ le disent invisible (2.x) ; un guide 2026 le dit affiché dans l'onglet de forgemagie. À vérifier directement dans le client Unity. Sans effet sur le moteur ; conditionne seulement ce que l'interface prétend montrer.",
-        "bounds": { "enum": [true, false] },
+        "bounds": {
+          "enum": [
+            true,
+            false
+          ]
+        },
         "default": false
       }
     },
     "transcendence": {
       "$comment": "Le verrou de l'objet (plus de forgemagie ni de réinitialisation par orbe) est SOURCE PRIMAIRE (devblog 2.58) et codé en dur dans src/logic/engine/transcendence.ts ; il n'est pas paramétrable. Ne restent ici que les règles non certaines.",
-      "refuseIfOverOrExo": {
+      "refuseIfExo": {
         "value": true,
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
-        "source": "R PARTIE 10 et Dofus Wiki (Fandom) : « Transcendence Runes cannot be used on an item that has already been overmaged or exomaged in any capacity » ; guides Unity 2026",
-        "note": "Refus de la rune de transcendance si l'objet possède déjà un over ou un exo. Non retrouvé tel quel dans le devblog 2.58 ; à confirmer en jeu.",
-        "bounds": { "enum": [true, false] },
+        "source": "JeuxOnLine (relais de l'annonce de la mise à jour 2.49) ; Dofus Wiki (Fandom) : « cannot be used on an item that has already been … exomaged »",
+        "note": "Refus de la rune de transcendance si l'objet possède déjà une ligne exotique. Relais communautaire d'une annonce officielle, texte primaire non retrouvé ; à confirmer en jeu.",
+        "bounds": {
+          "enum": [
+            true,
+            false
+          ]
+        },
         "default": true
       },
+      "refuseIfOver": {
+        "value": true,
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "Millenium (guide forgemagie) ; guides Unity 2026 ; Dofus Wiki (Fandom) : « … already been overmaged »",
+        "note": "Refus de la rune de transcendance si l'objet possède déjà une ligne au-dessus de son jet parfait. Source uniquement communautaire ; à confirmer en jeu.",
+        "bounds": {
+          "enum": [
+            true,
+            false
+          ]
+        },
+        "default": true
+      },
+      "maxCurrentValueByRank": {
+        "value": {},
+        "status": "INCONNU",
+        "source": "aucune source primaire ; seuils communautaires évoqués dans les guides (ex. Initiative 610 / 410 / 210 selon le rang) ; les effets 2825-2827 portés par chaque rune de transcendance (data/dataset.json) contiennent probablement ces seuils côté client, mais l'API DofusDB les renvoie à 0",
+        "note": "Valeur maximale que la ligne peut avoir AVANT la pose d'une rune d'un rang donné, par caractéristique : { \"<characteristicId>\": { \"Ta\": n, \"Pata\": n, \"Rata\": n } }. Vide = aucun seuil appliqué (le moteur n'invente pas de valeur). À extraire des effets 2825/2826/2827 du client Unity, puis à renseigner ici.",
+        "bounds": {
+          "min": 0,
+          "max": 100000
+        },
+        "default": {}
+      },
       "successRateByRank": {
-        "value": { "Ta": 100, "Pata": 100, "Rata": 100 },
+        "value": {
+          "Ta": 100,
+          "Pata": 100,
+          "Rata": 100
+        },
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
         "source": "Dofus Wiki (Fandom) : « Transcendence Runes have a 100% success rate » ; chaque rune de transcendance du dataset porte les effets 2825 (« Empêche les futures forgemagies »), 2826 (libellé vide) et 2827 (« #1 à #2 % de chances de réussite »), mais l'API DofusDB renvoie from = to = 0 pour 2827",
         "note": "Taux de réussite par rang (Ta / Pata / Rata). Le moteur applique la rune comme un SC garanti tant que ces valeurs sont à 100. La valeur réelle de l'effet 2827 doit être extraite du client Unity (elle n'est pas dans l'API) : si elle est inférieure à 100 pour certains rangs, la transcendance devra passer par le modèle probabiliste de la phase 3.",
-        "bounds": { "min": 0, "max": 100 },
-        "default": { "Ta": 100, "Pata": 100, "Rata": 100 }
+        "bounds": {
+          "min": 0,
+          "max": 100
+        },
+        "default": {
+          "Ta": 100,
+          "Pata": 100,
+          "Rata": 100
+        }
+      }
+    },
+    "probability": {
+      "$comment": "MODÈLE probabiliste SC/SN/EC. La formule serveur est SECRÈTE (forum officiel, docs/knowledge) : rien ici n'est une reproduction. Les deux seules bornes SOURCE PRIMAIRE (tutoriel officiel Ankama : SC ≥ 15 % en FM normale, jusqu'à 1 % en exo PA/PM/PO) sont codées en dur dans src/logic/probability/constraints.ts et appliquées APRÈS le modèle choisi ici. Les seuls facteurs cités par Ankama sont le niveau de l'objet et la proximité du jet maximal.",
+      "model": {
+        "value": "official_factors_linear",
+        "status": "INCONNU",
+        "source": "aucune : choix de projet. official_factors_linear n'utilise que les deux facteurs cités par le tutoriel officiel ; pool_ratio_legacy est l'ancien modèle inventé, conservé pour comparaison ; lookup_table est une table éditable pour les estimations de joueurs expérimentés",
+        "note": "Modèle actif. Tous les modèles sont des hypothèses paramétrées, comparables entre eux par Monte Carlo (src/logic/probability/monteCarlo.ts) et, à terme, avec des observations réelles (data/observations/).",
+        "bounds": {
+          "enum": [
+            "official_factors_linear",
+            "pool_ratio_legacy",
+            "lookup_table"
+          ]
+        },
+        "default": "official_factors_linear"
+      },
+      "heavyExoCharacteristics": {
+        "value": [
+          1,
+          23,
+          19
+        ],
+        "status": "SOURCE PRIMAIRE",
+        "source": "tutoriel officiel Ankama (dofus.com/fr/mmorpg/tutoriels/420190-forgemagie) : « Le taux de réussite des forgemagies exotiques est en revanche automatiquement très faible et peut descendre jusqu'à 1 % si l'on souhaite ajouter un PA… » ; R Key Findings 5 (PA/PM/PO)",
+        "note": "Caractéristiques dont l'exo relève du plancher 1 % : PA (1), PM (23), Portée (19). Toute extension de cette liste (ex. Invocations 26, ou un seuil de poids comme l'ancien code) est INCONNU : ne pas l'ajouter sans source. Le seuil ≈ 20 de densité évoqué par Huzounet (R PARTIE 7) n'est pas retenu.",
+        "bounds": {
+          "min": 1,
+          "max": 200
+        },
+        "default": [
+          1,
+          23,
+          19
+        ]
+      },
+      "ecShare": {
+        "value": 0.5,
+        "status": "INCONNU",
+        "source": "aucune. Les triplets « 66/34/0, 43/50/7, 15/50/35 » cités par R PARTIE 3 viennent d'une seule source ancienne recopiée (forgemagie.net) et ne sont pas utilisables",
+        "note": "Part du complément (1 − pSC) attribuée à l'échec critique en FM normale ; le reste va au succès neutre. 0,5 posé arbitrairement pour faire tourner la simulation.",
+        "bounds": {
+          "min": 0,
+          "max": 1
+        },
+        "default": 0.5
+      },
+      "heavyExoEcShare": {
+        "value": 1,
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "guides (R PARTIE 3, A §8) : exo PA/PM/PO = « 1 % SC, 0 % SN, 99 % EC »",
+        "note": "Part du complément attribuée à l'EC en exo lourd. 1 = aucun succès neutre possible (0/99 des guides). Le partage exact 0/99 n'est pas démontré (A §8).",
+        "bounds": {
+          "min": 0,
+          "max": 1
+        },
+        "default": 1
+      },
+      "officialFactorsLinear": {
+        "$comment": "pSC_brut = a + b × distance − c × (niveau / levelNormalizer), distance = (jetMax − valeur) / jetMax ∈ [0, 1] (0 = ligne au jet parfait ; exo = 0). Puis bornes officielles. Seuls les deux facteurs cités par Ankama interviennent.",
+        "a": {
+          "value": 0.15,
+          "status": "INCONNU",
+          "source": "aucune ; posé égal au plancher officiel de 15 % pour qu'une ligne au jet parfait soit au minimum",
+          "note": "Ordonnée à l'origine (pSC quand la ligne est au jet parfait, niveau 0).",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": 0.15
+        },
+        "b": {
+          "value": 0.5,
+          "status": "INCONNU",
+          "source": "aucune ; posé pour qu'une ligne vide (distance 1) donne ≈ 65 %, écho du « 66 % » d'un vieux guide (une seule source, R PARTIE 3)",
+          "note": "Pente selon la distance au jet maximal.",
+          "bounds": {
+            "min": -1,
+            "max": 1
+          },
+          "default": 0.5
+        },
+        "c": {
+          "value": 0,
+          "status": "INCONNU",
+          "source": "aucune ; Ankama cite le niveau de l'objet comme facteur sans en donner le sens",
+          "note": "Pente selon le niveau de l'objet (normalisé /200). 0 = aucun effet tant que le sens n'est pas connu.",
+          "bounds": {
+            "min": -1,
+            "max": 1
+          },
+          "default": 0
+        },
+        "levelNormalizer": {
+          "value": 200,
+          "status": "HYPOTHÈSE COMMUNAUTAIRE",
+          "source": "niveau maximal des objets équipables dans le dataset (data/items.json, max level = 200)",
+          "note": "Constante de normalisation du niveau de l'objet dans le terme c × (niveau / levelNormalizer). Donnée de jeu, pas une règle de forgemagie.",
+          "bounds": {
+            "min": 1,
+            "max": 1000
+          },
+          "default": 200
+        }
+      },
+      "poolRatioLegacy": {
+        "coefficients": {
+          "value": {
+            "baseSc": 0.5,
+            "slopeSc": 0.05,
+            "maxSc": 0.9,
+            "minSc": 0.05,
+            "baseEcPositive": 0.05,
+            "slopeEcPositive": 0.005,
+            "minEc": 0.01,
+            "baseEcNegative": 0.1,
+            "slopeEcNegative": 0.03,
+            "maxEc": 0.5
+          },
+          "status": "INCONNU",
+          "source": "aucune. Ancien code du projet (runeSimulator.ts supprimé en phase 2), reconstitué à l'identique pour comparaison",
+          "note": "Ratio r = budget de poids restant / poids de la rune. r ≥ 0 : pSC = min(baseSc + slopeSc·r, maxSc), pEC = max(baseEcPositive − slopeEcPositive·r, minEc) ; r < 0 : pSC = max(baseSc + slopeSc·r, minSc), pEC = min(baseEcNegative − slopeEcNegative·r, maxEc). Contredit la borne officielle de 15 % (minSc = 5 %) AVANT clamp ; utilise le budget de planification, qui n'est pas le reliquat serveur. Conservé uniquement pour comparaison.",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": {
+            "baseSc": 0.5,
+            "slopeSc": 0.05,
+            "maxSc": 0.9,
+            "minSc": 0.05,
+            "baseEcPositive": 0.05,
+            "slopeEcPositive": 0.005,
+            "minEc": 0.01,
+            "baseEcNegative": 0.1,
+            "slopeEcNegative": 0.03,
+            "maxEc": 0.5
+          }
+        }
+      },
+      "lookupTable": {
+        "table": {
+          "value": {
+            "distanceBuckets": [
+              0,
+              0.05,
+              0.2,
+              0.5,
+              1
+            ],
+            "runeWeightBuckets": [
+              0,
+              3,
+              10,
+              30,
+              1000
+            ],
+            "cells": [
+              [
+                {
+                  "pSC": 0.15,
+                  "pEC": 0.425
+                },
+                {
+                  "pSC": 0.15,
+                  "pEC": 0.425
+                },
+                {
+                  "pSC": 0.15,
+                  "pEC": 0.425
+                },
+                {
+                  "pSC": 0.15,
+                  "pEC": 0.425
+                }
+              ],
+              [
+                {
+                  "pSC": 0.25,
+                  "pEC": 0.375
+                },
+                {
+                  "pSC": 0.25,
+                  "pEC": 0.375
+                },
+                {
+                  "pSC": 0.25,
+                  "pEC": 0.375
+                },
+                {
+                  "pSC": 0.25,
+                  "pEC": 0.375
+                }
+              ],
+              [
+                {
+                  "pSC": 0.4,
+                  "pEC": 0.3
+                },
+                {
+                  "pSC": 0.4,
+                  "pEC": 0.3
+                },
+                {
+                  "pSC": 0.4,
+                  "pEC": 0.3
+                },
+                {
+                  "pSC": 0.4,
+                  "pEC": 0.3
+                }
+              ],
+              [
+                {
+                  "pSC": 0.6,
+                  "pEC": 0.2
+                },
+                {
+                  "pSC": 0.6,
+                  "pEC": 0.2
+                },
+                {
+                  "pSC": 0.6,
+                  "pEC": 0.2
+                },
+                {
+                  "pSC": 0.6,
+                  "pEC": 0.2
+                }
+              ]
+            ]
+          },
+          "status": "INCONNU",
+          "source": "aucune : gabarit à remplir par des joueurs expérimentés (panneau Paramètres avancés, import/export de profils)",
+          "note": "cells[i][j] = probabilités pour distance ∈ [distanceBuckets[i], distanceBuckets[i+1]) et poids de rune ∈ [runeWeightBuckets[j], runeWeightBuckets[j+1]). pSN = 1 − pSC − pEC. Les valeurs par défaut sont un simple gabarit croissant avec la distance, identiques d'une colonne à l'autre : elles ne représentent aucune mesure.",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": {
+            "distanceBuckets": [
+              0,
+              0.05,
+              0.2,
+              0.5,
+              1
+            ],
+            "runeWeightBuckets": [
+              0,
+              3,
+              10,
+              30,
+              1000
+            ],
+            "cells": [
+              [
+                {
+                  "pSC": 0.15,
+                  "pEC": 0.425
+                },
+                {
+                  "pSC": 0.15,
+                  "pEC": 0.425
+                },
+                {
+                  "pSC": 0.15,
+                  "pEC": 0.425
+                },
+                {
+                  "pSC": 0.15,
+                  "pEC": 0.425
+                }
+              ],
+              [
+                {
+                  "pSC": 0.25,
+                  "pEC": 0.375
+                },
+                {
+                  "pSC": 0.25,
+                  "pEC": 0.375
+                },
+                {
+                  "pSC": 0.25,
+                  "pEC": 0.375
+                },
+                {
+                  "pSC": 0.25,
+                  "pEC": 0.375
+                }
+              ],
+              [
+                {
+                  "pSC": 0.4,
+                  "pEC": 0.3
+                },
+                {
+                  "pSC": 0.4,
+                  "pEC": 0.3
+                },
+                {
+                  "pSC": 0.4,
+                  "pEC": 0.3
+                },
+                {
+                  "pSC": 0.4,
+                  "pEC": 0.3
+                }
+              ],
+              [
+                {
+                  "pSC": 0.6,
+                  "pEC": 0.2
+                },
+                {
+                  "pSC": 0.6,
+                  "pEC": 0.2
+                },
+                {
+                  "pSC": 0.6,
+                  "pEC": 0.2
+                },
+                {
+                  "pSC": 0.6,
+                  "pEC": 0.2
+                }
+              ]
+            ]
+          }
+        }
       }
     },
     "brisage": {
@@ -90,7 +493,10 @@
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
         "source": "KamelAkar brisage_cli.py l.425 (`0.0150`) ; Icksir calculator.py l.437 (`0.0150`) ; forum officiel (A [^9]) : 3 × jet × niveau × poids / 200 = 0,015",
         "note": "Papycha rapporte un écart avec le jeu dans 34 cas sur 200 (erreur max 7 %) : formule empirique, pas exacte (R PARTIE 9).",
-        "bounds": { "min": 0.001, "max": 1 },
+        "bounds": {
+          "min": 0.001,
+          "max": 1
+        },
         "default": 0.015
       },
       "constantOffset": {
@@ -98,7 +504,10 @@
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
         "source": "KamelAkar l.425 (`+ 1`) ; Icksir l.437 (`+ 1`) ; forum officiel (A [^9])",
         "note": "Terme additif de la formule, appliqué avant le coefficient dans les deux dépôts.",
-        "bounds": { "min": 0, "max": 10 },
+        "bounds": {
+          "min": 0,
+          "max": 10
+        },
         "default": 1
       },
       "focusOtherLinesFactor": {
@@ -106,7 +515,10 @@
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
         "source": "KamelAkar l.470 (`poids_focus + 0.5 * poids_others`) ; Icksir l.500 (`vr_propio + 0.5 * vr_resto`) ; R PARTIE 9 ; Reddit (A [^29])",
         "note": "Part du poids des autres lignes convertie en runes de la ligne focus.",
-        "bounds": { "min": 0, "max": 1 },
+        "bounds": {
+          "min": 0,
+          "max": 1
+        },
         "default": 0.5
       },
       "podsDivisor": {
@@ -114,7 +526,10 @@
         "status": "INCONNU",
         "source": "KamelAkar l.424 et l.476 ; Icksir l.431 et l.507 (`/ 2.5`)",
         "note": "Les deux dépôts divisent la valeur de Pods par 2,5 avant la formule, sans justification écrite. Lié à densities.40 (Pods, 0,25/pt) : 2,5 est exactement le poids d'une Rune Pod (+10 × 0,25), invariant vérifié par test (brisage.test.ts). Si densities.40 change, ce diviseur doit être revu.",
-        "bounds": { "min": 0.01, "max": 100 },
+        "bounds": {
+          "min": 0.01,
+          "max": 100
+        },
         "default": 2.5
       },
       "forceOneForActionStats": {
@@ -122,7 +537,12 @@
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
         "source": "KamelAkar l.418 ; Icksir l.428 : PA/PM/PO/Invocations avec valeur dans [0, 1] forcés à 1",
         "note": "Quirk identique dans les deux dépôts, non expliqué.",
-        "bounds": { "enum": [true, false] },
+        "bounds": {
+          "enum": [
+            true,
+            false
+          ]
+        },
         "default": true
       },
       "podsDivisorOnNonFocusLines": {
@@ -130,7 +550,12 @@
         "status": "CONTRADICTION",
         "source": "Icksir l.431 : la division par 2,5 s'applique à la ligne Pods avant tout calcul (donc aussi quand elle contribue au focus d'une autre ligne) ; KamelAkar l.455-467 : en mode focus, la ligne Pods non focalisée contribue avec sa valeur brute",
         "note": "Écart entre les deux dépôts. Défaut = comportement Icksir (cohérent avec le cas sans focus). Sans effet quand Pods est la ligne focus ou quand il n'y a pas de focus.",
-        "bounds": { "enum": [true, false] },
+        "bounds": {
+          "enum": [
+            true,
+            false
+          ]
+        },
         "default": true
       },
       "nonPositiveLineContribution": {
@@ -138,66 +563,654 @@
         "status": "CONTRADICTION",
         "source": "KamelAkar l.419 (`if value <= 0: continue`) ; Icksir l.436-438 (`else: vr = 1`, la ligne contribue constantOffset au total)",
         "note": "Écart entre les deux dépôts sur les lignes à valeur nulle ou négative (malus). skip : ignorées ; offset : contribuent constantOffset au poids total (donc à 50 % en focus). Défaut = KamelAkar.",
-        "bounds": { "enum": ["skip", "offset"] },
+        "bounds": {
+          "enum": [
+            "skip",
+            "offset"
+          ]
+        },
         "default": "skip"
       }
     }
   },
   "densities": {
-    "$comment": "Poids de forgemagie par point, indexé par characteristicId DofusDB (voir data/dataset.json → characteristics). Aucun champ de densité n'existe dans l'API DofusDB ; ces valeurs viennent de tables communautaires (A §3.1, R PARTIE 1). À réextraire depuis le client Unity (infobulle des runes) pour passer en SOURCE PRIMAIRE.",
-    "1":  { "name": "PA",                    "value": 100,  "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, convergence forte) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 500 }, "default": 100 },
-    "23": { "name": "PM",                    "value": 90,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, convergence forte) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 500 }, "default": 90 },
-    "19": { "name": "Portée",                "value": 51,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1 (« 51 et non 50 »)", "note": "L'affirmation « 51 choisi délibérément par Ankama pour interdire le double PO » n'a pas de source primaire.", "bounds": { "min": 0.01, "max": 500 }, "default": 51 },
-    "26": { "name": "Invocations",           "value": 30,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 500 }, "default": 30 },
-    "11": { "name": "Vitalité",              "value": 0.2,  "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1 (« 0,2 ; 0,25 débattu »)", "note": "Convention : 5 vitalité = 1 de poids (rune Vi +5 = 1). Valeur 0,25 rencontrée dans d'anciennes tables.", "bounds": { "min": 0.01, "max": 10 }, "default": 0.2 },
-    "10": { "name": "Force",                 "value": 1,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 50 }, "default": 1 },
-    "15": { "name": "Intelligence",          "value": 1,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 50 }, "default": 1 },
-    "13": { "name": "Chance",                "value": 1,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 50 }, "default": 1 },
-    "14": { "name": "Agilité",               "value": 1,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 50 }, "default": 1 },
-    "12": { "name": "Sagesse",               "value": 3,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1 (confirmé par exemples de reliquat)", "note": "", "bounds": { "min": 0.01, "max": 50 }, "default": 3 },
-    "48": { "name": "Prospection",           "value": 3,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 50 }, "default": 3 },
-    "25": { "name": "Puissance",             "value": 2,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1 (moyenne)", "note": "", "bounds": { "min": 0.01, "max": 50 }, "default": 2 },
-    "69": { "name": "Puissance pièges",      "value": 2,    "status": "INCONNU", "source": "aucune ; valeur posée par analogie avec Puissance", "note": "Absente de toutes les tables consultées. Runes Per Pi / Pa Per Pi / Ra Per Pi existent (dataset). Valeur arbitraire pour faire tourner la simulation.", "bounds": { "min": 0.01, "max": 50 }, "default": 2 },
-    "16": { "name": "Dommages",              "value": 20,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "Dommages fixes génériques (rune Do).", "bounds": { "min": 0.01, "max": 200 }, "default": 20 },
-    "88": { "name": "Dommages Terre",        "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, « vérifier les lignes exactes ») ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "89": { "name": "Dommages Feu",          "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "90": { "name": "Dommages Eau",          "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "91": { "name": "Dommages Air",          "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "92": { "name": "Dommages Neutre",       "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "86": { "name": "Dommages critiques",    "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, ligne « Do Cri »)", "note": "Ne pas confondre avec % Critique (characteristic 18).", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "84": { "name": "Dommages poussée",      "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, ligne « Do Pou »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "70": { "name": "Dommages pièges",       "value": 5,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, ligne « Pi »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "18": { "name": "% Critique",            "value": 10,   "status": "CONTRADICTION", "source": "A §3.1 (« 10 dans les tables récentes ; certaines tables anciennes divergent », C-B) ; R PARTIE 1 (10, auparavant 30, changelog 2.29) ; AP §3.2", "note": "Le code précédent utilisait 5 en étiquetant à tort l'effet 115 « Dommages Critiques ». Valeur 10 retenue (tables récentes) ; 30 dans les tables pré-2.29.", "bounds": { "min": 0.01, "max": 100 }, "default": 10 },
-    "49": { "name": "Soins",                 "value": 10,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C-B) ; R PARTIE 1 (10, auparavant 20/15)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 10 },
-    "50": { "name": "Renvoi de dommages",    "value": 5,    "status": "CONTRADICTION", "source": "DofusDB (page item 30942 Rune Pa Do Ren, « Densité 15 » pour +3 → 5/pt) ; AP §3.2 ; code précédent : 10", "note": "Absent des tables A et R. La densité affichée par le site DofusDB n'est pas exposée par son API. 5 retenu (source la plus proche d'une donnée client). Dépôts de brisage : KamelAkar 10, Icksir 5 (dernière affectation de sa table).", "bounds": { "min": 0.01, "max": 100 }, "default": 5 },
-    "40": { "name": "Pods",                  "value": 0.25, "status": "CONTRADICTION", "source": "A §3.1 (0,25 par point ; rune Pod +10 = 2,5 ; C-B « désaccords historiques ») ; R PARTIE 1 (« 2,5 par pod ») ; AP §3.2", "note": "Les deux rapports divergent d'un facteur 10. 0,25/pt retenu : cohérent avec la rune Pod +10 = 2,5 de poids. Lié à params.brisage.podsDivisor (2,5 = poids d'une Rune Pod), invariant vérifié par test.", "bounds": { "min": 0.001, "max": 50 }, "default": 0.25 },
-    "44": { "name": "Initiative",            "value": 0.1,  "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.001, "max": 10 }, "default": 0.1 },
-    "78": { "name": "Fuite",                 "value": 4,    "status": "CONTRADICTION", "source": "A §3.1 (4, B) ; R PARTIE 1 (« 4 ou 5 selon sources ») ; AP §3.2", "note": "Non tranché entre 4 et 5.", "bounds": { "min": 0.01, "max": 100 }, "default": 4 },
-    "79": { "name": "Tacle",                 "value": 4,    "status": "CONTRADICTION", "source": "A §3.1 (4, B) ; R PARTIE 1 (« 4 ou 5 selon sources ») ; AP §3.2", "note": "Non tranché entre 4 et 5.", "bounds": { "min": 0.01, "max": 100 }, "default": 4 },
-    "27": { "name": "Esquive PA",            "value": 7,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 7 },
-    "28": { "name": "Esquive PM",            "value": 7,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 7 },
-    "82": { "name": "Retrait PA",            "value": 7,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 7 },
-    "83": { "name": "Retrait PM",            "value": 7,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 7 },
-    "33": { "name": "% Résistance Terre",    "value": 6,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 6 },
-    "34": { "name": "% Résistance Feu",      "value": 6,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 6 },
-    "35": { "name": "% Résistance Eau",      "value": 6,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 6 },
-    "36": { "name": "% Résistance Air",      "value": 6,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 6 },
-    "37": { "name": "% Résistance Neutre",   "value": 6,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 6 },
-    "54": { "name": "Résistance Terre",      "value": 2,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, « tables historiques divergentes »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 2 },
-    "55": { "name": "Résistance Feu",        "value": 2,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, « tables historiques divergentes »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 2 },
-    "56": { "name": "Résistance Eau",        "value": 2,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, « tables historiques divergentes »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 2 },
-    "57": { "name": "Résistance Air",        "value": 2,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, « tables historiques divergentes »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 2 },
-    "58": { "name": "Résistance Neutre",     "value": 2,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B, « tables historiques divergentes »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 2 },
-    "87": { "name": "Résistance critiques",  "value": 2,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1 (« correction communautaire, pas 5 »)", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 2 },
-    "85": { "name": "Résistance poussée",    "value": 2,    "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (B) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 100 }, "default": 2 },
-    "125": { "name": "% Dommages mêlée",     "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C, « confirmation Unity nécessaire ») ; R PARTIE 1 (15, auparavant 30)", "note": "", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "120": { "name": "% Dommages distance",  "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "122": { "name": "% Dommages armes",     "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "123": { "name": "% Dommages sorts",     "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "124": { "name": "% Résistance mêlée",   "value": 15,   "status": "CONTRADICTION", "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Mé, poids 10)", "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10.", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "121": { "name": "% Résistance distance", "value": 15,  "status": "CONTRADICTION", "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Di, poids 10)", "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10.", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "142": { "name": "% Résistance armes",   "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "Aucune rune de forgemagie correspondante dans le dataset (ligne non ciblable, mais potentiellement présente sur un objet).", "bounds": { "min": 0.01, "max": 200 }, "default": 15 },
-    "141": { "name": "% Résistance sorts",   "value": 15,   "status": "HYPOTHÈSE COMMUNAUTAIRE", "source": "A §3.1 (C) ; R PARTIE 1", "note": "Aucune rune de forgemagie correspondante dans le dataset.", "bounds": { "min": 0.01, "max": 200 }, "default": 15 }
+    "1": {
+      "name": "PA",
+      "value": 100,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, convergence forte) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 500
+      },
+      "default": 100
+    },
+    "10": {
+      "name": "Force",
+      "value": 1,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 50
+      },
+      "default": 1
+    },
+    "11": {
+      "name": "Vitalité",
+      "value": 0.2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1 (« 0,2 ; 0,25 débattu »)",
+      "note": "Convention : 5 vitalité = 1 de poids (rune Vi +5 = 1). Valeur 0,25 rencontrée dans d'anciennes tables.",
+      "bounds": {
+        "min": 0.01,
+        "max": 10
+      },
+      "default": 0.2
+    },
+    "12": {
+      "name": "Sagesse",
+      "value": 3,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1 (confirmé par exemples de reliquat)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 50
+      },
+      "default": 3
+    },
+    "13": {
+      "name": "Chance",
+      "value": 1,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 50
+      },
+      "default": 1
+    },
+    "14": {
+      "name": "Agilité",
+      "value": 1,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 50
+      },
+      "default": 1
+    },
+    "15": {
+      "name": "Intelligence",
+      "value": 1,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 50
+      },
+      "default": 1
+    },
+    "16": {
+      "name": "Dommages",
+      "value": 20,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "Dommages fixes génériques (rune Do).",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 20
+    },
+    "18": {
+      "name": "% Critique",
+      "value": 10,
+      "status": "CONTRADICTION",
+      "source": "A §3.1 (« 10 dans les tables récentes ; certaines tables anciennes divergent », C-B) ; R PARTIE 1 (10, auparavant 30, changelog 2.29) ; AP §3.2",
+      "note": "Le code précédent utilisait 5 en étiquetant à tort l'effet 115 « Dommages Critiques ». Valeur 10 retenue (tables récentes) ; 30 dans les tables pré-2.29.",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 10
+    },
+    "19": {
+      "name": "Portée",
+      "value": 51,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1 (« 51 et non 50 »)",
+      "note": "L'affirmation « 51 choisi délibérément par Ankama pour interdire le double PO » n'a pas de source primaire.",
+      "bounds": {
+        "min": 0.01,
+        "max": 500
+      },
+      "default": 51
+    },
+    "23": {
+      "name": "PM",
+      "value": 90,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, convergence forte) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 500
+      },
+      "default": 90
+    },
+    "25": {
+      "name": "Puissance",
+      "value": 2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1 (moyenne)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 50
+      },
+      "default": 2
+    },
+    "26": {
+      "name": "Invocations",
+      "value": 30,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 500
+      },
+      "default": 30
+    },
+    "27": {
+      "name": "Esquive PA",
+      "value": 7,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 7
+    },
+    "28": {
+      "name": "Esquive PM",
+      "value": 7,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 7
+    },
+    "33": {
+      "name": "% Résistance Terre",
+      "value": 6,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 6
+    },
+    "34": {
+      "name": "% Résistance Feu",
+      "value": 6,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 6
+    },
+    "35": {
+      "name": "% Résistance Eau",
+      "value": 6,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 6
+    },
+    "36": {
+      "name": "% Résistance Air",
+      "value": 6,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 6
+    },
+    "37": {
+      "name": "% Résistance Neutre",
+      "value": 6,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 6
+    },
+    "40": {
+      "name": "Pods",
+      "value": 0.25,
+      "status": "CONTRADICTION",
+      "source": "A §3.1 (0,25 par point ; rune Pod +10 = 2,5 ; C-B « désaccords historiques ») ; R PARTIE 1 (« 2,5 par pod ») ; AP §3.2",
+      "note": "Les deux rapports divergent d'un facteur 10. 0,25/pt retenu : cohérent avec la rune Pod +10 = 2,5 de poids. Lié à params.brisage.podsDivisor (2,5 = poids d'une Rune Pod), invariant vérifié par test.",
+      "bounds": {
+        "min": 0.001,
+        "max": 50
+      },
+      "default": 0.25
+    },
+    "44": {
+      "name": "Initiative",
+      "value": 0.1,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.001,
+        "max": 10
+      },
+      "default": 0.1
+    },
+    "48": {
+      "name": "Prospection",
+      "value": 3,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 50
+      },
+      "default": 3
+    },
+    "49": {
+      "name": "Soins",
+      "value": 10,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (C-B) ; R PARTIE 1 (10, auparavant 20/15)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 10
+    },
+    "50": {
+      "name": "Renvoi de dommages",
+      "value": 5,
+      "status": "CONTRADICTION",
+      "source": "DofusDB (page item 30942 Rune Pa Do Ren, « Densité 15 » pour +3 → 5/pt) ; AP §3.2 ; code précédent : 10",
+      "note": "Absent des tables A et R. La densité affichée par le site DofusDB n'est pas exposée par son API. 5 retenu (source la plus proche d'une donnée client). Dépôts de brisage : KamelAkar 10, Icksir 5 (dernière affectation de sa table).",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "54": {
+      "name": "Résistance Terre",
+      "value": 2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, « tables historiques divergentes »)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 2
+    },
+    "55": {
+      "name": "Résistance Feu",
+      "value": 2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, « tables historiques divergentes »)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 2
+    },
+    "56": {
+      "name": "Résistance Eau",
+      "value": 2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, « tables historiques divergentes »)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 2
+    },
+    "57": {
+      "name": "Résistance Air",
+      "value": 2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, « tables historiques divergentes »)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 2
+    },
+    "58": {
+      "name": "Résistance Neutre",
+      "value": 2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, « tables historiques divergentes »)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 2
+    },
+    "69": {
+      "name": "Puissance pièges",
+      "value": 2,
+      "status": "INCONNU",
+      "source": "aucune ; valeur posée par analogie avec Puissance",
+      "note": "Absente de toutes les tables consultées. Runes Per Pi / Pa Per Pi / Ra Per Pi existent (dataset). Valeur arbitraire pour faire tourner la simulation.",
+      "bounds": {
+        "min": 0.01,
+        "max": 50
+      },
+      "default": 2
+    },
+    "70": {
+      "name": "Dommages pièges",
+      "value": 5,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, ligne « Pi »)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "78": {
+      "name": "Fuite",
+      "value": 4,
+      "status": "CONTRADICTION",
+      "source": "A §3.1 (4, B) ; R PARTIE 1 (« 4 ou 5 selon sources ») ; AP §3.2",
+      "note": "Non tranché entre 4 et 5.",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 4
+    },
+    "79": {
+      "name": "Tacle",
+      "value": 4,
+      "status": "CONTRADICTION",
+      "source": "A §3.1 (4, B) ; R PARTIE 1 (« 4 ou 5 selon sources ») ; AP §3.2",
+      "note": "Non tranché entre 4 et 5.",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 4
+    },
+    "82": {
+      "name": "Retrait PA",
+      "value": 7,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 7
+    },
+    "83": {
+      "name": "Retrait PM",
+      "value": 7,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 7
+    },
+    "84": {
+      "name": "Dommages poussée",
+      "value": 5,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, ligne « Do Pou »)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "85": {
+      "name": "Résistance poussée",
+      "value": 2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 2
+    },
+    "86": {
+      "name": "Dommages critiques",
+      "value": 5,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, ligne « Do Cri »)",
+      "note": "Ne pas confondre avec % Critique (characteristic 18).",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "87": {
+      "name": "Résistance critiques",
+      "value": 2,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1 (« correction communautaire, pas 5 »)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 2
+    },
+    "88": {
+      "name": "Dommages Terre",
+      "value": 5,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B, « vérifier les lignes exactes ») ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "89": {
+      "name": "Dommages Feu",
+      "value": 5,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "90": {
+      "name": "Dommages Eau",
+      "value": 5,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "91": {
+      "name": "Dommages Air",
+      "value": 5,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "92": {
+      "name": "Dommages Neutre",
+      "value": 5,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (B) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 100
+      },
+      "default": 5
+    },
+    "120": {
+      "name": "% Dommages distance",
+      "value": 15,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (C) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 15
+    },
+    "121": {
+      "name": "% Résistance distance",
+      "value": 15,
+      "status": "CONTRADICTION",
+      "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Di, poids 10)",
+      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10.",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 15
+    },
+    "122": {
+      "name": "% Dommages armes",
+      "value": 15,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (C) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 15
+    },
+    "123": {
+      "name": "% Dommages sorts",
+      "value": 15,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (C) ; R PARTIE 1",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 15
+    },
+    "124": {
+      "name": "% Résistance mêlée",
+      "value": 15,
+      "status": "CONTRADICTION",
+      "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Mé, poids 10)",
+      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10.",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 15
+    },
+    "125": {
+      "name": "% Dommages mêlée",
+      "value": 15,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (C, « confirmation Unity nécessaire ») ; R PARTIE 1 (15, auparavant 30)",
+      "note": "",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 15
+    },
+    "141": {
+      "name": "% Résistance sorts",
+      "value": 15,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (C) ; R PARTIE 1",
+      "note": "Aucune rune de forgemagie correspondante dans le dataset.",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 15
+    },
+    "142": {
+      "name": "% Résistance armes",
+      "value": 15,
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "A §3.1 (C) ; R PARTIE 1",
+      "note": "Aucune rune de forgemagie correspondante dans le dataset (ligne non ciblable, mais potentiellement présente sur un objet).",
+      "bounds": {
+        "min": 0.01,
+        "max": 200
+      },
+      "default": 15
+    },
+    "$comment": "Poids de forgemagie par point, indexé par characteristicId DofusDB (voir data/dataset.json → characteristics). Aucun champ de densité n'existe dans l'API DofusDB ; ces valeurs viennent de tables communautaires (A §3.1, R PARTIE 1). À réextraire depuis le client Unity (infobulle des runes) pour passer en SOURCE PRIMAIRE."
   },
   "notes": [
     "Rune de chasse (item 10057, effet 795) : characteristic 0 dans DofusDB, donc non indexable ici. Poids 5 selon A §3.1 (C-B). À traiter par un paramètre dédié quand le module armes sera abordé.",

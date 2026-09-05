@@ -4,11 +4,18 @@ import type { ForgemagieItemState, Rng } from '../types/forgemagie';
 import { simulationReducer, initialState } from '../logic/statsReducer';
 import { computeWeightBudget } from '../logic/planning/weightBudget';
 import { applyRune as engineApplyRune } from '../logic/engine';
+import {
+  computeOutcomeProbabilities,
+  drawOutcome,
+  isHeavyExo,
+  mathRandomRng,
+  type ProbabilityOutput,
+} from '../logic/probability';
 import { getCharacteristicName, getRuneTiers } from '../data/dataset';
-import { getDensity, getEngineParams } from '../data/params';
+import { getDensity, getEngineParams, getProbabilityParams } from '../data/params';
 
-/** RNG de l'application (le moteur exige un RNG injecté ; les tests fournissent le leur). */
-const appRng: Rng = { next: () => Math.random() };
+/** RNG de l'application (le moteur et le modèle exigent un RNG injecté ; les tests fournissent le leur). */
+const appRng: Rng = mathRandomRng;
 
 /** Valeur ajoutée par une rune d'un palier donné (data/rune-tiers.json), repli sur le palier inférieur. */
 export function getRuneValue(characteristicId: number, tier: RuneTier): number {
@@ -24,12 +31,18 @@ export function getRuneValue(characteristicId: number, tier: RuneTier): number {
   }
 }
 
+/** Estimation du MODÈLE probabiliste pour une rune, avec le nom du modèle (à afficher comme tel). */
+export interface RuneEstimate extends ProbabilityOutput {
+  model: string;
+  isHeavyExo: boolean;
+}
+
 /** Vue UI → état moteur. */
 function toEngineState(stats: SimulatedStat[], residualPool: number, level: number): ForgemagieItemState {
   return {
     level,
     residualPool,
-    itemLocked: false,
+    itemLocked: stats.length > 0 && stats.every((s) => s.isLocked),
     lines: stats.map((s) => ({
       characteristicId: s.characteristicId,
       value: s.currentValue,
@@ -61,7 +74,8 @@ function fromEngineState(state: ForgemagieItemState, previous: SimulatedStat[]):
 
 /**
  * Hook principal : lignes visibles, reliquat serveur, budget de planification, actions.
- * L'issue SC/SN/EC est FOURNIE par l'interface (aucun modèle probabiliste avant la phase 3).
+ * L'issue SC/SN/EC est soit FOURNIE par l'interface, soit TIRÉE par le modèle probabiliste
+ * (paramétré, statut INCONNU), jamais présentée comme la formule du serveur.
  */
 export function useSimulation() {
   const [state, dispatch] = useReducer(simulationReducer, initialState);
@@ -104,6 +118,31 @@ export function useSimulation() {
   const redo = useCallback(() => dispatch({ type: 'REDO' }), []);
   const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), []);
   const clearLog = useCallback(() => dispatch({ type: 'CLEAR_LOG' }), []);
+
+  /** Estimation du modèle probabiliste pour une rune sur une ligne (affichage). */
+  const estimateRune = useCallback(
+    (targetCharacteristicId: number, tier: RuneTier): RuneEstimate | null => {
+      const target = state.stats.find((s) => s.characteristicId === targetCharacteristicId);
+      if (!target) return null;
+      const runeValue = getRuneValue(targetCharacteristicId, tier);
+      if (runeValue <= 0) return null;
+      const probabilityParams = getProbabilityParams();
+      const heavy = isHeavyExo(targetCharacteristicId, target.isExo, probabilityParams);
+      const probs = computeOutcomeProbabilities(
+        {
+          itemLevel: state.item?.level ?? 0,
+          line: { value: target.currentValue, baseMax: target.baseMax, isExo: target.isExo },
+          runeWeight: runeValue * target.weightPerPoint,
+          isHeavyExo: heavy,
+          residualPool: state.residualPool,
+          weightBudget: budget.remainingBudget,
+        },
+        probabilityParams
+      );
+      return { ...probs, model: probabilityParams.model, isHeavyExo: heavy };
+    },
+    [state.stats, state.item, state.residualPool, budget.remainingBudget]
+  );
 
   const applyRune = useCallback(
     (targetCharacteristicId: number, tier: RuneTier, outcome: RuneOutcome) => {
@@ -148,6 +187,17 @@ export function useSimulation() {
     [state.stats, state.residualPool, state.item, state.logCounter]
   );
 
+  /** Tire l'issue avec le modèle probabiliste puis l'applique au moteur. */
+  const drawAndApplyRune = useCallback(
+    (targetCharacteristicId: number, tier: RuneTier) => {
+      const estimate = estimateRune(targetCharacteristicId, tier);
+      if (!estimate) return;
+      const outcome = drawOutcome(estimate, appRng);
+      return applyRune(targetCharacteristicId, tier, outcome);
+    },
+    [estimateRune, applyRune]
+  );
+
   return {
     item: state.item,
     stats: state.stats,
@@ -166,6 +216,8 @@ export function useSimulation() {
     redo,
     toggleMode,
     applyRune,
+    drawAndApplyRune,
+    estimateRune,
     clearLog,
   };
 }

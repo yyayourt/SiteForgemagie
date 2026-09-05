@@ -1,7 +1,8 @@
 /**
  * Runes de transcendance et orbes.
  * SOURCE PRIMAIRE (devblog 2.58) : objet transcendé = plus de forgemagie ni d'orbe.
- * HYPOTHÈSES COMMUNAUTAIRES (paramètres) : refus si over/exo, taux 100 % par rang.
+ * Non certain (paramètres, dans l'ordre) : refuseIfExo, refuseIfOver, maxCurrentValueByRank,
+ * successRateByRank.
  */
 import { describe, it, expect } from 'vitest';
 import { applyRune, applyTranscendenceRune, applyRegenerationOrb } from '../../logic/engine';
@@ -38,7 +39,7 @@ describe('applyTranscendenceRune — application', () => {
   });
 });
 
-describe('SOURCE PRIMAIRE (devblog 2.58) — verrou de l\'objet', () => {
+describe("SOURCE PRIMAIRE (devblog 2.58) — verrou de l'objet", () => {
   const transcended = () => {
     const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
     return applyTranscendenceRune(state, ta(CHAR.FORCE, 10), params()).state;
@@ -58,12 +59,12 @@ describe('SOURCE PRIMAIRE (devblog 2.58) — verrou de l\'objet', () => {
       expect(onOther.reason).toBe('item_locked');
       expect(onOther.state).toBe(s);
     }
-    const onSame = applyRune(s, { characteristicId: CHAR.FORCE, value: 1 }, 'SC', params(), seqRng([0]));
-    expect(onSame.reason).toBe('item_locked');
+    expect(applyRune(s, { characteristicId: CHAR.FORCE, value: 1 }, 'SC', params(), seqRng([0])).reason).toBe('item_locked');
   });
 
-  it('refuses a second transcendence rune', () => {
-    const again = applyTranscendenceRune(transcended(), ta(CHAR.SAGESSE, 10), params());
+  it('refuses a second transcendence rune, before any hypothesis check', () => {
+    const permissive = testParams({ transcendence: { refuseIfExo: false, refuseIfOver: false } });
+    const again = applyTranscendenceRune(transcended(), ta(CHAR.SAGESSE, 10), permissive);
     expect(again.accepted).toBe(false);
     expect(again.reason).toBe('item_locked');
   });
@@ -73,41 +74,84 @@ describe('SOURCE PRIMAIRE (devblog 2.58) — verrou de l\'objet', () => {
     expect(r.accepted).toBe(false);
     expect(r.reason).toBe('item_locked');
   });
-
-  it('the lock is not a parameter: it holds whatever the params say', () => {
-    const s = transcended();
-    const permissive = testParams({ transcendence: { refuseIfOverOrExo: false } });
-    expect(applyRune(s, { characteristicId: CHAR.SAGESSE, value: 1 }, 'SC', permissive, seqRng([0])).reason).toBe('item_locked');
-    expect(applyTranscendenceRune(s, ta(CHAR.SAGESSE, 10), permissive).reason).toBe('item_locked');
-  });
 });
 
-describe('HYPOTHÈSE COMMUNAUTAIRE — refus si over/exo (paramètre refuseIfOverOrExo)', () => {
-  it('is refused when the item already has an over', () => {
-    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 51, baseMax: 50 })]);
-    const r = applyTranscendenceRune(state, ta(CHAR.SAGESSE, 10), params());
-    expect(r.accepted).toBe(false);
-    expect(r.reason).toBe('transcendence_requires_clean_item');
-    expect(r.state).toBe(state);
-  });
-
-  it('is refused when the item already has an exo', () => {
-    const state = makeState([
-      line({ characteristicId: CHAR.FORCE, value: 50 }),
+describe('ordre des vérifications : verrou → exo → over → seuil → application', () => {
+  const overAndExo = () =>
+    makeState([
+      line({ characteristicId: CHAR.FORCE, value: 51, baseMax: 50 }),
       line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true }),
     ]);
-    expect(applyTranscendenceRune(state, ta(CHAR.FORCE, 10), params()).reason).toBe('transcendence_requires_clean_item');
+
+  it('exo is reported before over', () => {
+    const r = applyTranscendenceRune(overAndExo(), ta(CHAR.SAGESSE, 10), params());
+    expect(r.reason).toBe('transcendence_has_exo');
   });
 
-  it('is accepted on an over item when the parameter is false', () => {
-    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 51, baseMax: 50 })]);
-    const r = applyTranscendenceRune(state, ta(CHAR.SAGESSE, 10), testParams({ transcendence: { refuseIfOverOrExo: false } }));
+  it('over is reported when refuseIfExo is off', () => {
+    const r = applyTranscendenceRune(overAndExo(), ta(CHAR.SAGESSE, 10), testParams({ transcendence: { refuseIfExo: false } }));
+    expect(r.reason).toBe('transcendence_has_over');
+  });
+
+  it('threshold is reported when both refusals are off', () => {
+    const p = testParams({
+      transcendence: { refuseIfExo: false, refuseIfOver: false, maxCurrentValueByRank: { [String(CHAR.FORCE)]: { Ta: 40 } } },
+    });
+    const r = applyTranscendenceRune(overAndExo(), ta(CHAR.FORCE, 10), p);
+    expect(r.reason).toBe('transcendence_threshold_exceeded');
+  });
+
+  it('application happens when everything is off', () => {
+    const p = testParams({ transcendence: { refuseIfExo: false, refuseIfOver: false } });
+    const r = applyTranscendenceRune(overAndExo(), ta(CHAR.SAGESSE, 10), p);
     expect(r.accepted).toBe(true);
+    expect(r.state.itemLocked).toBe(true);
   });
 });
 
-describe('HYPOTHÈSE COMMUNAUTAIRE — taux par rang (paramètre successRateByRank)', () => {
-  it('a rank below 100 % is refused explicitly instead of being drawn (phase 3)', () => {
+describe('HYPOTHÈSES COMMUNAUTAIRES — refuseIfExo / refuseIfOver', () => {
+  it('refuseIfExo alone refuses an exo item but accepts an over item', () => {
+    const p = testParams({ transcendence: { refuseIfExo: true, refuseIfOver: false } });
+    const exo = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true })]);
+    const over = makeState([line({ characteristicId: CHAR.FORCE, value: 51, baseMax: 50 })]);
+    expect(applyTranscendenceRune(exo, ta(CHAR.FORCE, 10), p).reason).toBe('transcendence_has_exo');
+    expect(applyTranscendenceRune(over, ta(CHAR.SAGESSE, 10), p).accepted).toBe(true);
+  });
+
+  it('refuseIfOver alone refuses an over item but accepts an exo item', () => {
+    const p = testParams({ transcendence: { refuseIfExo: false, refuseIfOver: true } });
+    const exo = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true })]);
+    const over = makeState([line({ characteristicId: CHAR.FORCE, value: 51, baseMax: 50 })]);
+    expect(applyTranscendenceRune(over, ta(CHAR.SAGESSE, 10), p).reason).toBe('transcendence_has_over');
+    expect(applyTranscendenceRune(exo, ta(CHAR.FORCE, 10), p).accepted).toBe(true);
+  });
+
+  it('an exo line at 0 does not count as an exo', () => {
+    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.PA, value: 0, baseMin: 0, baseMax: 0, isExo: true })]);
+    expect(applyTranscendenceRune(state, ta(CHAR.FORCE, 10), params()).accepted).toBe(true);
+  });
+});
+
+describe('INCONNU — maxCurrentValueByRank', () => {
+  it('no threshold configured (default): nothing is refused on that ground', () => {
+    const state = makeState([line({ characteristicId: CHAR.INITIATIVE, value: 5000 })]);
+    expect(applyTranscendenceRune(state, ta(CHAR.INITIATIVE, 100), params()).accepted).toBe(true);
+  });
+
+  it('a configured threshold refuses a line above it, per rank, and accepts at or below', () => {
+    const p = testParams({ transcendence: { maxCurrentValueByRank: { [String(CHAR.INITIATIVE)]: { Ta: 210, Pata: 410 } } } });
+    const at211 = makeState([line({ characteristicId: CHAR.INITIATIVE, value: 211 })]);
+    const at210 = makeState([line({ characteristicId: CHAR.INITIATIVE, value: 210 })]);
+    expect(applyTranscendenceRune(at211, ta(CHAR.INITIATIVE, 100), p).reason).toBe('transcendence_threshold_exceeded');
+    expect(applyTranscendenceRune(at210, ta(CHAR.INITIATIVE, 100), p).accepted).toBe(true);
+    expect(applyTranscendenceRune(at211, { characteristicId: CHAR.INITIATIVE, value: 150, rank: 'Pata' }, p).accepted).toBe(true);
+    // Rata non renseigné → aucun seuil
+    expect(applyTranscendenceRune(at211, { characteristicId: CHAR.INITIATIVE, value: 200, rank: 'Rata' }, p).accepted).toBe(true);
+  });
+});
+
+describe('HYPOTHÈSE COMMUNAUTAIRE — successRateByRank', () => {
+  it('a rank below 100 % is refused explicitly instead of being drawn', () => {
     const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 })]);
     const p = testParams({ transcendence: { successRateByRank: { Ta: 100, Pata: 90, Rata: 100 } } });
     const r = applyTranscendenceRune(state, { characteristicId: CHAR.FORCE, value: 15, rank: 'Pata' }, p);
@@ -121,17 +165,16 @@ describe('applyRegenerationOrb (HYPOTHÈSE COMMUNAUTAIRE hors verrou)', () => {
   it('re-rolls natural lines within [baseMin, baseMax], removes exos, purges the residual', () => {
     const state = makeState(
       [
-        line({ characteristicId: CHAR.FORCE, value: 70, baseMin: 30, baseMax: 50 }), // over
+        line({ characteristicId: CHAR.FORCE, value: 70, baseMin: 30, baseMax: 50 }),
         line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true }),
       ],
       12
     );
     const r = applyRegenerationOrb(state, seqRng([0.999]));
     expect(r.accepted).toBe(true);
-    expect(getLine(r.state, CHAR.FORCE).value).toBe(50); // rng 0.999 → borne haute
+    expect(getLine(r.state, CHAR.FORCE).value).toBe(50);
     expect(r.state.lines.some((l) => l.characteristicId === CHAR.PA)).toBe(false);
     expect(r.state.residualPool).toBe(0);
-    const low = applyRegenerationOrb(state, seqRng([0]));
-    expect(getLine(low.state, CHAR.FORCE).value).toBe(30);
+    expect(getLine(applyRegenerationOrb(state, seqRng([0])).state, CHAR.FORCE).value).toBe(30);
   });
 });

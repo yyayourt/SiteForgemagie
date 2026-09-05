@@ -23,8 +23,10 @@ const REFUSAL_LABELS: Record<string, string> = {
   line_locked: 'ligne verrouillée',
   no_density: 'densité inconnue',
   over_cap_exceeded: "plafond d'over/exo dépassé",
-  transcendence_requires_clean_item: 'transcendance : over/exo présent',
-  transcendence_rate_not_certain: 'transcendance : taux de réussite < 100 % (phase 3)',
+  transcendence_has_exo: 'transcendance : exo présent (hypothèse)',
+  transcendence_has_over: 'transcendance : over présent (hypothèse)',
+  transcendence_threshold_exceeded: 'transcendance : seuil de rang dépassé (paramètre)',
+  transcendence_rate_not_certain: 'transcendance : taux de réussite < 100 % (modèle)',
 };
 
 export function SimulationLog({ log, onClear }: Props) {
