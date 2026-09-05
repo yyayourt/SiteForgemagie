@@ -81,7 +81,7 @@ export function computeOutcomeProbabilities(
 /**
  * Tire un résultat aléatoire (SC/SN/EC) selon les probabilités.
  */
-export function rollOutcome(pSC: number, pSN: number, _pEC: number): RuneOutcome {
+export function rollOutcome(pSC: number, pSN: number): RuneOutcome {
   const roll = Math.random();
   if (roll < pSC) return 'SC';
   if (roll < pSC + pSN) return 'SN';
@@ -215,14 +215,14 @@ export function simulateRune(
   const pool = computeItemPool(stats);
 
   // Calcul des probabilités (gère le cas spécial exo lourd)
-  const { pSC, pSN, pEC } = computeOutcomeProbabilities(
+  const { pSC, pSN } = computeOutcomeProbabilities(
     pool.poolRemaining,
     runeWeight,
     targetStat.isExo
   );
 
   // Tirage aléatoire
-  const outcome = rollOutcome(pSC, pSN, pEC);
+  const outcome = rollOutcome(pSC, pSN);
 
   let newStats = [...stats.map((s) => ({ ...s }))];
   let sideEffect: SimLogEntry['sideEffect'] = undefined;

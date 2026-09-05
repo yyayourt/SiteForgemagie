@@ -1,73 +1,18 @@
-# React + TypeScript + Vite
+# Simulateur de Forgemagie — DOFUS 3 / DOFUS Unity
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Objectif
 
-Currently, two official plugins are available:
+Reconstruire aussi fidèlement que possible la logique **serveur** de la Forgemagie de DOFUS 3 (DOFUS Unity) : calcul du poids des lignes, budget de planification (`weightBudget`), reliquat serveur (`residualPool` = perte − rune, jamais négatif, créé par un SN/EC et consommé en priorité), action des runes, issues SC/SN/EC, sélection des pertes, over/exo/overmax, potions, orbes régénérants, runes de transcendance et brisage. Ce n'est ni un calculateur de poids simplifié ni un guide : c'est une reconstruction traçable, où chaque nombre sait d'où il vient.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Règles épistémiques
 
-## React Compiler
+Aucune valeur n'est un fait sans preuve. Chaque règle, valeur ou formule porte un statut explicite : `SOURCE PRIMAIRE` (devblog, interface du jeu, données client), `MODÈLE EMPIRIQUE` (données expérimentales reproductibles, N documenté), `HYPOTHÈSE COMMUNAUTAIRE` (guides et forums, non vérifié), `CONTRADICTION` (sources fiables en désaccord) ou `INCONNU`. Les règles certaines sont codées en dur et testées ; tout le reste vit dans `empirical_params.json` avec sa valeur, son statut, sa source, ses bornes et sa valeur par défaut, et reste modifiable depuis l'interface. Aucune formule n'est inventée pour « faire tourner » la simulation sans être marquée comme telle. Le détail des règles est dans `CLAUDE.md` ; l'état des connaissances dans `docs/knowledge/` ; l'audit de départ dans `docs/audit-projet-existant.md`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Structure
 
-## Expanding the ESLint configuration
+- `src/` — application React 19 + TypeScript + Vite 7 + Tailwind 4 (`data/` tables dérivées du dataset, `logic/` moteur, `hooks/` et `components/` interface, `__tests__/` tests Vitest).
+- `data/` — dataset de référence figé (généré par `scripts/`, jamais interrogé en direct par l'application), avec version du jeu, date d'extraction et provenance de chaque champ.
+- `empirical_params.json` — paramètres non certains, exposés dans le panneau « Paramètres avancés ».
+- `docs/knowledge/` — audits et rapports de reconstruction ; `docs/plans/` — plans en cours ; `docs/archive/` — documents obsolètes conservés pour l'historique.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Commandes : `npm run dev`, `npm run build`, `npm test`, `npm run lint`.
