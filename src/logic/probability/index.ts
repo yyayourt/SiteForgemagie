@@ -20,6 +20,7 @@ export type { ProbabilityInput, ProbabilityModel, ProbabilityOutput } from './ty
 export { distanceToMax, splitComplement } from './types';
 export { applyOfficialBounds, MIN_SC_NORMAL, MIN_SC_HEAVY_EXO } from './constraints';
 export { createSeededRng, mathRandomRng } from './rng';
+export { overCapUsageAfter } from './overCapUsage';
 export { officialFactorsLinearModel, poolRatioLegacyModel, lookupTableModel };
 
 const MODELS: Record<ProbabilityModelName, ProbabilityModel> = {

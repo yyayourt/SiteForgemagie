@@ -21,6 +21,12 @@ export interface ProbabilityInput {
   residualPool: number;
   /** Budget de planification (dérivé de l'état visible). Utilisé seulement par pool_ratio_legacy. */
   weightBudget: number;
+  /**
+   * Usage de la borne d'over/exo APRÈS la rune : cumul (part over + exo) / overCapWeight.
+   * 0 = aucun over ni exo, 1 = exactement à la borne. Optionnel : absent = 0. Utilisé par le
+   * terme d de official_factors_linear (INCONNU, nul par défaut).
+   */
+  overCapUsage?: number;
 }
 
 export interface ProbabilityOutput {

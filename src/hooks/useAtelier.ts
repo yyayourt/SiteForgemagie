@@ -20,6 +20,7 @@ import {
   isHeavyExo,
   mathRandomRng,
   createSeededRng,
+  overCapUsageAfter,
   type ProbabilityOutput,
 } from '../logic/probability';
 import { simulateRuneAttempts, type MonteCarloResult } from '../logic/probability/monteCarlo';
@@ -44,6 +45,8 @@ export interface RuneOption {
 export interface RuneEstimate extends ProbabilityOutput {
   model: ProbabilityModelName;
   isHeavyExo: boolean;
+  /** Usage de la borne over/exo si la rune passe (cumul / borne), 1 = à la borne */
+  overCapUsage: number;
 }
 
 const TIER_LABELS: Record<RuneTier, string> = { normal: '', pa: 'Pa', ra: 'Ra' };
@@ -224,6 +227,7 @@ export function useAtelier() {
       const option = runeOptions(characteristicId).find((o) => o.tier === tier);
       if (!target || !option || option.value <= 0) return null;
       const heavy = isHeavyExo(characteristicId, target.isExo, probabilityParams);
+      const overCapUsage = overCapUsageAfter(engineState, { characteristicId, value: option.value }, engineParams);
       const probs = computeOutcomeProbabilities(
         {
           itemLevel: level,
@@ -232,12 +236,13 @@ export function useAtelier() {
           isHeavyExo: heavy,
           residualPool: state.residualPool,
           weightBudget: budget.remainingBudget,
+          overCapUsage,
         },
         probabilityParams
       );
-      return { ...probs, model: probabilityParams.model, isHeavyExo: heavy };
+      return { ...probs, model: probabilityParams.model, isHeavyExo: heavy, overCapUsage };
     },
-    [stats, runeOptions, probabilityParams, level, state.residualPool, budget.remainingBudget]
+    [stats, runeOptions, probabilityParams, level, state.residualPool, budget.remainingBudget, engineState, engineParams]
   );
 
   const commit = useCallback(

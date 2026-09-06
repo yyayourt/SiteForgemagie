@@ -85,7 +85,7 @@ describe('bornes SOURCE PRIMAIRE (tutoriel officiel)', () => {
   }
 
   it('the floor is applied even when a model is deliberately mis-parameterised', () => {
-    const p = params({ officialFactorsLinear: { a: -1, b: 0, c: 0, levelNormalizer: 200 } });
+    const p = params({ officialFactorsLinear: { a: -1, b: 0, c: 0, d: 0, levelNormalizer: 200 } });
     expect(computeOutcomeProbabilities(input(), p).pSC).toBeCloseTo(MIN_SC_NORMAL, 9);
     const legacy = params({ poolRatioLegacy: { ...getProbabilityParams().poolRatioLegacy, minSc: 0 } });
     expect(computeOutcomeProbabilities(input({ weightBudget: -1e6 }), legacy, 'pool_ratio_legacy').pSC).toBeCloseTo(MIN_SC_NORMAL, 9);
@@ -105,7 +105,7 @@ describe('official_factors_linear', () => {
   });
 
   it('a, b, c and levelNormalizer are parameters: pSC = a + b·distance − c·level/normalizer before bounds', () => {
-    const p = params({ officialFactorsLinear: { a: 0.2, b: 0.4, c: 0.1, levelNormalizer: 200 }, ecShare: 0.25 });
+    const p = params({ officialFactorsLinear: { a: 0.2, b: 0.4, c: 0.1, d: 0, levelNormalizer: 200 }, ecShare: 0.25 });
     const r = computeOutcomeProbabilities(input({ line: { value: 25, baseMax: 50, isExo: false }, itemLevel: 100 }), p);
     // 0.2 + 0.4 × 0.5 − 0.1 × 0.5 = 0.35 ; complément 0.65 → EC 25 %, SN 75 %
     expect(r.pSC).toBeCloseTo(0.35, 9);

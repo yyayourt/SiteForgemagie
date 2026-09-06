@@ -229,7 +229,7 @@
         "default": 1
       },
       "officialFactorsLinear": {
-        "$comment": "pSC_brut = a + b × distance − c × (niveau / levelNormalizer), distance = (jetMax − valeur) / jetMax ∈ [0, 1] (0 = ligne au jet parfait ; exo = 0). Puis bornes officielles. Seuls les deux facteurs cités par Ankama interviennent.",
+        "$comment": "pSC_brut = a + b × distance − c × (niveau / levelNormalizer) − d × usageBorne, distance = (jetMax − valeur) / jetMax ∈ [0, 1] (0 = ligne au jet parfait ; exo = 0), usageBorne = cumul over+exo APRÈS la rune / overCapWeight, borné à [0, 1]. Puis bornes officielles. a, b, c : seuls les deux facteurs cités par Ankama ; d : facteur proposé par le projet, nul par défaut.",
         "a": {
           "value": 0.15,
           "status": "INCONNU",
@@ -257,6 +257,17 @@
           "status": "INCONNU",
           "source": "aucune ; Ankama cite le niveau de l'objet comme facteur sans en donner le sens",
           "note": "Pente selon le niveau de l'objet (normalisé /200). 0 = aucun effet tant que le sens n'est pas connu.",
+          "bounds": {
+            "min": -1,
+            "max": 1
+          },
+          "default": 0
+        },
+        "d": {
+          "value": 0,
+          "status": "INCONNU",
+          "source": "aucune source publiée. Proposition du projet (2026-09-06) d'après l'observation d'objets rares proches de la borne over/exo : « plus on s'approche de la limite, plus la chance de passer la rune doit être réduite ». Apparentée, sans être identique, à la règle 1 du guide Huz (« plus un item est lourd, plus les runes auront du mal à passer », qui parle du poids total).",
+          "note": "Pente selon l'usage de la borne d'over/exo après la rune (cumul over+exo / overCapWeight, borné à [0, 1]). 0 = aucun effet : le modèle par défaut reste celui des deux facteurs officiels tant qu'aucune mesure ne fixe cette pente. Une valeur de 0,3 retire 30 points de pSC brut à une rune qui amènerait l'objet exactement à la borne, avant les planchers officiels. À estimer par le journal d'observations (N documenté) avant toute autre valeur.",
           "bounds": {
             "min": -1,
             "max": 1

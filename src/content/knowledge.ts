@@ -76,7 +76,7 @@ export const KNOWLEDGE_SECTIONS: KnowledgeSection[] = [
     paramSections: ['probability'],
     prose: [
       "La formule du serveur est secrète et n'existe dans aucun dépôt public. Le simulateur ne la reproduit pas : il propose des modèles paramétrés, tous marqués inconnus, et affiche chaque estimation avec le badge « modèle empirique » et le nom du modèle actif.",
-      "Deux bornes sont officielles et appliquées après tout modèle : un plancher de succès critique en forgemagie normale, et un plancher bien plus bas pour les exotiques PA, PM et PO. Les seuls facteurs cités par Ankama sont le niveau de l'objet et la proximité du jet maximal ; le modèle par défaut n'utilise que ces deux facteurs.",
+      "Deux bornes sont officielles et appliquées après tout modèle : un plancher de succès critique en forgemagie normale, et un plancher bien plus bas pour les exotiques PA, PM et PO. Les seuls facteurs cités par Ankama sont le niveau de l'objet et la proximité du jet maximal ; le modèle par défaut n'utilise que ces deux facteurs. Il comporte aussi un terme de proximité de la borne d'over/exo, proposé par le projet d'après l'observation d'objets rares proches de cette borne : sa pente est nulle par défaut, donc sans effet tant qu'un relevé ne l'aura pas mesurée.",
       "Le journal d'observations en jeu est la seule voie pour faire passer un paramètre au statut de modèle empirique.",
     ],
     certain: [

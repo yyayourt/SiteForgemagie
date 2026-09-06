@@ -91,7 +91,12 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
                     <div><b className="block font-display text-[22px] text-sn">{pct(estimate.pSN)}</b><small className="text-[11px] text-ash-3">succès neutre</small></div>
                     <div><b className="block font-display text-[22px] text-ec">{pct(estimate.pEC)}</b><small className="text-[11px] text-ash-3">échec critique</small></div>
                   </div>
-                  <p className="m-0 mt-2 text-[11px] text-ash-3 leading-snug">
+                  <p className={`m-0 mt-2 text-[11px] leading-snug tnum ${estimate.overCapUsage > 1 ? 'text-ec' : estimate.overCapUsage >= 0.85 ? 'text-molten-text' : 'text-ash-3'}`}>
+                    {estimate.overCapUsage > 1
+                      ? `Dépasserait la borne over/exo (${Math.round(estimate.overCapUsage * 100)} %) : le moteur refusera la rune.`
+                      : `Borne over/exo après la rune : ${Math.round(estimate.overCapUsage * 100)} %${atelier.probabilityParams.officialFactorsLinear.d !== 0 && atelier.probabilityParams.model === 'official_factors_linear' ? ` (pente d = ${atelier.probabilityParams.officialFactorsLinear.d})` : ''}.`}
+                  </p>
+                  <p className="m-0 mt-1.5 text-[11px] text-ash-3 leading-snug">
                     Estimation d'un modèle paramétré, pas la formule du serveur. Seuls le plancher de quinze pour cent en forgemagie normale et celui d'un pour cent en exo PA/PM/PO sont officiels.
                   </p>
                 </div>

@@ -12,6 +12,7 @@ import type { ForgemagieItemState, Rng, Rune, RuneOutcome } from '../../types/fo
 import { applyRune } from '../engine';
 import { computeOutcomeProbabilities, drawOutcome, isHeavyExo } from './index';
 import type { ProbabilityInput, ProbabilityOutput } from './types';
+import { overCapUsageAfter } from './overCapUsage';
 
 export interface MonteCarloOptions {
   runs: number;
@@ -64,6 +65,7 @@ export function buildProbabilityInput(
     isHeavyExo: isHeavyExo(rune.characteristicId, isExo, probabilityParams),
     residualPool: state.residualPool,
     weightBudget,
+    overCapUsage: overCapUsageAfter(state, rune, engineParams),
   };
 }
 

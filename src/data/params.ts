@@ -252,7 +252,8 @@ export interface ProbabilityParams {
   ecShare: number;
   /** Part du complément allant à l'EC en exo lourd (HYPOTHÈSE COMMUNAUTAIRE, 1 = pas de SN). */
   heavyExoEcShare: number;
-  officialFactorsLinear: { a: number; b: number; c: number; levelNormalizer: number };
+  /** d : pente selon l'usage de la borne over/exo après la rune (INCONNU, 0 par défaut = sans effet). */
+  officialFactorsLinear: { a: number; b: number; c: number; d: number; levelNormalizer: number };
   poolRatioLegacy: PoolRatioLegacyCoefficients;
   lookupTable: LookupTableSpec;
 }
@@ -268,6 +269,7 @@ export function getProbabilityParams(overrides?: ParamOverrides): ProbabilityPar
       a: r<number>('officialFactorsLinear.a'),
       b: r<number>('officialFactorsLinear.b'),
       c: r<number>('officialFactorsLinear.c'),
+      d: r<number>('officialFactorsLinear.d'),
       levelNormalizer: r<number>('officialFactorsLinear.levelNormalizer'),
     },
     poolRatioLegacy: { ...r<PoolRatioLegacyCoefficients>('poolRatioLegacy.coefficients') },
