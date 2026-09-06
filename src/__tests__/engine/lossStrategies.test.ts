@@ -53,13 +53,13 @@ describe('prioritizeOverExo (HYPOTHÈSE COMMUNAUTAIRE)', () => {
     makeState([
       line({ characteristicId: CHAR.SAGESSE, value: 30 }), // naturelle, première dans l'ordre
       line({ characteristicId: CHAR.FORCE, value: 55, baseMax: 50 }), // over de 5
-      line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true }), // exo
+      line({ characteristicId: CHAR.PO, value: 1, baseMin: 0, baseMax: 0, isExo: true }), // exo (51 : reste sous la borne globale avec l'over)
       line({ characteristicId: CHAR.VITALITE, value: 300 }), // cible
     ]);
 
   it('true : over/exo lines are hit first, and an over line only loses its over part', () => {
     const params = testParams({ lossSelection: { strategy: 'uniform', prioritizeOverExo: true } });
-    // Rune Vi +5 = 1 de poids ; candidates over/exo dans l'ordre : Force (over), PA (exo) ; rng 0 → Force
+    // Rune Vi +5 = 1 de poids ; candidates over/exo dans l'ordre : Force (over), PO (exo) ; rng 0 → Force
     const r = applyRune(overExoItem(), { characteristicId: CHAR.VITALITE, value: 5 }, 'SN', params, seqRng([0]));
     expect(r.losses).toEqual([{ characteristicId: CHAR.FORCE, pointsLost: 1, weightLost: 1 }]);
     expect(getLine(r.state, CHAR.SAGESSE).value).toBe(30);
@@ -67,20 +67,20 @@ describe('prioritizeOverExo (HYPOTHÈSE COMMUNAUTAIRE)', () => {
 
   it('true : a loss bigger than the over part continues on the next candidates', () => {
     const params = testParams({ lossSelection: { strategy: 'uniform', prioritizeOverExo: true } });
-    // Rune Do +1 = 20 ; Force over = 5 (5 de poids) puis PA exo (100) → PA saute entier, reliquat 85
+    // Rune Do +1 = 20 ; Force over = 5 (5 de poids) puis PO exo (51) → PO saute entier, reliquat 36
     const state = makeState([
       line({ characteristicId: CHAR.DOMMAGES, value: 10 }),
       line({ characteristicId: CHAR.FORCE, value: 55, baseMax: 50 }),
-      line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true }),
+      line({ characteristicId: CHAR.PO, value: 1, baseMin: 0, baseMax: 0, isExo: true }),
     ]);
     const r = applyRune(state, { characteristicId: CHAR.DOMMAGES, value: 1 }, 'SN', params, seqRng([0, 0]));
     expect(r.losses).toEqual([
       { characteristicId: CHAR.FORCE, pointsLost: 5, weightLost: 5 },
-      { characteristicId: CHAR.PA, pointsLost: 1, weightLost: 100 },
+      { characteristicId: CHAR.PO, pointsLost: 1, weightLost: 51 },
     ]);
     expect(getLine(r.state, CHAR.FORCE).value).toBe(50);
-    expect(getLine(r.state, CHAR.PA).value).toBe(0);
-    expect(r.residualPoolAfter).toBe(85);
+    expect(getLine(r.state, CHAR.PO).value).toBe(0);
+    expect(r.residualPoolAfter).toBe(36);
   });
 
   it('false : the first candidate in item order can be a natural line', () => {

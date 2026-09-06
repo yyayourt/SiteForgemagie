@@ -8,9 +8,11 @@
  * Ce module ne partage AUCUN code avec le moteur (src/logic/engine) et ne connaît pas
  * le reliquat serveur (residualPool), qui est un état propre et non dérivable.
  *
- * Bornes d'over/exo : OVER_CAP_WEIGHT (HYPOTHÈSE COMMUNAUTAIRE) via getStatAbsoluteMax,
- * lecture « par ligne » ; overExoBudgetRemaining est un indicateur de la lecture
- * « globale » (overCapScope : CONTRADICTION), affiché à titre d'information.
+ * Bornes d'over/exo : OVER_CAP_WEIGHT (HYPOTHÈSE COMMUNAUTAIRE). overExoTotal est mesuré sur
+ * la part over (valeur − jet max) et l'exo ; overExoBudgetRemaining = borne − cumul, ce que
+ * la jauge « over/exo utilisé » affiche (portée overCapScope : HYPOTHÈSE COMMUNAUTAIRE,
+ * global par défaut). computeMaxReachable reçoit le plafond de ligne calculé par l'appelant
+ * selon la portée active (src/data/statCaps → getStatAbsoluteMaxInContext).
  */
 
 import type { SimulatedStat, WeightBudget } from '../../types';
@@ -93,17 +95,20 @@ export function getStatStatus(
 
 /**
  * Maximum atteignable pour une ligne en planification :
- * min(max permis par le budget restant, plafond par ligne).
+ * min(max permis par le budget restant, plafond de la ligne).
+ * `absoluteMax` : plafond selon la portée active (getStatAbsoluteMaxInContext) ; à défaut,
+ * plafond de la ligne seule (lecture par ligne, comportement historique).
  */
 export function computeMaxReachable(
   stat: SimulatedStat,
   remainingBudget: number,
-  overrides?: ParamOverrides
+  overrides?: ParamOverrides,
+  absoluteMax?: number
 ): number {
   if (!stat.isForgemeable || stat.weightPerPoint === 0) return stat.currentValue;
 
   const maxByBudget = stat.currentValue + Math.floor(remainingBudget / stat.weightPerPoint);
-  const maxByCap = getStatAbsoluteMax(stat, overrides);
+  const maxByCap = absoluteMax ?? getStatAbsoluteMax(stat, overrides);
 
   return Math.max(stat.currentValue, Math.min(maxByBudget, maxByCap));
 }

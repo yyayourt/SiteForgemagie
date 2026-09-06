@@ -5,8 +5,10 @@
  * Rien n'est écrit à la main ici. Statut du résultat : celui des deux paramètres
  * (overCapWeight : HYPOTHÈSE COMMUNAUTAIRE ; densité : voir chaque entrée).
  * Ce sont des plafonds arithmétiques, pas nécessairement des limites de gameplay
- * (docs/knowledge, audit §9). Le calcul ci-dessous est celui de la lecture « par ligne » ;
- * la lecture « globale » (overCapScope) est appliquée par le moteur.
+ * (docs/knowledge, audit §9). `getMaxOverOrExo` est le plafond d'une ligne SEULE (lecture
+ * « par ligne », ou lecture globale sans autre over/exo) ; `getLineOverRoom` tient compte
+ * de la portée active (overCapScope, HYPOTHÈSE COMMUNAUTAIRE : global par défaut) et de
+ * ce que les autres lignes consomment déjà. Le moteur applique la même règle (engine/overCap).
  *
  * Toutes les fonctions acceptent des surcharges de paramètres (profil du panneau
  * « Paramètres avancés ») ; sans argument, elles utilisent les valeurs du fichier.
@@ -16,6 +18,7 @@ import { getCharacteristicName } from './dataset';
 import {
   DENSITIES,
   getDensity,
+  getOverCapScope,
   getOverCapWeight,
   type EpistemicStatus,
   type ParamOverrides,
@@ -101,7 +104,7 @@ export const CATEGORY_ORDER: StatCapCategory[] = [
 ];
 
 /**
- * Valeur maximale atteignable sur une ligne (lecture « par ligne » de la borne) :
+ * Valeur maximale atteignable sur une ligne SEULE (lecture « par ligne » de la borne) :
  * - exo : maxOverOrExo
  * - naturelle : baseMax + maxOverOrExo
  * - sans densité documentée : Infinity (aucune contrainte connue)
@@ -113,4 +116,46 @@ export function getStatAbsoluteMax(
   const maxOver = getMaxOverOrExo(stat.characteristicId, overrides);
   if (maxOver === undefined) return Infinity;
   return stat.isExo ? maxOver : stat.baseMax + maxOver;
+}
+
+export interface OverCapLine {
+  characteristicId: number;
+  currentValue: number;
+  baseMax: number;
+  isExo: boolean;
+  isForgemeable: boolean;
+}
+
+/** Poids over (valeur − jet max) ou exo (valeur entière) d'une ligne, × densité. Jamais négatif. */
+export function getLineOverExoWeight(line: OverCapLine, overrides?: ParamOverrides): number {
+  const density = getDensity(line.characteristicId, overrides) ?? 0;
+  const points = line.isExo ? Math.max(0, line.currentValue) : Math.max(0, line.currentValue - line.baseMax);
+  return points * density;
+}
+
+/** Cumul over + exo de l'objet, mesuré sur la part over et l'exo (même règle que le moteur en scope global). */
+export function getTotalOverExoWeight(lines: readonly OverCapLine[], overrides?: ParamOverrides): number {
+  return lines.filter((l) => l.isForgemeable).reduce((sum, l) => sum + getLineOverExoWeight(l, overrides), 0);
+}
+
+/**
+ * Points d'over (ou d'exo) qu'une ligne peut porter au maximum, selon la portée active :
+ * - per_line : floor(overCapWeight / densité) ;
+ * - global : floor((overCapWeight − over/exo des AUTRES lignes) / densité), jamais négatif.
+ * undefined sans densité documentée.
+ */
+export function getLineOverRoom(stat: OverCapLine, allLines: readonly OverCapLine[], overrides?: ParamOverrides): number | undefined {
+  const density = getDensity(stat.characteristicId, overrides);
+  if (density === undefined || density <= 0) return undefined;
+  const cap = getOverCapWeight(overrides);
+  if (getOverCapScope(overrides) === 'per_line') return Math.floor(cap / density);
+  const others = getTotalOverExoWeight(allLines.filter((l) => l.characteristicId !== stat.characteristicId), overrides);
+  return Math.max(0, Math.floor((cap - others + 1e-9) / density));
+}
+
+/** Valeur maximale atteignable sur une ligne dans le contexte de l'objet (portée active). */
+export function getStatAbsoluteMaxInContext(stat: OverCapLine, allLines: readonly OverCapLine[], overrides?: ParamOverrides): number {
+  const room = getLineOverRoom(stat, allLines, overrides);
+  if (room === undefined) return Infinity;
+  return stat.isExo ? room : stat.baseMax + room;
 }

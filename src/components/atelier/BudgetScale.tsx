@@ -1,5 +1,7 @@
 import type { WeightBudget } from '../../types';
-import { InfoTip } from '../shell/Badges';
+import { InfoTip, StatusBadge } from '../shell/Badges';
+import { useParams } from '../../app/ParamsProvider';
+import { getOverCapScope, getOverCapWeight, getParamEntry } from '../../data/params';
 
 interface Props {
   budget: WeightBudget;
@@ -7,11 +9,21 @@ interface Props {
 
 /**
  * La balance : BUDGET DE POIDS de planification, dérivé des lignes visibles.
- * Fer froid, sans lumière : ce n'est pas le reliquat.
+ * Fer froid, sans lumière : ce n'est pas le reliquat. Sous la balance, la jauge
+ * « over/exo utilisé » : cumul de la part over et des exos face à la borne.
  */
 export function BudgetScale({ budget }: Props) {
-  const { freedWeight, spentWeight, remainingBudget, overExoTotal, overExoBudgetRemaining } = budget;
+  const { overrides } = useParams();
+  const { freedWeight, spentWeight, remainingBudget, overExoTotal } = budget;
   const tilt = Math.max(-6, Math.min(6, (spentWeight - freedWeight) / 25));
+
+  const cap = getOverCapWeight(overrides);
+  const scope = getOverCapScope(overrides);
+  const scopeEntry = getParamEntry<string>('params.overCapScope');
+  const capEntry = getParamEntry<number>('params.overCapWeight');
+  const usedPercent = cap > 0 ? Math.min(100, (overExoTotal / cap) * 100) : 0;
+  const atCap = overExoTotal >= cap - 1e-9;
+  const nearCap = !atCap && usedPercent >= 85;
 
   return (
     <section className="surface-iron p-4 sm:p-5" aria-labelledby="budget-title">
@@ -37,11 +49,35 @@ export function BudgetScale({ budget }: Props) {
         <dt>Poids consommé</dt><dd className="m-0 text-right font-semibold text-ash">{spentWeight.toFixed(1)}</dd>
         <dt>Reste à payer</dt>
         <dd className={`m-0 text-right font-semibold ${remainingBudget < 0 ? 'text-sn' : 'text-ash'}`}>{remainingBudget.toFixed(1)}</dd>
-        <dt className="pt-1 border-t border-iron-edge/60">Over + exo</dt>
-        <dd className="m-0 pt-1 border-t border-iron-edge/60 text-right text-ash" title={`Lecture « globale » de la borne : il reste ${overExoBudgetRemaining.toFixed(1)} avant le plafond. La portée de la borne (par ligne ou globale) est une CONTRADICTION non tranchée.`}>
-          {overExoTotal.toFixed(1)}
-        </dd>
       </dl>
+
+      {/* Jauge de la borne d'over/exo */}
+      <div className="mt-3 pt-3 border-t border-iron-edge/60" role="group" aria-labelledby="overcap-title">
+        <div className="flex items-center gap-1.5">
+          <span id="overcap-title" className="text-[13px] text-ash-2">Over/exo utilisé</span>
+          <InfoTip label="Comment la borne d'over/exo est mesurée">
+            <p className="m-0">Cumul de la <strong className="text-ash">part over</strong> de chaque ligne (valeur moins jet maximal, fois densité) et du poids des <strong className="text-ash">exotiques</strong>, face à la borne de <span className="tnum">{cap}</span> (<StatusBadge status={capEntry?.status ?? 'HYPOTHÈSE COMMUNAUTAIRE'} />).</p>
+            <p className="m-0 mt-2">
+              Portée <StatusBadge status={scopeEntry?.status ?? 'HYPOTHÈSE COMMUNAUTAIRE'} /> : {scope === 'global'
+                ? "cumulée sur l'objet, comme les exemples d'un guide récent qui font partager la borne à deux lignes. Un objet observé avec un exo PA et un over de deux points de poids ailleurs réfuterait cette lecture."
+                : 'par ligne (chaque ligne dispose de sa propre borne) ; ce cumul est alors indicatif.'}
+            </p>
+          </InfoTip>
+          <b className={`ml-auto text-[13px] tnum ${atCap ? 'text-ec' : nearCap ? 'text-molten-text' : 'text-ash'}`} aria-live="polite">
+            {overExoTotal.toFixed(1)} / {cap}
+          </b>
+        </div>
+        <div className="roll-track relative h-2 mt-1.5 rounded-full overflow-hidden" aria-hidden="true">
+          <span
+            className={`absolute inset-y-0 left-0 rounded-full ${atCap ? 'bg-ec' : 'bg-[linear-gradient(90deg,var(--color-over),var(--color-exo))]'}`}
+            style={{ width: `${usedPercent}%` }}
+          />
+        </div>
+        <p className="text-[11px] text-ash-3 mt-1 leading-snug tnum">
+          {scope === 'global' ? `borne cumulée sur l'objet · reste ${Math.max(0, cap - overExoTotal).toFixed(1)}` : 'borne par ligne · cumul indicatif'}
+        </p>
+      </div>
+
       <p className="text-xs text-ash-3 mt-2 leading-snug">
         La balance dit ce que vous planifiez ; le creuset, ce que le serveur retient.
       </p>

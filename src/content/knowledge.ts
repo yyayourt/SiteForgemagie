@@ -44,8 +44,8 @@ export const KNOWLEDGE_SECTIONS: KnowledgeSection[] = [
     title: 'Over, exotique et plafond',
     paramSections: ['overCap'],
     prose: [
-      "Une ligne au-dessus de son jet maximal est un over ; une ligne absente du patron de l'objet est un exotique. Une borne pratique de poids ajouté est largement attestée par les guides récents, mais sa nature exacte, par ligne ou en cumul sur l'objet, n'est pas tranchée : le simulateur l'expose comme un paramètre et refuse toute tentative qui la dépasserait.",
-      "Les plafonds par caractéristique affichés dans l'atelier sont de simples divisions de cette borne par la densité : des maxima arithmétiques, pas nécessairement des limites de jeu.",
+      "Une ligne au-dessus de son jet maximal est un over ; une ligne absente du patron de l'objet est un exotique. Une borne pratique de poids ajouté est largement attestée par les guides récents. Sa portée est un paramètre : par défaut, le simulateur additionne la part over de chaque ligne (valeur moins jet maximal, fois densité) et le poids des exotiques sur tout l'objet, lecture cumulée que suggèrent les exemples d'un guide récent où deux lignes se partagent la borne et où l'on conseille de lisser un over avant de tenter un exotique. La lecture par ligne reste disponible ; un objet observé avec un exotique PA et un over de deux points de poids sur une autre ligne réfuterait la lecture cumulée.",
+      "Les plafonds par caractéristique affichés dans l'atelier sont des divisions de cette borne par la densité, diminuée de ce que les autres lignes consomment déjà : des maxima arithmétiques, pas nécessairement des limites de jeu. La jauge « over/exo utilisé » de la balance montre le cumul face à la borne.",
     ],
   },
   {

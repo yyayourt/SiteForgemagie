@@ -25,7 +25,7 @@ import {
 import { simulateRuneAttempts, type MonteCarloResult } from '../logic/probability/monteCarlo';
 import { getAvailableRuneTiers, getCharacteristicName, getTranscendenceRunes, type TranscendenceRuneInfo } from '../data/dataset';
 import { getCraftParams, getDensity, getEngineParams, getProbabilityParams, type ParamOverrides, type ProbabilityModelName } from '../data/params';
-import { getStatAbsoluteMax } from '../data/statCaps';
+import { getStatAbsoluteMaxInContext } from '../data/statCaps';
 import { useParams } from '../app/ParamsProvider';
 
 const appRng: Rng = mathRandomRng;
@@ -150,7 +150,7 @@ export function useAtelier() {
     (characteristicId: number, newValue: number) => {
       const stat = stats.find((s) => s.characteristicId === characteristicId);
       if (!stat) return;
-      dispatch({ type: 'UPDATE_STAT', characteristicId, newValue, max: getStatAbsoluteMax(stat, overrides) });
+      dispatch({ type: 'UPDATE_STAT', characteristicId, newValue, max: getStatAbsoluteMaxInContext(stat, stats, overrides) });
     },
     [stats, overrides]
   );

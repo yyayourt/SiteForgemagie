@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { AtelierApi } from '../../hooks/useAtelier';
 import { computeMaxReachable } from '../../logic/planning/weightBudget';
-import { getMaxOverOrExo } from '../../data/statCaps';
+import { getLineOverRoom, getStatAbsoluteMaxInContext } from '../../data/statCaps';
 import { getParamEntry } from '../../data/params';
 import { useParams } from '../../app/ParamsProvider';
 import { InfoTip, StatusBadge } from '../shell/Badges';
@@ -139,7 +139,9 @@ export function ItemSlab({ atelier, onSaveToShowcase }: Props) {
       {/* Lignes */}
       <ul className="m-0 p-0 list-none">
         {stats.map((stat) => {
-          const maxOver = getMaxOverOrExo(stat.characteristicId, overrides) ?? null;
+          // Plafond de la ligne selon la portée de la borne (global : ce que les autres lignes laissent)
+          const maxOver = getLineOverRoom(stat, stats, overrides) ?? null;
+          const absoluteMax = getStatAbsoluteMaxInContext(stat, stats, overrides);
           const effectiveBudget =
             stat.currentValue > stat.baseMax
               ? budget.remainingBudget + (stat.currentValue - stat.baseMax) * stat.weightPerPoint
@@ -147,8 +149,8 @@ export function ItemSlab({ atelier, onSaveToShowcase }: Props) {
                 ? budget.remainingBudget - (stat.baseMax - stat.currentValue) * stat.weightPerPoint
                 : budget.remainingBudget;
           const maxReachable = stat.isExo
-            ? computeMaxReachable(stat, budget.remainingBudget + stat.currentValue * stat.weightPerPoint, overrides)
-            : computeMaxReachable({ ...stat, currentValue: stat.baseMax }, Math.max(0, effectiveBudget), overrides);
+            ? computeMaxReachable(stat, budget.remainingBudget + stat.currentValue * stat.weightPerPoint, overrides, absoluteMax)
+            : computeMaxReachable({ ...stat, currentValue: stat.baseMax }, Math.max(0, effectiveBudget), overrides, absoluteMax);
           return (
             <ItemLine
               key={stat.characteristicId}

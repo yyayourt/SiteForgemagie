@@ -16,17 +16,17 @@
       "default": 101
     },
     "overCapScope": {
-      "value": "per_line",
-      "status": "CONTRADICTION",
-      "source": "A §7 et §13 (nature globale vs par ligne : C-D) ; R PARTIE 6 (« over+exo cumulés ≤ 101 global ») ; AP §3.3 R1",
-      "note": "Les deux rapports de docs/knowledge/ se contredisent. per_line : chaque ligne over/exo dispose de son propre plafond overCapWeight. global : la somme des poids over+exo de l'objet est plafonnée. Défaut per_line PROVISOIRE, choisi pour continuité avec le code précédent, pas par preuve.",
+      "value": "global",
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) : « Les statistiques en exo ne peuvent excéder 101 de densité (Ex : 10 ini et 1 PA, 55 vita 1 PM…) » et « lisser des statistiques avant de tenter un exo (Ex : 213 vita/200, placer une rune pods de 2,5 de densité qui retire 13 vita pour être à 200/200 vita) » ; R PARTIE 6 (« over+exo cumulés ≤ 101 global ») ; contra A §7 et §13 (par ligne, confiance C-D) ; AP §3.3 R1",
+      "note": "global : la somme des poids over (valeur − jet max, × densité) et exo (valeur × densité) de l'objet est plafonnée à overCapWeight ; per_line : chaque ligne dispose de son propre plafond. Défaut global depuis le 2026-09-06 : les deux exemples de Huz additionnent deux lignes (10 ini = 1 + PA 100 = 101 ; 55 vita = 11 + PM 90 = 101) et son conseil de ramener un over 213/200 vita à 200 avant un exo PA n'a de sens que si l'over compte dans le même budget que l'exo. Hypothèse forte mais non démontrée : un objet observé en jeu avec un exo PA ET un over d'au moins 2 de poids sur une autre ligne (ex. 211/200 vita) réfuterait cette lecture et rendrait per_line.",
       "bounds": {
         "enum": [
           "per_line",
           "global"
         ]
       },
-      "default": "per_line"
+      "default": "global"
     },
     "ecLossFactor": {
       "value": 1,
@@ -57,7 +57,7 @@
       "prioritizeOverExo": {
         "value": true,
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
-        "source": "R PARTIE 5 (Tofus, learn-dofus : « over/exo d'abord, puis puits, puis lignes naturelles ») ; A §15.2",
+        "source": "R PARTIE 5 (Tofus, learn-dofus : « over/exo d'abord, puis puits, puis lignes naturelles ») ; A §15.2 ; guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) : « Les stats en over et en exo sont priorisés par le jeu lorsque l'artisan place des runes derrière »",
         "note": "Si vrai, les lignes en over ou exotiques sont ciblées avant les lignes naturelles lors d'une perte. Hypothèse forte mais non démontrée expérimentalement.",
         "bounds": {
           "enum": [
@@ -85,7 +85,7 @@
       "visibleInClient": {
         "value": false,
         "status": "CONTRADICTION",
-        "source": "docs internes (Cadernis via Reverse-Engineering §A : le client ne reçoit que magicPoolStatus, sens de variation, « le reliquat lui-même n'est pas exposé au client ») vs guide 2026 (affirme que le reliquat est affiché dans l'onglet FM du client Unity)",
+        "source": "docs internes (Cadernis via Reverse-Engineering §A : le client ne reçoit que magicPoolStatus, sens de variation, « le reliquat lui-même n'est pas exposé au client ») vs guide 2026 (affirme que le reliquat est affiché dans l'onglet FM du client Unity) ; guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) (côté « affiché ») : « nous n'avons plus besoin de calculer ce Reliquat, il s'affiche directement sur l'onglet de forgemagie »",
         "note": "Le reliquat est-il visible en jeu ? Les rapports de docs/knowledge/ le disent invisible (2.x) ; un guide 2026 le dit affiché dans l'onglet de forgemagie. À vérifier directement dans le client Unity. Sans effet sur le moteur ; conditionne seulement ce que l'interface prétend montrer.",
         "bounds": {
           "enum": [
@@ -101,7 +101,7 @@
       "refuseIfExo": {
         "value": true,
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
-        "source": "JeuxOnLine (relais de l'annonce de la mise à jour 2.49) ; Dofus Wiki (Fandom) : « cannot be used on an item that has already been … exomaged »",
+        "source": "JeuxOnLine (relais de l'annonce de la mise à jour 2.49) ; Dofus Wiki (Fandom) : « cannot be used on an item that has already been … exomaged » ; guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) : « Avant de placer la rune transcendance, l'item ne doit ni avoir d'over ni d'exo »",
         "note": "Refus de la rune de transcendance si l'objet possède déjà une ligne exotique. Relais communautaire d'une annonce officielle, texte primaire non retrouvé ; à confirmer en jeu.",
         "bounds": {
           "enum": [
@@ -114,7 +114,7 @@
       "refuseIfOver": {
         "value": true,
         "status": "HYPOTHÈSE COMMUNAUTAIRE",
-        "source": "Millenium (guide forgemagie) ; guides Unity 2026 ; Dofus Wiki (Fandom) : « … already been overmaged »",
+        "source": "Millenium (guide forgemagie) ; guides Unity 2026 ; Dofus Wiki (Fandom) : « … already been overmaged » ; guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) : « Avant de placer la rune transcendance, l'item ne doit ni avoir d'over ni d'exo »",
         "note": "Refus de la rune de transcendance si l'objet possède déjà une ligne au-dessus de son jet parfait. Source uniquement communautaire ; à confirmer en jeu.",
         "bounds": {
           "enum": [

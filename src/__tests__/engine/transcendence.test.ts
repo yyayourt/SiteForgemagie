@@ -83,7 +83,7 @@ describe('ordre des vérifications : verrou → exo → over → seuil → appli
   const overAndExo = () =>
     makeState([
       line({ characteristicId: CHAR.FORCE, value: 51, baseMax: 50 }),
-      line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true }),
+      line({ characteristicId: CHAR.PO, value: 1, baseMin: 0, baseMax: 0, isExo: true }), // 51 : sous la borne globale
     ]);
 
   it('exo is reported before over', () => {
@@ -115,7 +115,7 @@ describe('ordre des vérifications : verrou → exo → over → seuil → appli
 describe('HYPOTHÈSES COMMUNAUTAIRES — refuseIfExo / refuseIfOver', () => {
   it('refuseIfExo alone refuses an exo item but accepts an over item', () => {
     const p = testParams({ transcendence: { refuseIfExo: true, refuseIfOver: false } });
-    const exo = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true })]);
+    const exo = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.PO, value: 1, baseMin: 0, baseMax: 0, isExo: true })]);
     const over = makeState([line({ characteristicId: CHAR.FORCE, value: 51, baseMax: 50 })]);
     expect(applyTranscendenceRune(exo, ta(CHAR.FORCE, 10), p).reason).toBe('transcendence_has_exo');
     expect(applyTranscendenceRune(over, ta(CHAR.SAGESSE, 10), p).accepted).toBe(true);
@@ -123,7 +123,7 @@ describe('HYPOTHÈSES COMMUNAUTAIRES — refuseIfExo / refuseIfOver', () => {
 
   it('refuseIfOver alone refuses an over item but accepts an exo item', () => {
     const p = testParams({ transcendence: { refuseIfExo: false, refuseIfOver: true } });
-    const exo = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true })]);
+    const exo = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.PO, value: 1, baseMin: 0, baseMax: 0, isExo: true })]);
     const over = makeState([line({ characteristicId: CHAR.FORCE, value: 51, baseMax: 50 })]);
     expect(applyTranscendenceRune(over, ta(CHAR.SAGESSE, 10), p).reason).toBe('transcendence_has_over');
     expect(applyTranscendenceRune(exo, ta(CHAR.FORCE, 10), p).accepted).toBe(true);

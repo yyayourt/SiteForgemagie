@@ -1,6 +1,7 @@
 /**
  * Borne d'over/exo : overCapWeight (HYPOTHÈSE COMMUNAUTAIRE, 101) dans ses deux lectures
- * concurrentes overCapScope = per_line | global (CONTRADICTION).
+ * overCapScope = global (défaut, HYPOTHÈSE COMMUNAUTAIRE : guide Huz, exemples « 10 ini et
+ * 1 PA », « 55 vita 1 PM » = 101 cumulés) | per_line (option).
  */
 import { describe, it, expect } from 'vitest';
 import { applyRune, checkOverCap, hasAnyOverOrExo, withRuneApplied } from '../../logic/engine';
@@ -58,6 +59,47 @@ describe('global', () => {
     expect(r.accepted).toBe(true);
     const check = checkOverCap(r.state, CHAR.PA, global());
     expect(check.overWeightAfter).toBe(100);
+  });
+});
+
+describe("global (défaut) — exemples du guide Huz, borne mesurée sur la part over et l'exo", () => {
+  const capeVita = (value: number, baseMax = 350) => line({ characteristicId: CHAR.VITALITE, value, baseMin: 251, baseMax });
+
+  it('the file default is global', () => {
+    expect(testParams().overCapScope).toBe('global');
+  });
+
+  it('cape 370/350 vita (over 4) + exo PM (90) = 94 → accepted', () => {
+    const r = applyRune(makeState([capeVita(370)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', testParams(), seqRng([0]));
+    expect(r.accepted).toBe(true);
+    expect(checkOverCap(r.state, CHAR.PM, testParams()).overWeightAfter).toBeCloseTo(94, 9);
+  });
+
+  it('then a Rune Vi (+5 vita, 1 of weight) → 95, still accepted', () => {
+    const withPm = applyRune(makeState([capeVita(370)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', testParams(), seqRng([0])).state;
+    const r = applyRune(withPm, { characteristicId: CHAR.VITALITE, value: 5 }, 'SC', testParams(), seqRng([0]));
+    expect(r.accepted).toBe(true);
+    expect(checkOverCap(r.state, CHAR.VITALITE, testParams()).overWeightAfter).toBeCloseTo(95, 9);
+  });
+
+  it('exo PA on an item at 213/200 vita → refused (100 + 2,6 = 102,6 > 101)', () => {
+    const r = applyRune(makeState([capeVita(213, 200)]), { characteristicId: CHAR.PA, value: 1 }, 'SC', testParams(), seqRng([0]));
+    expect(r.accepted).toBe(false);
+    expect(r.reason).toBe('over_cap_exceeded');
+    // lissé à 200/200 (conseil de Huz), le PA passe
+    expect(applyRune(makeState([capeVita(200, 200)]), { characteristicId: CHAR.PA, value: 1 }, 'SC', testParams(), seqRng([0])).accepted).toBe(true);
+  });
+
+  it('measures the over portion, not the whole line: 213/200 vita weighs 42,6 but only 2,6 counts, so an exo PM (90) fits', () => {
+    const r = applyRune(makeState([capeVita(213, 200)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', testParams(), seqRng([0]));
+    expect(r.accepted).toBe(true);
+    expect(checkOverCap(r.state, CHAR.PM, testParams()).overWeightAfter).toBeCloseTo(92.6, 9);
+  });
+
+  it('refutation pointer: exo PA + over ≥ 2 of weight elsewhere is exactly what global forbids and per_line allows', () => {
+    const state = makeState([capeVita(211, 200), line({ characteristicId: CHAR.PA, value: 1, baseMin: 0, baseMax: 0, isExo: true })]);
+    expect(checkOverCap(state, CHAR.PA, global()).allowed).toBe(false);
+    expect(checkOverCap(state, CHAR.PA, perLine()).allowed).toBe(true);
   });
 });
 
