@@ -2,7 +2,7 @@
   "$comment": "Paramètres NON certains du simulateur. Chaque entrée porte value / status / source / note / bounds / default. Statuts : SOURCE PRIMAIRE, MODÈLE EMPIRIQUE, HYPOTHÈSE COMMUNAUTAIRE, CONTRADICTION, INCONNU (cf. CLAUDE.md). Les règles SOURCE PRIMAIRE ne sont pas ici : elles sont codées en dur et testées. Sources abrégées : A = docs/knowledge/audit-forgemagie-dofus3.md ; R = docs/knowledge/Reconstruction_of_the_DOFUS_3_Unity_Forgemagie_Algorithm__2026_V.md ; AP = docs/audit-projet-existant.md.",
   "schemaVersion": 1,
   "gameVersion": "3.6.10.11",
-  "updatedAt": "2026-09-05",
+  "updatedAt": "2026-09-06",
   "params": {
     "overCapWeight": {
       "value": 101,
@@ -153,6 +153,22 @@
           "Pata": 100,
           "Rata": 100
         }
+      }
+    },
+    "craft": {
+      "$comment": "Jet de craft : loi de tirage de chaque ligne dans son intervalle [min, max]. Utilisée par l'orbe régénérant (src/logic/engine/orb.ts) et par la saisie rapide « Jet aléatoire » de l'atelier, via src/logic/craft/rollItem.ts.",
+      "rollDistribution": {
+        "value": "uniform",
+        "status": "INCONNU",
+        "source": "aucune : la loi du jet de craft n'est pas publique. Le tutoriel officiel dit seulement que les jets d'un objet crafté sont aléatoires dans l'intervalle affiché ; R PARTIE 10 (orbe = « jet de craft aléatoire », relais de guides) ne précise aucune loi.",
+        "note": "uniform : chaque valeur entière de [min, max] est équiprobable, choix par défaut faute de mieux. triangular : moyenne de deux tirages uniformes (les valeurs médianes sont favorisées), alternative SANS SOURCE, fournie uniquement pour tester une hypothèse de joueur. Aucune donnée publique ne départage ces lois ; un relevé de jets bruts (journal d'observations) pourrait le faire.",
+        "bounds": {
+          "enum": [
+            "uniform",
+            "triangular"
+          ]
+        },
+        "default": "uniform"
       }
     },
     "probability": {

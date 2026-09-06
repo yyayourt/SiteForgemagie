@@ -7,6 +7,9 @@
 import { describe, it, expect } from 'vitest';
 import { applyRune, applyTranscendenceRune, applyRegenerationOrb } from '../../logic/engine';
 import { CHAR, getLine, line, makeState, seqRng, testParams } from './helpers';
+import { getCraftParams } from '../../data/params';
+
+const craft = () => getCraftParams();
 
 const params = () => testParams();
 const ta = (characteristicId: number, value: number) => ({ characteristicId, value, rank: 'Ta' as const });
@@ -70,7 +73,7 @@ describe("SOURCE PRIMAIRE (devblog 2.58) — verrou de l'objet", () => {
   });
 
   it('refuses a regeneration orb', () => {
-    const r = applyRegenerationOrb(transcended(), seqRng([0.5]));
+    const r = applyRegenerationOrb(transcended(), seqRng([0.5]), craft());
     expect(r.accepted).toBe(false);
     expect(r.reason).toBe('item_locked');
   });
@@ -170,11 +173,11 @@ describe('applyRegenerationOrb (HYPOTHÈSE COMMUNAUTAIRE hors verrou)', () => {
       ],
       12
     );
-    const r = applyRegenerationOrb(state, seqRng([0.999]));
+    const r = applyRegenerationOrb(state, seqRng([0.999]), craft());
     expect(r.accepted).toBe(true);
     expect(getLine(r.state, CHAR.FORCE).value).toBe(50);
     expect(r.state.lines.some((l) => l.characteristicId === CHAR.PA)).toBe(false);
     expect(r.state.residualPool).toBe(0);
-    expect(getLine(applyRegenerationOrb(state, seqRng([0])).state, CHAR.FORCE).value).toBe(30);
+    expect(getLine(applyRegenerationOrb(state, seqRng([0]), craft()).state, CHAR.FORCE).value).toBe(30);
   });
 });

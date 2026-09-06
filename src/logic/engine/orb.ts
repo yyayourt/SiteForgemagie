@@ -7,11 +7,13 @@
  *
  * HYPOTHÈSE COMMUNAUTAIRE (docs/knowledge R PARTIE 10, Millenium ; CLAUDE.md « à confirmer ») :
  *   l'orbe réinitialise l'objet à un jet de craft aléatoire et purge over, exo et reliquat.
- *   La loi du jet de craft est INCONNUE : un tirage uniforme entier dans [baseMin, baseMax]
- *   est utilisé ici faute de mieux, avec RNG injecté.
+ *   La loi du jet de craft est INCONNUE : elle vient de empirical_params.json →
+ *   craft.rollDistribution et le tirage est délégué à src/logic/craft/rollItem (RNG injecté).
  */
 
-import type { ForgemagieItemState, ItemLine, RefusalReason, Rng } from '../../types/forgemagie';
+import type { ForgemagieItemState, RefusalReason, Rng } from '../../types/forgemagie';
+import type { CraftParams } from '../../data/params';
+import { rollItem } from '../craft/rollItem';
 
 export interface OrbResult {
   accepted: boolean;
@@ -19,18 +21,12 @@ export interface OrbResult {
   state: ForgemagieItemState;
 }
 
-export function applyRegenerationOrb(state: ForgemagieItemState, rng: Rng): OrbResult {
+export function applyRegenerationOrb(state: ForgemagieItemState, rng: Rng, craft: CraftParams): OrbResult {
   // SOURCE PRIMAIRE (devblog 2.58) : pas d'orbe sur un objet transcendé
   if (state.itemLocked) return { accepted: false, reason: 'item_locked', state };
 
-  // HYPOTHÈSE COMMUNAUTAIRE : jet de craft aléatoire, exos retirés, reliquat purgé
-  const lines: ItemLine[] = state.lines
-    .filter((l) => !l.isExo)
-    .map((l) => {
-      const span = l.baseMax - l.baseMin;
-      const roll = span > 0 ? l.baseMin + Math.min(span, Math.floor(rng.next() * (span + 1))) : l.baseMax;
-      return { ...l, value: roll };
-    });
-
-  return { accepted: true, state: { ...state, lines, residualPool: 0 } };
+  // HYPOTHÈSE COMMUNAUTAIRE : exos retirés, jet de craft retiré (loi = paramètre), reliquat purgé
+  const natural = { ...state, lines: state.lines.filter((l) => !l.isExo) };
+  const rolled = rollItem(natural, craft, rng);
+  return { accepted: true, state: { ...rolled, residualPool: 0 } };
 }

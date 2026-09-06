@@ -94,10 +94,14 @@ export const KNOWLEDGE_SECTIONS: KnowledgeSection[] = [
   },
   {
     id: 'orbes',
-    title: 'Orbes régénérants',
-    paramSections: [],
+    title: 'Jet de craft et orbes régénérants',
+    paramSections: ['craft'],
     prose: [
-      "Un orbe remet l'objet à un jet de craft aléatoire et purge over, exotiques et reliquat, selon les guides. La loi du jet n'est pas connue : le simulateur tire uniformément dans l'intervalle du jet, à titre provisoire. Le refus sur un objet transcendé est, lui, une règle officielle.",
+      "Un objet crafté reçoit sur chaque ligne une valeur tirée dans l'intervalle affiché par le jeu. La loi de ce tirage n'est pas publique : le simulateur l'expose comme un paramètre, uniforme par défaut faute de mieux, avec une loi de rechange sans source pour tester une hypothèse. La même fonction sert au bouton « Jet aléatoire » de l'enclume, qui ne touche pas au reliquat, et l'indicateur de qualité du jet mesure la position pondérée par densité dans ces intervalles.",
+      "Un orbe remet l'objet à un jet de craft aléatoire et purge over, exotiques et reliquat, selon les guides. Le refus sur un objet transcendé est, lui, une règle officielle.",
+    ],
+    certain: [
+      "Objet transcendé : aucune réinitialisation par orbe (devblog de la mise à jour 2.58).",
     ],
   },
 ];

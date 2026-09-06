@@ -44,6 +44,8 @@ export type TranscendenceRank = 'Ta' | 'Pata' | 'Rata';
 /** { "<characteristicId>": { Ta?: n, Pata?: n, Rata?: n } } */
 export type TranscendenceThresholds = Record<string, Partial<Record<TranscendenceRank, number>>>;
 export type ProbabilityModelName = 'official_factors_linear' | 'pool_ratio_legacy' | 'lookup_table';
+/** Loi du jet de craft (INCONNU) : voir src/logic/craft/rollDistributions.ts. */
+export type RollDistributionName = 'uniform' | 'triangular';
 
 export const PARAMS_META = {
   schemaVersion: paramsJson.schemaVersion,
@@ -171,6 +173,17 @@ export function getEngineParams(overrides?: ParamOverrides): EngineParams {
       successRateByRank: { ...r<Record<TranscendenceRank, number>>('params.transcendence.successRateByRank') },
     },
   };
+}
+
+// ─── Jet de craft (src/logic/craft) ──────────────────────────────────────────
+
+/** Paramètres du jet de craft : loi de tirage d'une ligne dans [baseMin, baseMax]. INCONNU. */
+export interface CraftParams {
+  rollDistribution: RollDistributionName;
+}
+
+export function getCraftParams(overrides?: ParamOverrides): CraftParams {
+  return { rollDistribution: readParam<RollDistributionName>('params.craft.rollDistribution', overrides) };
 }
 
 // ─── Brisage ─────────────────────────────────────────────────────────────────

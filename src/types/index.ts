@@ -103,10 +103,29 @@ export interface ForgeEvent {
 
 export type AtelierMode = 'forge' | 'adjust';
 
+// ─── Coût de session ───
+
+/** Consommable dépensé par une action : rune de forgemagie, rune de transcendance, orbe, potion. */
+export interface ConsumableRef {
+  /** Clé stable : `rune:<runeId du dataset>`, `orb`, `potion:<id>` */
+  key: string;
+  kind: ForgeActionKind;
+  /** Libellé d'affichage, ex. « Rune Pa Vi », « Orbe régénérant » */
+  label: string;
+}
+
+export interface ConsumedEntry extends ConsumableRef {
+  count: number;
+}
+
+/** Compteur de la session : clé de consommable → nombre consommé. Fait partie de l'historique (undo). */
+export type SessionConsumption = Record<string, ConsumedEntry>;
+
 export interface AtelierSnapshot {
   stats: SimulatedStat[];
   residualPool: number;
   itemLocked: boolean;
+  consumed: SessionConsumption;
 }
 
 /** State of the atelier with undo history */
@@ -117,6 +136,8 @@ export interface AtelierState {
   residualPool: number;
   /** Objet transcendé (plus de forgemagie ni d'orbe) */
   itemLocked: boolean;
+  /** Runes, orbes et potions consommés sur cet objet depuis la dernière remise à zéro */
+  consumed: SessionConsumption;
   history: AtelierSnapshot[];
   future: AtelierSnapshot[];
   mode: AtelierMode;
@@ -133,10 +154,13 @@ export type AtelierAction =
   | { type: 'ADD_EXO'; stat: SimulatedStat }
   | { type: 'REMOVE_EXO'; characteristicId: number }
   | { type: 'RESET_TO_PERFECT' }
+  /** Saisie rapide (tout au max, au min, jet aléatoire) : lignes remplacées, reliquat et verrou intacts */
+  | { type: 'REPLACE_STATS'; stats: SimulatedStat[] }
   | { type: 'UNDO' }
   | { type: 'REDO' }
   | { type: 'SET_MODE'; mode: AtelierMode }
   | { type: 'SELECT_LINE'; characteristicId: number | null }
-  | { type: 'APPLY_RESULT'; snapshot: AtelierSnapshot; logEntry: SimLogEntry; event: ForgeEvent }
+  | { type: 'APPLY_RESULT'; snapshot: AtelierSnapshot; logEntry: SimLogEntry; event: ForgeEvent; consumable?: ConsumableRef }
   | { type: 'RESET_RESIDUAL' }
+  | { type: 'RESET_SESSION' }
   | { type: 'CLEAR_LOG' };

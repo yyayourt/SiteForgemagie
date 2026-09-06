@@ -36,6 +36,7 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
   const estimate = selected ? atelier.estimate(selected.characteristicId, tier) : null;
   const disabled = !item || itemLocked || mode !== 'forge';
   const lockNote = getParamEntry<boolean>('params.transcendence.refuseIfOver');
+  const rollLaw = getParamEntry<string>('params.craft.rollDistribution');
 
   return (
     <section className="surface-iron p-4 sm:p-5 flex flex-col gap-3" aria-labelledby="action-title">
@@ -140,7 +141,7 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
       {tab === 'orb' && item && !disabled && (
         <>
           <p className="text-[13px] text-ash-2 leading-snug">
-            L'orbe régénérant remet l'objet à un jet de craft aléatoire, retire les exos et vide le reliquat. <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" /> La loi du jet est inconnue : tirage uniforme dans l'intervalle, à titre provisoire. Le refus sur un objet transcendé est <StatusBadge status="SOURCE PRIMAIRE" />.
+            L'orbe régénérant remet l'objet à un jet de craft aléatoire, retire les exos et vide le reliquat. <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" /> La loi du jet est un paramètre <StatusBadge status={rollLaw?.status ?? 'INCONNU'} /> (« {atelier.craftParams.rollDistribution} », section « Jet de craft » des paramètres), le même que pour le bouton « Jet aléatoire » de l'enclume. Le refus sur un objet transcendé est <StatusBadge status="SOURCE PRIMAIRE" />.
           </p>
           <ul className="m-0 p-0 list-none text-xs text-ash-3 grid grid-cols-2 gap-x-3 gap-y-0.5">
             {FM_ORBS.filter((o) => !o.nameFr.includes('(lié)')).map((o) => <li key={o.id}>{o.nameFr} · niv. {o.level}</li>)}

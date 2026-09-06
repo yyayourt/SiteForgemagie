@@ -3,7 +3,7 @@ import { useParams } from '../../app/ParamsProvider';
 import { ItemSearch } from '../atelier/ItemSearch';
 import type { Item, SimulatedStat } from '../../types';
 
-export type Page = 'atelier' | 'montecarlo' | 'savoir';
+export type Page = 'atelier' | 'vitrine' | 'montecarlo' | 'savoir';
 
 interface Props {
   page: Page;
@@ -12,15 +12,18 @@ interface Props {
   paramsOpen: boolean;
   onSelectItem: (item: Item, stats: SimulatedStat[]) => void;
   currentItemName?: string;
+  /** Nombre d'objets dans la vitrine (badge de navigation) */
+  showcaseCount?: number;
 }
 
 const PAGES: { id: Page; label: string }[] = [
   { id: 'atelier', label: 'Atelier' },
+  { id: 'vitrine', label: 'Vitrine' },
   { id: 'montecarlo', label: 'Monte Carlo' },
   { id: 'savoir', label: 'Savoir' },
 ];
 
-export function TopBar({ page, onNavigate, onOpenParams, paramsOpen, onSelectItem, currentItemName }: Props) {
+export function TopBar({ page, onNavigate, onOpenParams, paramsOpen, onSelectItem, currentItemName, showcaseCount = 0 }: Props) {
   const { theme, toggle } = useTheme();
   const { overrideCount } = useParams();
 
@@ -36,18 +39,21 @@ export function TopBar({ page, onNavigate, onOpenParams, paramsOpen, onSelectIte
           <ItemSearch onSelect={onSelectItem} currentItemName={currentItemName} />
         </div>
 
-        <nav className="ml-auto flex items-center gap-1" aria-label="Pages">
+        <nav className="ml-auto flex items-center gap-1 max-w-full overflow-x-auto [scrollbar-width:thin]" aria-label="Pages">
           {PAGES.map((p) => (
             <button
               key={p.id}
               type="button"
               onClick={() => onNavigate(p.id)}
               aria-current={page === p.id ? 'page' : undefined}
-              className={`px-3 py-2 rounded-control border text-sm whitespace-nowrap transition-colors ${
+              className={`shrink-0 px-3 py-2 rounded-control border text-sm whitespace-nowrap transition-colors ${
                 page === p.id ? 'border-iron-edge bg-iron text-ash' : 'border-transparent text-ash-2 hover:text-ash hover:bg-iron'
               }`}
             >
               {p.label}
+              {p.id === 'vitrine' && showcaseCount > 0 && (
+                <span className="ml-1.5 text-[11px] px-1.5 py-px rounded-full border border-iron-edge text-ash-3 tnum" aria-label={`${showcaseCount} objet(s) dans la vitrine`}>{showcaseCount}</span>
+              )}
             </button>
           ))}
           <button
@@ -55,7 +61,7 @@ export function TopBar({ page, onNavigate, onOpenParams, paramsOpen, onSelectIte
             onClick={onOpenParams}
             aria-expanded={paramsOpen}
             aria-controls="params-drawer"
-            className={`px-3 py-2 rounded-control border text-sm transition-colors ${
+            className={`shrink-0 px-3 py-2 rounded-control border text-sm whitespace-nowrap transition-colors ${
               paramsOpen ? 'border-iron-edge bg-iron text-ash' : 'border-transparent text-ash-2 hover:text-ash hover:bg-iron'
             }`}
           >
@@ -70,7 +76,7 @@ export function TopBar({ page, onNavigate, onOpenParams, paramsOpen, onSelectIte
             type="button"
             onClick={toggle}
             aria-pressed={theme === 'light'}
-            className="ml-1 inline-flex items-center gap-2 px-3 py-2 rounded-full border border-iron-edge bg-iron text-ash-2 text-xs hover:text-ash hover:border-ash-3"
+            className="shrink-0 ml-1 inline-flex items-center gap-2 px-3 py-2 rounded-full border border-iron-edge bg-iron text-ash-2 text-xs hover:text-ash hover:border-ash-3"
             title="Basculer entre la forge de nuit (mode principal) et l'atelier de jour"
           >
             {theme === 'light' ? (

@@ -15,7 +15,7 @@ export type ParamKind = 'number' | 'boolean' | 'enum' | 'json';
 
 export interface ParamDescriptor {
   path: string;
-  /** Section d'affichage : 'overCap' | 'ecLoss' | 'lossSelection' | 'residualPool' | 'transcendence' | 'probability' | 'brisage' | 'densities' */
+  /** Section d'affichage : 'overCap' | 'ecLoss' | 'lossSelection' | 'residualPool' | 'transcendence' | 'craft' | 'probability' | 'brisage' | 'densities' */
   section: string;
   /** Sous-groupe éventuel (ex. officialFactorsLinear) */
   subgroup?: string;
@@ -36,12 +36,13 @@ export const SECTION_LABELS: Record<string, string> = {
   lossSelection: 'Sélection des pertes',
   residualPool: 'Reliquat',
   transcendence: 'Transcendance',
+  craft: 'Jet de craft',
   probability: 'Modèle probabiliste',
   brisage: 'Brisage',
   densities: 'Densités (poids par point)',
 };
 
-export const SECTION_ORDER = ['densities', 'overCap', 'lossSelection', 'ecLoss', 'residualPool', 'transcendence', 'probability', 'brisage'];
+export const SECTION_ORDER = ['densities', 'overCap', 'lossSelection', 'ecLoss', 'residualPool', 'transcendence', 'craft', 'probability', 'brisage'];
 
 function isEntry(node: unknown): node is ParamEntry<unknown> {
   return (

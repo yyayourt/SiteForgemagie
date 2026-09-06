@@ -1,17 +1,19 @@
 /**
  * Hook central de l'atelier : lignes visibles, reliquat serveur, budget de planification,
- * actions (rune, transcendance, orbe), estimation du modèle probabiliste, Monte Carlo,
- * persistance locale. Toutes les règles viennent de src/logic ; l'issue d'une rune est
- * soit tirée par le MODÈLE (statut INCONNU), soit forcée à la main.
+ * actions (rune, transcendance, orbe), saisie rapide (max, min, jet aléatoire), compteur
+ * de consommation, estimation du modèle probabiliste, Monte Carlo, persistance locale.
+ * Toutes les règles viennent de src/logic ; l'issue d'une rune est soit tirée par le
+ * MODÈLE (statut INCONNU), soit forcée à la main.
  */
 
 import { useReducer, useMemo, useCallback, useEffect, useRef } from 'react';
-import type { Item, SimulatedStat, RuneTier, RuneOutcome, SimLogEntry, ForgeEvent, AtelierMode, AtelierState } from '../types';
+import type { Item, SimulatedStat, RuneTier, RuneOutcome, SimLogEntry, ForgeEvent, AtelierMode, AtelierState, ConsumableRef } from '../types';
 import type { ApplyRuneResult, ForgemagieItemState, Rng } from '../types/forgemagie';
 import { atelierReducer, initialAtelierState } from '../state/atelierReducer';
 import { loadJson, saveJson, STORAGE_KEYS } from '../state/persistence';
 import { computeWeightBudget } from '../logic/planning/weightBudget';
 import { applyRune, applyTranscendenceRune, applyRegenerationOrb } from '../logic/engine';
+import { rollItem, computeRollQuality } from '../logic/craft';
 import {
   computeOutcomeProbabilities,
   drawOutcome,
@@ -22,7 +24,7 @@ import {
 } from '../logic/probability';
 import { simulateRuneAttempts, type MonteCarloResult } from '../logic/probability/monteCarlo';
 import { getAvailableRuneTiers, getCharacteristicName, getTranscendenceRunes, type TranscendenceRuneInfo } from '../data/dataset';
-import { getDensity, getEngineParams, getProbabilityParams, type ParamOverrides, type ProbabilityModelName } from '../data/params';
+import { getCraftParams, getDensity, getEngineParams, getProbabilityParams, type ParamOverrides, type ProbabilityModelName } from '../data/params';
 import { getStatAbsoluteMax } from '../data/statCaps';
 import { useParams } from '../app/ParamsProvider';
 
@@ -33,6 +35,9 @@ export interface RuneOption {
   label: string;
   value: number;
   weight: number;
+  /** Identifiant de la rune dans le dataset (clé du carnet de prix) */
+  runeId: number;
+  nameFr: string;
 }
 
 /** Estimation du MODÈLE probabiliste pour une rune, avec le nom du modèle (à afficher comme tel). */
@@ -42,6 +47,8 @@ export interface RuneEstimate extends ProbabilityOutput {
 }
 
 const TIER_LABELS: Record<RuneTier, string> = { normal: '', pa: 'Pa', ra: 'Ra' };
+
+export const ORB_CONSUMABLE: ConsumableRef = { key: 'orb', kind: 'orb', label: 'Orbe régénérant' };
 
 function toEngineState(stats: SimulatedStat[], residualPool: number, itemLocked: boolean, level: number): ForgemagieItemState {
   return {
@@ -76,13 +83,13 @@ function fromEngineState(state: ForgemagieItemState, previous: SimulatedStat[], 
   });
 }
 
-type PersistedAtelier = Pick<AtelierState, 'item' | 'stats' | 'residualPool' | 'itemLocked' | 'mode' | 'selectedCharacteristicId' | 'log' | 'logCounter'>;
+type PersistedAtelier = Pick<AtelierState, 'item' | 'stats' | 'residualPool' | 'itemLocked' | 'consumed' | 'mode' | 'selectedCharacteristicId' | 'log' | 'logCounter'>;
 
 export function useAtelier() {
   const { overrides } = useParams();
   const [state, dispatch] = useReducer(atelierReducer, initialAtelierState, (init) => {
-    const saved = loadJson<PersistedAtelier>(STORAGE_KEYS.atelier);
-    return saved && saved.item ? { ...init, ...saved } : init;
+    const saved = loadJson<Partial<PersistedAtelier>>(STORAGE_KEYS.atelier);
+    return saved && saved.item ? { ...init, ...saved, consumed: saved.consumed ?? {} } : init;
   });
 
   // Persistance (après le premier rendu)
@@ -97,13 +104,14 @@ export function useAtelier() {
       stats: state.stats,
       residualPool: state.residualPool,
       itemLocked: state.itemLocked,
+      consumed: state.consumed,
       mode: state.mode,
       selectedCharacteristicId: state.selectedCharacteristicId,
       log: state.log,
       logCounter: state.logCounter,
     };
     saveJson(STORAGE_KEYS.atelier, persisted);
-  }, [state.item, state.stats, state.residualPool, state.itemLocked, state.mode, state.selectedCharacteristicId, state.log, state.logCounter]);
+  }, [state.item, state.stats, state.residualPool, state.itemLocked, state.consumed, state.mode, state.selectedCharacteristicId, state.log, state.logCounter]);
 
   // Densités effectives (surcharges actives) appliquées aux lignes affichées
   const stats = useMemo(
@@ -113,6 +121,7 @@ export function useAtelier() {
   const budget = useMemo(() => computeWeightBudget(stats, overrides), [stats, overrides]);
   const engineParams = useMemo(() => getEngineParams(overrides), [overrides]);
   const probabilityParams = useMemo(() => getProbabilityParams(overrides), [overrides]);
+  const craftParams = useMemo(() => getCraftParams(overrides), [overrides]);
   const level = state.item?.level ?? 0;
 
   const engineState = useMemo(
@@ -120,10 +129,21 @@ export function useAtelier() {
     [stats, state.residualPool, state.itemLocked, level]
   );
 
+  /** Qualité du jet : position pondérée par densité dans les intervalles de craft (null si rien n'est tirable) */
+  const rollQuality = useMemo(
+    () =>
+      computeRollQuality(
+        stats.map((s) => ({ characteristicId: s.characteristicId, value: s.currentValue, baseMin: s.baseMin, baseMax: s.baseMax, isExo: s.isExo })),
+        new Map(stats.map((s) => [s.characteristicId, s.weightPerPoint]))
+      ),
+    [stats]
+  );
+
   const selected = stats.find((s) => s.characteristicId === state.selectedCharacteristicId) ?? null;
 
   // ─── Sélection, édition ───
   const selectItem = useCallback((item: Item, itemStats: SimulatedStat[]) => dispatch({ type: 'SET_ITEM', item, stats: itemStats }), []);
+  const restore = useCallback((next: Partial<AtelierState>) => dispatch({ type: 'RESTORE', state: next }), []);
   const selectLine = useCallback((characteristicId: number | null) => dispatch({ type: 'SELECT_LINE', characteristicId }), []);
   const setMode = useCallback((mode: AtelierMode) => dispatch({ type: 'SET_MODE', mode }), []);
   const updateStat = useCallback(
@@ -161,6 +181,26 @@ export function useAtelier() {
   const redo = useCallback(() => dispatch({ type: 'REDO' }), []);
   const clearLog = useCallback(() => dispatch({ type: 'CLEAR_LOG' }), []);
   const resetResidual = useCallback(() => dispatch({ type: 'RESET_RESIDUAL' }), []);
+  const resetSession = useCallback(() => dispatch({ type: 'RESET_SESSION' }), []);
+
+  // ─── Saisie rapide : lignes naturelles seulement, reliquat et exos intacts ───
+  const setAllToMax = useCallback(
+    () => dispatch({ type: 'REPLACE_STATS', stats: stats.map((s) => (s.isExo || s.isLocked ? s : { ...s, currentValue: s.baseMax })) }),
+    [stats]
+  );
+  const setAllToMin = useCallback(
+    () => dispatch({ type: 'REPLACE_STATS', stats: stats.map((s) => (s.isExo || s.isLocked ? s : { ...s, currentValue: s.baseMin })) }),
+    [stats]
+  );
+  /** Jet aléatoire selon craft.rollDistribution (INCONNU). Même fonction que l'orbe, sans purge. */
+  const rollRandom = useCallback(
+    (seed?: number) => {
+      const rng = seed === undefined ? appRng : createSeededRng(seed);
+      const rolled = rollItem(engineState, craftParams, rng);
+      dispatch({ type: 'REPLACE_STATS', stats: fromEngineState(rolled, stats, overrides) });
+    },
+    [engineState, craftParams, stats, overrides]
+  );
 
   // ─── Runes ───
   const runeOptions = useCallback(
@@ -171,6 +211,8 @@ export function useAtelier() {
         label: TIER_LABELS[tier],
         value: info.value,
         weight: info.value * density,
+        runeId: info.runeId,
+        nameFr: info.nameFr,
       }));
     },
     [overrides]
@@ -199,7 +241,11 @@ export function useAtelier() {
   );
 
   const commit = useCallback(
-    (result: ApplyRuneResult, entry: Omit<SimLogEntry, 'id' | 'refusedReason' | 'losses' | 'absorbedByResidual' | 'residualPoolBefore' | 'residualPoolAfter' | 'outcome'> & { outcome: RuneOutcome }) => {
+    (
+      result: ApplyRuneResult,
+      entry: Omit<SimLogEntry, 'id' | 'refusedReason' | 'losses' | 'absorbedByResidual' | 'residualPoolBefore' | 'residualPoolAfter' | 'outcome'> & { outcome: RuneOutcome },
+      consumable: ConsumableRef
+    ) => {
       const newStats = result.accepted ? fromEngineState(result.state, stats, overrides) : stats;
       const logEntry: SimLogEntry = {
         ...entry,
@@ -224,13 +270,14 @@ export function useAtelier() {
       };
       dispatch({
         type: 'APPLY_RESULT',
-        snapshot: { stats: newStats, residualPool: result.state.residualPool, itemLocked: result.state.itemLocked },
+        snapshot: { stats: newStats, residualPool: result.state.residualPool, itemLocked: result.state.itemLocked, consumed: state.consumed },
         logEntry,
         event,
+        consumable,
       });
       return result;
     },
-    [stats, overrides, state.logCounter]
+    [stats, overrides, state.logCounter, state.consumed]
   );
 
   const forceRune = useCallback(
@@ -239,17 +286,21 @@ export function useAtelier() {
       const option = runeOptions(characteristicId).find((o) => o.tier === tier);
       if (!target || !option) return;
       const result = applyRune(engineState, { characteristicId, value: option.value }, outcome, engineParams, appRng);
-      return commit(result, {
-        kind: 'rune',
-        actionLabel: `${option.label ? option.label + ' ' : ''}${target.statName} +${option.value}`,
-        targetStatName: target.statName,
-        targetCharacteristicId: characteristicId,
-        runeValue: option.value,
-        runeWeight: result.runeWeight,
-        outcome,
-        drawnByModel,
-        modelName: drawnByModel ? probabilityParams.model : undefined,
-      });
+      return commit(
+        result,
+        {
+          kind: 'rune',
+          actionLabel: `${option.label ? option.label + ' ' : ''}${target.statName} +${option.value}`,
+          targetStatName: target.statName,
+          targetCharacteristicId: characteristicId,
+          runeValue: option.value,
+          runeWeight: result.runeWeight,
+          outcome,
+          drawnByModel,
+          modelName: drawnByModel ? probabilityParams.model : undefined,
+        },
+        { key: `rune:${option.runeId}`, kind: 'rune', label: option.nameFr }
+      );
     },
     [stats, runeOptions, engineState, engineParams, commit, probabilityParams.model]
   );
@@ -272,16 +323,20 @@ export function useAtelier() {
       if (!rune) return;
       const target = stats.find((s) => s.characteristicId === characteristicId);
       const result = applyTranscendenceRune(engineState, { characteristicId, value: rune.value, rank: rune.rank }, engineParams);
-      return commit(result, {
-        kind: 'transcendence',
-        actionLabel: `${rune.nameFr.replace(/^Rune /, '')} +${rune.value}`,
-        targetStatName: target?.statName ?? getCharacteristicName(characteristicId),
-        targetCharacteristicId: characteristicId,
-        runeValue: rune.value,
-        runeWeight: result.runeWeight,
-        outcome: 'SC',
-        drawnByModel: false,
-      });
+      return commit(
+        result,
+        {
+          kind: 'transcendence',
+          actionLabel: `${rune.nameFr.replace(/^Rune /, '')} +${rune.value}`,
+          targetStatName: target?.statName ?? getCharacteristicName(characteristicId),
+          targetCharacteristicId: characteristicId,
+          runeValue: rune.value,
+          runeWeight: result.runeWeight,
+          outcome: 'SC',
+          drawnByModel: false,
+        },
+        { key: `rune:${rune.runeId}`, kind: 'transcendence', label: rune.nameFr }
+      );
     },
     [stats, engineState, engineParams, commit]
   );
@@ -290,7 +345,7 @@ export function useAtelier() {
   const applyOrb = useCallback(
     (seed?: number) => {
       const rng = seed === undefined ? appRng : createSeededRng(seed);
-      const r = applyRegenerationOrb(engineState, rng);
+      const r = applyRegenerationOrb(engineState, rng, craftParams);
       const asRuneResult: ApplyRuneResult = {
         accepted: r.accepted,
         reason: r.reason,
@@ -304,18 +359,22 @@ export function useAtelier() {
         residualPoolBefore: engineState.residualPool,
         residualPoolAfter: r.state.residualPool,
       };
-      return commit(asRuneResult, {
-        kind: 'orb',
-        actionLabel: 'Orbe régénérant',
-        targetStatName: '',
-        targetCharacteristicId: null,
-        runeValue: 0,
-        runeWeight: 0,
-        outcome: 'SC',
-        drawnByModel: false,
-      });
+      return commit(
+        asRuneResult,
+        {
+          kind: 'orb',
+          actionLabel: 'Orbe régénérant',
+          targetStatName: '',
+          targetCharacteristicId: null,
+          runeValue: 0,
+          runeWeight: 0,
+          outcome: 'SC',
+          drawnByModel: false,
+        },
+        ORB_CONSUMABLE
+      );
     },
-    [engineState, commit]
+    [engineState, craftParams, commit]
   );
 
   // ─── Monte Carlo ───
@@ -340,27 +399,36 @@ export function useAtelier() {
     stats,
     residualPool: state.residualPool,
     itemLocked: state.itemLocked,
+    consumed: state.consumed,
     mode: state.mode,
     selectedId: state.selectedCharacteristicId,
     selected,
     log: state.log,
+    logCounter: state.logCounter,
     lastEvent: state.lastEvent,
     canUndo: state.history.length > 0,
     canRedo: state.future.length > 0,
     budget,
+    rollQuality,
     engineParams,
     probabilityParams,
+    craftParams,
     selectItem,
+    restore,
     selectLine,
     setMode,
     updateStat,
     addExo,
     removeExo,
     resetToPerfect,
+    setAllToMax,
+    setAllToMin,
+    rollRandom,
     undo,
     redo,
     clearLog,
     resetResidual,
+    resetSession,
     runeOptions,
     estimate,
     attemptRune,

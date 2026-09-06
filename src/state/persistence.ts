@@ -7,6 +7,8 @@ export const STORAGE_KEYS = {
   theme: 'forge-theme',
   params: 'forge-params',
   atelier: 'forge-atelier',
+  prices: 'forge-prices',
+  showcase: 'forge-showcase',
 } as const;
 
 export function loadJson<T>(key: string): T | null {
