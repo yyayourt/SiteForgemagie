@@ -16,7 +16,7 @@
  */
 
 import type { SimulatedStat, WeightBudget } from '../../types';
-import { getMaxOverOrExo, getStatAbsoluteMax } from '../../data/statCaps';
+import { getLineOverRoomAlone, getStatAbsoluteMax } from '../../data/statCaps';
 import { getOverCapWeight, type ParamOverrides } from '../../data/params';
 
 /**
@@ -37,7 +37,8 @@ export function computeWeightBudget(stats: SimulatedStat[], overrides?: ParamOve
     if (!stat.isForgemeable) continue;
 
     const weight = stat.weightPerPoint;
-    const maxOver = getMaxOverOrExo(stat.characteristicId, overrides);
+    // Marge d'over de la ligne seule (règle 1 : 505 vita au total par défaut)
+    const maxOver = getLineOverRoomAlone(stat, overrides);
 
     if (stat.isExo) {
       const ew = stat.currentValue * weight;

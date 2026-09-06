@@ -8,7 +8,7 @@
       "value": 101,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §7 (borne pratique, confiance B) ; R PARTIE 6 ; guides 2025-2026 (dafous.app, dofustool)",
-      "note": "Poids maximal d'over/exo. Existence d'une borne pratique à 101 bien attestée ; formule exacte de validation serveur inconnue.",
+      "note": "Poids maximal d'over/exo. Existence d'une borne pratique à 101 bien attestée ; formule exacte de validation serveur inconnue. Ce qu'elle mesure sur une ligne : overCapLineBasis ; sa portée sur l'objet : overCapScope.",
       "bounds": {
         "min": 1,
         "max": 500
@@ -27,6 +27,19 @@
         ]
       },
       "default": "global"
+    },
+    "overCapLineBasis": {
+      "value": "total_value",
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
+      "source": "guide Huz (huzounet.fr/guides/forgemagie, 21/01/2026) : « L'over maximal d'un item ne peut excéder 101 de densité sur une statistique (Ex : 505 vita, 101 agilité…) », lu comme une VALEUR TOTALE de ligne par un joueur expérimenté du projet (2026-09-06 : « que l'item ait de base 200 ou 500 vita, en over il ne pourra pas dépasser 505 »)",
+      "note": "Ce que la borne overCapWeight mesure sur UNE ligne en over ou en exo. total_value : valeur totale × densité ≤ borne (505 vita au total, 101 agilité, 33 sagesse…), donc une ligne dont le jet naturel pèse déjà plus que la borne (ex. 40 sagesse = 120) ne peut plus être montée en over, et la marge d'over dépend de la base (base 400 vita : +105 ; base 500 : +5). over_part : seule la part au-delà du jet max compte (ancienne lecture du projet, base 400 vita : +505). La phrase du guide admet les deux lectures ; total_value vient de l'expérience en jeu. Réfutation de total_value : un objet observé avec une ligne au-dessus de son jet max ET un poids total supérieur à la borne (ex. 41 sagesse, 510 vita). Le cumul de l'objet (overCapScope = global) reste mesuré sur la part over, sinon l'exemple « 213/200 vita à lisser avant un exo PA » du même guide serait impossible.",
+      "bounds": {
+        "enum": [
+          "total_value",
+          "over_part"
+        ]
+      },
+      "default": "total_value"
     },
     "ecLossFactor": {
       "value": 1,

@@ -52,9 +52,9 @@ describe('applyRune — SN : création du reliquat', () => {
   });
 
   it('a loss larger than one line cascades over several lines', () => {
-    // Rune Do +1 = 20 de poids ; Force 2 (2 de poids) puis Sagesse (3/pt)
+    // Rune Do +1 = 20 de poids (ligne 5/6 : pas d'over) ; Force 2 (2 de poids) puis Sagesse (3/pt)
     const state = makeState([
-      line({ characteristicId: CHAR.DOMMAGES, value: 5 }),
+      line({ characteristicId: CHAR.DOMMAGES, value: 5, baseMax: 6 }),
       line({ characteristicId: CHAR.FORCE, value: 2 }),
       line({ characteristicId: CHAR.SAGESSE, value: 30 }),
     ]);

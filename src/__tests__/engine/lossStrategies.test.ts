@@ -67,9 +67,9 @@ describe('prioritizeOverExo (HYPOTHÈSE COMMUNAUTAIRE)', () => {
 
   it('true : a loss bigger than the over part continues on the next candidates', () => {
     const params = testParams({ lossSelection: { strategy: 'uniform', prioritizeOverExo: true } });
-    // Rune Do +1 = 20 ; Force over = 5 (5 de poids) puis PO exo (51) → PO saute entier, reliquat 36
+    // Rune Do +1 = 20 (ligne 10/11 : pas d'over) ; Force over = 5 (5 de poids) puis PO exo (51) → PO saute entier, reliquat 36
     const state = makeState([
-      line({ characteristicId: CHAR.DOMMAGES, value: 10 }),
+      line({ characteristicId: CHAR.DOMMAGES, value: 10, baseMax: 11 }),
       line({ characteristicId: CHAR.FORCE, value: 55, baseMax: 50 }),
       line({ characteristicId: CHAR.PO, value: 1, baseMin: 0, baseMax: 0, isExo: true }),
     ]);

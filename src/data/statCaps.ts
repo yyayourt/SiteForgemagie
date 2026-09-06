@@ -1,6 +1,10 @@
 /**
  * Plafonds d'over/exo par caractéristique, DÉRIVÉS de empirical_params.json :
  *   maxOverOrExo = floor(overCapWeight / densité)
+ * = valeur TOTALE maximale d'une ligne en over ou en exo (overCapLineBasis = total_value,
+ * défaut : 505 vita, 101 agilité, 33 sagesse), ou marge d'over au-delà du jet max
+ * (over_part). Une ligne dont le jet max pèse déjà plus que la borne n'a aucune marge d'over
+ * en total_value.
  *
  * Rien n'est écrit à la main ici. Statut du résultat : celui des deux paramètres
  * (overCapWeight : HYPOTHÈSE COMMUNAUTAIRE ; densité : voir chaque entrée).
@@ -18,6 +22,7 @@ import { getCharacteristicName } from './dataset';
 import {
   DENSITIES,
   getDensity,
+  getOverCapLineBasis,
   getOverCapScope,
   getOverCapWeight,
   type EpistemicStatus,
@@ -104,18 +109,34 @@ export const CATEGORY_ORDER: StatCapCategory[] = [
 ];
 
 /**
- * Valeur maximale atteignable sur une ligne SEULE (lecture « par ligne » de la borne) :
+ * Marge d'over d'une ligne SEULE (points au-delà du jet max qu'elle peut porter) :
+ * - exo : maxOverOrExo (toute sa valeur est de l'over)
+ * - naturelle, total_value : max(0, maxOverOrExo − baseMax) ; over_part : maxOverOrExo
+ * - sans densité documentée : undefined
+ */
+export function getLineOverRoomAlone(
+  stat: { characteristicId: number; baseMax: number; isExo: boolean },
+  overrides?: ParamOverrides
+): number | undefined {
+  const maxOver = getMaxOverOrExo(stat.characteristicId, overrides);
+  if (maxOver === undefined) return undefined;
+  if (stat.isExo) return maxOver;
+  return getOverCapLineBasis(overrides) === 'total_value' ? Math.max(0, maxOver - stat.baseMax) : maxOver;
+}
+
+/**
+ * Valeur maximale atteignable sur une ligne SEULE (règle 1 de la borne) :
  * - exo : maxOverOrExo
- * - naturelle : baseMax + maxOverOrExo
+ * - naturelle : baseMax + marge d'over (total_value : max(baseMax, maxOverOrExo))
  * - sans densité documentée : Infinity (aucune contrainte connue)
  */
 export function getStatAbsoluteMax(
   stat: { characteristicId: number; baseMax: number; isExo: boolean },
   overrides?: ParamOverrides
 ): number {
-  const maxOver = getMaxOverOrExo(stat.characteristicId, overrides);
-  if (maxOver === undefined) return Infinity;
-  return stat.isExo ? maxOver : stat.baseMax + maxOver;
+  const room = getLineOverRoomAlone(stat, overrides);
+  if (room === undefined) return Infinity;
+  return stat.isExo ? room : stat.baseMax + room;
 }
 
 export interface OverCapLine {
@@ -139,18 +160,19 @@ export function getTotalOverExoWeight(lines: readonly OverCapLine[], overrides?:
 }
 
 /**
- * Points d'over (ou d'exo) qu'une ligne peut porter au maximum, selon la portée active :
- * - per_line : floor(overCapWeight / densité) ;
- * - global : floor((overCapWeight − over/exo des AUTRES lignes) / densité), jamais négatif.
- * undefined sans densité documentée.
+ * Points d'over (ou d'exo) qu'une ligne peut porter au maximum dans le contexte de l'objet :
+ * - règle 1 (toujours) : marge de la ligne seule (getLineOverRoomAlone) ;
+ * - règle 2 (scope global) : en plus, floor((overCapWeight − parts over/exo des AUTRES lignes) / densité).
+ * Jamais négatif ; undefined sans densité documentée.
  */
 export function getLineOverRoom(stat: OverCapLine, allLines: readonly OverCapLine[], overrides?: ParamOverrides): number | undefined {
   const density = getDensity(stat.characteristicId, overrides);
-  if (density === undefined || density <= 0) return undefined;
+  const alone = getLineOverRoomAlone(stat, overrides);
+  if (density === undefined || density <= 0 || alone === undefined) return undefined;
+  if (getOverCapScope(overrides) === 'per_line') return alone;
   const cap = getOverCapWeight(overrides);
-  if (getOverCapScope(overrides) === 'per_line') return Math.floor(cap / density);
   const others = getTotalOverExoWeight(allLines.filter((l) => l.characteristicId !== stat.characteristicId), overrides);
-  return Math.max(0, Math.floor((cap - others + 1e-9) / density));
+  return Math.max(0, Math.min(alone, Math.floor((cap - others + 1e-9) / density)));
 }
 
 /** Valeur maximale atteignable sur une ligne dans le contexte de l'objet (portée active). */

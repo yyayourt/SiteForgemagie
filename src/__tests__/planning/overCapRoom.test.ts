@@ -27,7 +27,7 @@ describe('borne d\'over/exo — portée', () => {
     expect(getTotalOverExoWeight(lines)).toBeCloseTo(13 * 0.2 + 90, 9);
   });
 
-  it('global: a PM exo (90) leaves 11 of weight, so 55 points of over on Vitalité', () => {
+  it('global: a PM exo (90) leaves 11 of weight, so 55 points of over on Vitalité (règle 1 en laisserait 155)', () => {
     const vita = l({ characteristicId: CHAR.VITALITE, currentValue: 350, baseMax: 350 });
     const pm = l({ characteristicId: CHAR.PM, currentValue: 1, baseMax: 0, isExo: true });
     expect(getLineOverRoom(vita, [vita, pm], global)).toBe(55);
@@ -39,11 +39,21 @@ describe('borne d\'over/exo — portée', () => {
     expect(getLineOverRoom({ ...pm, currentValue: 0 }, [over, pm], global)).toBe(1);
   });
 
-  it('per_line: other lines do not matter (505 vita regardless of the PM exo)', () => {
+  it('per_line: other lines do not matter, but the line total is capped at 505 vita (base 350 → +155)', () => {
     const vita = l({ characteristicId: CHAR.VITALITE, currentValue: 350, baseMax: 350 });
     const pm = l({ characteristicId: CHAR.PM, currentValue: 1, baseMax: 0, isExo: true });
-    expect(getLineOverRoom(vita, [vita, pm], perLine)).toBe(505);
-    expect(getStatAbsoluteMaxInContext(vita, [vita, pm], perLine)).toBe(855);
+    expect(getLineOverRoom(vita, [vita, pm], perLine)).toBe(155);
+    expect(getStatAbsoluteMaxInContext(vita, [vita, pm], perLine)).toBe(505);
+  });
+
+  it('total_value: the room depends on the base (400 → +105, 500 → +5, 520 → 0) ; over_part gives +505 regardless', () => {
+    const at = (baseMax: number) => l({ characteristicId: CHAR.VITALITE, currentValue: baseMax, baseMax });
+    expect(getLineOverRoom(at(400), [at(400)], global)).toBe(105);
+    expect(getLineOverRoom(at(500), [at(500)], global)).toBe(5);
+    expect(getLineOverRoom(at(520), [at(520)], global)).toBe(0);
+    expect(getStatAbsoluteMaxInContext(at(520), [at(520)], global)).toBe(520);
+    const overPart = { ...global, 'params.overCapLineBasis': 'over_part' } as const;
+    expect(getLineOverRoom(at(400), [at(400)], overPart)).toBe(505);
   });
 
   it('never goes negative, ignores non-forgeable lines, undefined without density', () => {

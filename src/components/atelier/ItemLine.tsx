@@ -162,7 +162,7 @@ export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, o
       </div>
 
       {/* Barres de jet et d'over */}
-      <div className="col-span-3 sm:col-span-1 sm:col-start-4" title={stat.isExo ? 'Ligne exotique : tout son poids est de l\'over' : `Position dans le jet ${stat.baseMin} à ${stat.baseMax}, puis over jusqu'à +${maxOver ?? '∞'}`}>
+      <div className="col-span-3 sm:col-span-1 sm:col-start-4" title={stat.isExo ? 'Ligne exotique : tout son poids est de l\'over' : `Position dans le jet ${stat.baseMin} à ${stat.baseMax}, puis over jusqu'à +${maxOver ?? '∞'} (règle : 101 de poids au total sur la ligne, et cumul de l'objet)`}>
         <div className="roll-track h-2 rounded-full overflow-hidden">
           <div className={`h-full rounded-full ${stat.isExo ? 'bg-exo' : 'bg-[linear-gradient(90deg,#6a4a2b,#b98a4a)]'} transition-[width] duration-500`} style={{ width: `${rollPercent}%` }} />
         </div>

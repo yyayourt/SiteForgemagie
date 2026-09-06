@@ -31,6 +31,16 @@ export function lineOverWeight(line: ItemLine, params: EngineParams): number {
   return overPoints * density;
 }
 
+/**
+ * Poids d'une ligne au sens de la borne par ligne (overCapLineBasis) : 0 si la ligne n'est
+ * ni en over ni exotique ; sinon son poids TOTAL (total_value, défaut : 505 vita au total)
+ * ou seulement sa part over (over_part).
+ */
+export function lineCapWeight(line: ItemLine, params: EngineParams): number {
+  if (!isOverOrExo(line)) return 0;
+  return params.overCapLineBasis === 'total_value' ? lineWeight(line, params) : lineOverWeight(line, params);
+}
+
 /** Vrai si la ligne est en over (naturelle au-dessus de baseMax) ou exotique avec valeur > 0. */
 export function isOverOrExo(line: ItemLine): boolean {
   return line.isExo ? line.value > 0 : line.value > line.baseMax;

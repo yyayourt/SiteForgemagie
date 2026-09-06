@@ -16,4 +16,4 @@ export {
 } from './lossSelection';
 export { checkOverCap, hasAnyOverOrExo } from './overCap';
 export { onItemLeavesWorkshop, normalizeResidual, type ResidualResetEvent } from './residual';
-export { runeWeight, lineWeight, lineOverWeight, isOverOrExo, getLineDensity } from './weights';
+export { runeWeight, lineWeight, lineOverWeight, lineCapWeight, isOverOrExo, getLineDensity } from './weights';

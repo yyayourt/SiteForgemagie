@@ -137,7 +137,8 @@ describe('HYPOTHÈSES COMMUNAUTAIRES — refuseIfExo / refuseIfOver', () => {
 
 describe('INCONNU — maxCurrentValueByRank', () => {
   it('no threshold configured (default): nothing is refused on that ground', () => {
-    const state = makeState([line({ characteristicId: CHAR.INITIATIVE, value: 5000 })]);
+    // 500 + 100 initiative = 60 de poids au total : sous la borne par ligne
+    const state = makeState([line({ characteristicId: CHAR.INITIATIVE, value: 500 })]);
     expect(applyTranscendenceRune(state, ta(CHAR.INITIATIVE, 100), params()).accepted).toBe(true);
   });
 

@@ -35,6 +35,8 @@ export interface DensityParam extends ParamEntry<number> {
 export type ParamOverrides = Readonly<Record<string, unknown>>;
 
 export type OverCapScope = 'per_line' | 'global';
+/** Ce que la borne mesure sur une ligne en over/exo : valeur totale (défaut) ou seule la part over. */
+export type OverCapLineBasis = 'total_value' | 'over_part';
 export type LossSelectionStrategyName =
   | 'uniform'
   | 'weighted_by_weight'
@@ -120,6 +122,9 @@ export function getOverCapWeight(overrides?: ParamOverrides): number {
 export function getOverCapScope(overrides?: ParamOverrides): OverCapScope {
   return readParam<OverCapScope>('params.overCapScope', overrides);
 }
+export function getOverCapLineBasis(overrides?: ParamOverrides): OverCapLineBasis {
+  return readParam<OverCapLineBasis>('params.overCapLineBasis', overrides);
+}
 
 // ─── Moteur (règles + reliquat) ──────────────────────────────────────────────
 
@@ -129,6 +134,8 @@ export interface EngineParams {
   densities: ReadonlyMap<number, number>;
   overCapWeight: number;
   overCapScope: OverCapScope;
+  /** HYPOTHÈSE COMMUNAUTAIRE : la borne s'applique à la valeur totale d'une ligne en over (505 vita), pas à sa part over. */
+  overCapLineBasis: OverCapLineBasis;
   /** Perte en EC = ecLossFactor × poids de la rune (INCONNU) */
   ecLossFactor: number;
   lossSelection: {
@@ -157,6 +164,7 @@ export function getEngineParams(overrides?: ParamOverrides): EngineParams {
     densities: getDensityMap(overrides),
     overCapWeight: r<number>('params.overCapWeight'),
     overCapScope: r<OverCapScope>('params.overCapScope'),
+    overCapLineBasis: r<OverCapLineBasis>('params.overCapLineBasis'),
     ecLossFactor: r<number>('params.ecLossFactor'),
     lossSelection: {
       strategy: r<LossSelectionStrategyName>('params.lossSelection.strategy'),

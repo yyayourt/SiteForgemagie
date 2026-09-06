@@ -72,8 +72,8 @@ describe('computeMaxReachable', () => {
     expect(computeMaxReachable(makeStat(), 20)).toBe(70);
   });
 
-  it('is bounded by the per-line cap derived from empirical_params.json (Force : 50 + 101)', () => {
-    expect(computeMaxReachable(makeStat(), 1000)).toBe(151);
+  it('is bounded by the per-line cap derived from empirical_params.json (Force : 101 au total, lecture valeur totale)', () => {
+    expect(computeMaxReachable(makeStat(), 1000)).toBe(101);
   });
 
   it('exo Vitalité is capped at floor(101 / 0,2) = 505', () => {
