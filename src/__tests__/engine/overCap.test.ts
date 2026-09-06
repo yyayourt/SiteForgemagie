@@ -103,6 +103,31 @@ describe("global (défaut) — exemples du guide Huz, borne mesurée sur la part
   });
 });
 
+describe("règle 1 (Huz) : « l’over maximal ne peut excéder 101 de densité sur une statistique », dans les deux portées", () => {
+  const vita = (value: number) => makeState([line({ characteristicId: CHAR.VITALITE, value, baseMin: 351, baseMax: 400 })]);
+
+  it.each([global(), perLine()])("505 vita d’over (101,0) accepté, 506 refusé ; agilité +101 accepté, +102 refusé", (p) => {
+    expect(applyRune(vita(400), { characteristicId: CHAR.VITALITE, value: 505 }, 'SC', p, seqRng([0])).accepted).toBe(true);
+    expect(applyRune(vita(400), { characteristicId: CHAR.VITALITE, value: 506 }, 'SC', p, seqRng([0])).accepted).toBe(false);
+    const agi = makeState([line({ characteristicId: CHAR.CHANCE, value: 50 })]);
+    expect(applyRune(agi, { characteristicId: CHAR.CHANCE, value: 101 }, 'SC', p, seqRng([0])).accepted).toBe(true);
+    expect(applyRune(agi, { characteristicId: CHAR.CHANCE, value: 102 }, 'SC', p, seqRng([0])).accepted).toBe(false);
+  });
+
+  it.each([global(), perLine()])('à 900/400 vita (+500 = 100,0), une Rune Vi (+5) passe encore, une Ra Vi (+50) est refusée', (p) => {
+    expect(applyRune(vita(900), { characteristicId: CHAR.VITALITE, value: 5 }, 'SC', p, seqRng([0])).accepted).toBe(true);
+    const ra = applyRune(vita(900), { characteristicId: CHAR.VITALITE, value: 50 }, 'SC', p, seqRng([0]));
+    expect(ra.accepted).toBe(false);
+    expect(ra.reason).toBe('over_cap_exceeded');
+  });
+
+  it('un exo suit la même borne par ligne : exo Vitalité 505 accepté, 506 refusé (global)', () => {
+    const base = makeState([line({ characteristicId: CHAR.FORCE, value: 50 })]);
+    expect(applyRune(base, { characteristicId: CHAR.VITALITE, value: 505 }, 'SC', global(), seqRng([0])).accepted).toBe(true);
+    expect(applyRune(base, { characteristicId: CHAR.VITALITE, value: 506 }, 'SC', global(), seqRng([0])).accepted).toBe(false);
+  });
+});
+
 describe('checkOverCap / hasAnyOverOrExo', () => {
   it('reports the weight considered and the cap', () => {
     const state = withRuneApplied(makeState([line({ characteristicId: CHAR.FORCE, value: 50 })]), { characteristicId: CHAR.FORCE, value: 30 });
