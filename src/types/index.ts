@@ -88,6 +88,9 @@ export interface SimLogEntry {
   absorbedByResidual: number;
   residualPoolBefore: number;
   residualPoolAfter: number;
+  /** Valeur réellement appliquée (troncature à la borne d'over/exo) */
+  appliedValue?: number;
+  truncated?: boolean;
 }
 
 /** Dernier événement appliqué, pour les micro-interactions (rejouées par clé) */

@@ -19,7 +19,8 @@
  */
 
 import type { EngineParams } from '../../data/params';
-import type { ForgemagieItemState, ItemLine } from '../../types/forgemagie';
+import type { ForgemagieItemState, ItemLine, Rune } from '../../types/forgemagie';
+import { withRuneApplied } from './applyRune';
 import { lineCapWeight, lineOverWeight } from './weights';
 
 export interface OverCapCheck {
@@ -54,6 +55,41 @@ export function checkOverCap(
   // Règle 2 (global) : le cumul des parts over + exo de l'objet ne dépasse pas la borne non plus
   const overWeightAfter = after.lines.reduce((sum, l) => sum + lineOverWeight(l, params), 0);
   return { allowed: lineOk && overWeightAfter <= cap + EPS, overWeightAfter, lineWeightAfter, cap };
+}
+
+/**
+ * Plus grande valeur v ∈ [0, rune.value] telle que la rune (characteristicId, v) respecte la
+ * borne (règles 1 et 2). Sert à la troncature (overCapExcess.behaviour = truncate) : la rune
+ * s'arrête à la borne au lieu d'être refusée. Renvoie 0 si rien ne peut s'appliquer.
+ *
+ * La contrainte est monotone en v : on calcule un candidat arithmétique puis on redescend
+ * tant que checkOverCap le refuse (arrondis), pour rester exactement cohérent avec la vérification.
+ */
+export function maxApplicableRuneValue(state: ForgemagieItemState, rune: Rune, params: EngineParams): number {
+  const density = params.densities.get(rune.characteristicId);
+  if (density === undefined || density <= 0 || rune.value <= 0) return 0;
+  const cap = params.overCapWeight;
+  const line = state.lines.find((l) => l.characteristicId === rune.characteristicId);
+  const value = line?.value ?? 0;
+  const baseMax = line && !line.isExo ? line.baseMax : 0;
+  const isExo = !line || line.isExo;
+
+  // Règle 1 : total de la ligne (ou part over) ≤ borne, sauf si elle reste ≤ jet max
+  const maxTotal = params.overCapLineBasis === 'total_value' || isExo ? Math.floor(cap / density + 1e-9) : baseMax + Math.floor(cap / density + 1e-9);
+  let candidate = Math.max(isExo ? -Infinity : baseMax - value, maxTotal - value);
+
+  // Règle 2 (global) : la part over de la ligne ≤ borne − parts over/exo des autres lignes
+  if (params.overCapScope === 'global') {
+    const others = state.lines
+      .filter((l) => l.characteristicId !== rune.characteristicId)
+      .reduce((sum, l) => sum + lineOverWeight(l, params), 0);
+    const room = Math.floor((cap - others) / density + 1e-9);
+    candidate = Math.min(candidate, Math.max(isExo ? -Infinity : baseMax - value, baseMax + room - value));
+  }
+
+  let v = Math.min(rune.value, Math.floor(candidate));
+  while (v > 0 && !checkOverCap(withRuneApplied(state, { characteristicId: rune.characteristicId, value: v }), rune.characteristicId, params).allowed) v--;
+  return Math.max(0, v);
 }
 
 /** Vrai si au moins une ligne est en over ou exotique (utilisé par la transcendance). */

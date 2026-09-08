@@ -78,6 +78,10 @@ export interface ApplyRuneResult {
   outcome: RuneOutcome;
   /** Poids de la rune = value × densité. */
   runeWeight: number;
+  /** Valeur réellement appliquée sur la ligne (≤ rune.value ; 0 si refusée ou en EC). */
+  appliedValue: number;
+  /** La rune a été arrêtée à la borne d'over/exo (overCapExcess.behaviour = truncate). */
+  truncated: boolean;
   /** Poids de perte demandé (0 en SC). */
   lossRequested: number;
   /** Part de la perte absorbée par le reliquat. */

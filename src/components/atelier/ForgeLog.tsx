@@ -28,6 +28,7 @@ function describe(e: SimLogEntry): string {
   if (e.kind === 'orb') return 'jet retiré au hasard, exos retirés, reliquat vidé';
   if (e.kind === 'transcendence') return 'posée sans perte ; objet verrouillé';
   const parts: string[] = [];
+  if (e.truncated && e.outcome !== 'EC') parts.push(`tronquée à +${e.appliedValue ?? 0} sur ${e.runeValue} (borne over/exo)`);
   if (e.absorbedByResidual > 0) parts.push(`le reliquat absorbe ${e.absorbedByResidual.toFixed(1)}`);
   for (const l of e.losses) parts.push(`${l.statName} −${l.pointsLost} (${l.weightLost.toFixed(1)})`);
   const delta = e.residualPoolAfter - e.residualPoolBefore;

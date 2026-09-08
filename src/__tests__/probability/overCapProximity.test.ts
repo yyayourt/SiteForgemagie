@@ -34,7 +34,9 @@ describe('overCapUsageAfter — mesure', () => {
     const clean = makeState([line({ characteristicId: CHAR.FORCE, value: 40, baseMax: 50 })]);
     expect(overCapUsageAfter(clean, { characteristicId: CHAR.FORCE, value: 5 }, testParams())).toBe(0);
     const over = makeState([line({ characteristicId: CHAR.VITALITE, value: 213, baseMax: 200 })]);
-    expect(overCapUsageAfter(over, { characteristicId: CHAR.PA, value: 1 }, testParams())).toBeCloseTo(102.6 / 101, 9);
+    // en mode refuse la rune entière est mesurée (> 1) ; en truncate (défaut) rien ne s'applique → usage inchangé
+    expect(overCapUsageAfter(over, { characteristicId: CHAR.PA, value: 1 }, testParams({ overCapExcess: { behaviour: 'refuse' } }))).toBeCloseTo(102.6 / 101, 9);
+    expect(overCapUsageAfter(over, { characteristicId: CHAR.PA, value: 1 }, testParams())).toBeCloseTo(2.6 / 101, 9);
   });
 
   it('is fed to the Monte Carlo input', () => {

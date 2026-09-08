@@ -16,8 +16,11 @@
  * - EC : rune non appliquée, perte = ecLossFactor × poids de la rune (ecLossFactor :
  *        INCONNU, empirical_params.json), même mécanique d'absorption.
  * - Une rune sur une ligne verrouillée (transcendance) ou un objet verrouillé est refusée.
- * - La tentative est refusée si l'application dépasserait la borne d'over/exo
- *   (overCapWeight / overCapScope), quelle que soit l'issue fournie.
+ * - Borne d'over/exo (overCapWeight / overCapLineBasis / overCapScope) : si la rune la
+ *   dépasserait, elle est TRONQUÉE à la borne (overCapExcess.behaviour = truncate, HYPOTHÈSE
+ *   COMMUNAUTAIRE : « Ra Vi sur 480 vita passe jusqu'à 505 ») ou refusée entière (refuse).
+ *   Refus dans tous les cas si plus rien ne peut s'appliquer. La perte d'une rune tronquée
+ *   est mesurée sur la rune entière ou sur la part appliquée (overCapExcess.lossBasis, INCONNU).
  */
 
 import type { EngineParams } from '../../data/params';
@@ -30,7 +33,7 @@ import type {
   Rng,
 } from '../../types/forgemagie';
 import { applyLoss } from './losses';
-import { checkOverCap } from './overCap';
+import { maxApplicableRuneValue } from './overCap';
 import { getLineDensity, runeWeight } from './weights';
 
 function refused(
@@ -45,6 +48,8 @@ function refused(
     state,
     outcome,
     runeWeight: weight,
+    appliedValue: 0,
+    truncated: false,
     lossRequested: 0,
     absorbedByResidual: 0,
     losses: [],
@@ -90,10 +95,15 @@ export function applyRune(
   const existing = state.lines.find((l) => l.characteristicId === rune.characteristicId);
   if (existing?.isLocked) return refused(state, outcome, 'line_locked', weight);
 
-  // La tentative elle-même est conditionnée par la borne d'over/exo
-  const hypothetical = withRuneApplied(state, rune);
-  const cap = checkOverCap(hypothetical, rune.characteristicId, params);
-  if (!cap.allowed) return refused(state, outcome, 'over_cap_exceeded', weight);
+  // Borne d'over/exo : troncature à la borne, ou refus
+  const applicable = maxApplicableRuneValue(state, rune, params);
+  if (applicable <= 0) return refused(state, outcome, 'over_cap_exceeded', weight);
+  if (applicable < rune.value && params.overCapExcess.behaviour === 'refuse') return refused(state, outcome, 'over_cap_exceeded', weight);
+  const truncated = applicable < rune.value;
+  const appliedRune: Rune = { characteristicId: rune.characteristicId, value: applicable };
+  const hypothetical = withRuneApplied(state, appliedRune);
+  // Poids retenu pour la perte : rune entière (défaut) ou part appliquée (overCapExcess.lossBasis)
+  const lossWeight = truncated && params.overCapExcess.lossBasis === 'applied_only' ? runeWeight(appliedRune, params) : weight;
 
   const residualPoolBefore = state.residualPool;
 
@@ -105,6 +115,8 @@ export function applyRune(
         state: hypothetical,
         outcome,
         runeWeight: weight,
+        appliedValue: applicable,
+        truncated,
         lossRequested: 0,
         absorbedByResidual: 0,
         losses: [],
@@ -115,13 +127,15 @@ export function applyRune(
     }
 
     case 'SN': {
-      const loss = applyLoss(hypothetical, weight, rune.characteristicId, params, rng);
+      const loss = applyLoss(hypothetical, lossWeight, rune.characteristicId, params, rng);
       return {
         accepted: true,
         state: loss.state,
         outcome,
         runeWeight: weight,
-        lossRequested: weight,
+        appliedValue: applicable,
+        truncated,
+        lossRequested: lossWeight,
         absorbedByResidual: loss.absorbedByResidual,
         losses: loss.losses,
         unabsorbedWeight: loss.unabsorbedWeight,
@@ -131,13 +145,15 @@ export function applyRune(
     }
 
     case 'EC': {
-      const lossRequested = weight * params.ecLossFactor;
+      const lossRequested = lossWeight * params.ecLossFactor;
       const loss = applyLoss(state, lossRequested, rune.characteristicId, params, rng);
       return {
         accepted: true,
         state: loss.state,
         outcome,
         runeWeight: weight,
+        appliedValue: 0,
+        truncated,
         lossRequested,
         absorbedByResidual: loss.absorbedByResidual,
         losses: loss.losses,

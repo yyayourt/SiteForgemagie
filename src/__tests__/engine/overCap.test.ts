@@ -7,8 +7,11 @@ import { describe, it, expect } from 'vitest';
 import { applyRune, checkOverCap, hasAnyOverOrExo, withRuneApplied } from '../../logic/engine';
 import { CHAR, line, makeState, seqRng, testParams } from './helpers';
 
-const perLine = () => testParams({ overCapScope: 'per_line', overCapWeight: 101 });
-const global = () => testParams({ overCapScope: 'global', overCapWeight: 101 });
+// Ces tests vérifient la BORNE elle-même : le dépassement est donc en mode « refuse »
+// (la troncature à la borne, défaut du fichier, est testée dans overCapTruncate.test.ts).
+const strict = (extra: Parameters<typeof testParams>[0] = {}) => testParams({ overCapExcess: { behaviour: 'refuse' }, ...extra });
+const perLine = () => strict({ overCapScope: 'per_line', overCapWeight: 101 });
+const global = () => strict({ overCapScope: 'global', overCapWeight: 101 });
 
 describe('per_line', () => {
   it('allows Force 50 → 101 (densité 1, valeur totale) and refuses 102', () => {
@@ -70,30 +73,30 @@ describe("global (défaut) — exemples du guide Huz, borne mesurée sur la part
   });
 
   it('cape 370/350 vita (over 4) + exo PM (90) = 94 → accepted', () => {
-    const r = applyRune(makeState([capeVita(370)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', testParams(), seqRng([0]));
+    const r = applyRune(makeState([capeVita(370)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', strict(), seqRng([0]));
     expect(r.accepted).toBe(true);
-    expect(checkOverCap(r.state, CHAR.PM, testParams()).overWeightAfter).toBeCloseTo(94, 9);
+    expect(checkOverCap(r.state, CHAR.PM, strict()).overWeightAfter).toBeCloseTo(94, 9);
   });
 
   it('then a Rune Vi (+5 vita, 1 of weight) → 95, still accepted', () => {
-    const withPm = applyRune(makeState([capeVita(370)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', testParams(), seqRng([0])).state;
-    const r = applyRune(withPm, { characteristicId: CHAR.VITALITE, value: 5 }, 'SC', testParams(), seqRng([0]));
+    const withPm = applyRune(makeState([capeVita(370)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', strict(), seqRng([0])).state;
+    const r = applyRune(withPm, { characteristicId: CHAR.VITALITE, value: 5 }, 'SC', strict(), seqRng([0]));
     expect(r.accepted).toBe(true);
-    expect(checkOverCap(r.state, CHAR.VITALITE, testParams()).overWeightAfter).toBeCloseTo(95, 9);
+    expect(checkOverCap(r.state, CHAR.VITALITE, strict()).overWeightAfter).toBeCloseTo(95, 9);
   });
 
   it('exo PA on an item at 213/200 vita → refused (100 + 2,6 = 102,6 > 101)', () => {
-    const r = applyRune(makeState([capeVita(213, 200)]), { characteristicId: CHAR.PA, value: 1 }, 'SC', testParams(), seqRng([0]));
+    const r = applyRune(makeState([capeVita(213, 200)]), { characteristicId: CHAR.PA, value: 1 }, 'SC', strict(), seqRng([0]));
     expect(r.accepted).toBe(false);
     expect(r.reason).toBe('over_cap_exceeded');
     // lissé à 200/200 (conseil de Huz), le PA passe
-    expect(applyRune(makeState([capeVita(200, 200)]), { characteristicId: CHAR.PA, value: 1 }, 'SC', testParams(), seqRng([0])).accepted).toBe(true);
+    expect(applyRune(makeState([capeVita(200, 200)]), { characteristicId: CHAR.PA, value: 1 }, 'SC', strict(), seqRng([0])).accepted).toBe(true);
   });
 
   it('measures the over portion, not the whole line: 213/200 vita weighs 42,6 but only 2,6 counts, so an exo PM (90) fits', () => {
-    const r = applyRune(makeState([capeVita(213, 200)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', testParams(), seqRng([0]));
+    const r = applyRune(makeState([capeVita(213, 200)]), { characteristicId: CHAR.PM, value: 1 }, 'SC', strict(), seqRng([0]));
     expect(r.accepted).toBe(true);
-    expect(checkOverCap(r.state, CHAR.PM, testParams()).overWeightAfter).toBeCloseTo(92.6, 9);
+    expect(checkOverCap(r.state, CHAR.PM, strict()).overWeightAfter).toBeCloseTo(92.6, 9);
   });
 
   it('refutation pointer: exo PA + over ≥ 2 of weight elsewhere is exactly what global forbids and per_line allows', () => {
@@ -118,38 +121,38 @@ describe("règle 1 (Huz, lecture valeur totale) : « 505 vita, 101 agilité » a
   });
 
   it('base 500 : +5 accepté (505), +6 refusé ; base 520 (104 de poids) : aucun over possible', () => {
-    expect(applyRune(vita(500, 500), { characteristicId: CHAR.VITALITE, value: 5 }, 'SC', testParams(), seqRng([0])).accepted).toBe(true);
-    expect(applyRune(vita(500, 500), { characteristicId: CHAR.VITALITE, value: 6 }, 'SC', testParams(), seqRng([0])).accepted).toBe(false);
-    const heavy = applyRune(vita(520, 520), { characteristicId: CHAR.VITALITE, value: 5 }, 'SC', testParams(), seqRng([0]));
+    expect(applyRune(vita(500, 500), { characteristicId: CHAR.VITALITE, value: 5 }, 'SC', strict(), seqRng([0])).accepted).toBe(true);
+    expect(applyRune(vita(500, 500), { characteristicId: CHAR.VITALITE, value: 6 }, 'SC', strict(), seqRng([0])).accepted).toBe(false);
+    const heavy = applyRune(vita(520, 520), { characteristicId: CHAR.VITALITE, value: 5 }, 'SC', strict(), seqRng([0]));
     expect(heavy.accepted).toBe(false);
     expect(heavy.reason).toBe('over_cap_exceeded');
   });
 
   it('a natural line that stays at or under its max is never concerned, even above 101 of weight (40 sagesse = 120)', () => {
     const sag = makeState([line({ characteristicId: CHAR.SAGESSE, value: 35, baseMin: 31, baseMax: 40 })]);
-    expect(applyRune(sag, { characteristicId: CHAR.SAGESSE, value: 5 }, 'SC', testParams(), seqRng([0])).accepted).toBe(true);
-    expect(applyRune(sag, { characteristicId: CHAR.SAGESSE, value: 6 }, 'SC', testParams(), seqRng([0])).accepted).toBe(false);
+    expect(applyRune(sag, { characteristicId: CHAR.SAGESSE, value: 5 }, 'SC', strict(), seqRng([0])).accepted).toBe(true);
+    expect(applyRune(sag, { characteristicId: CHAR.SAGESSE, value: 6 }, 'SC', strict(), seqRng([0])).accepted).toBe(false);
   });
 
   it('agilité (densité 1) : 101 au total accepté, 102 refusé ; exo Vitalité 505 accepté, 506 refusé', () => {
     const agi = makeState([line({ characteristicId: CHAR.CHANCE, value: 50 })]);
-    expect(applyRune(agi, { characteristicId: CHAR.CHANCE, value: 51 }, 'SC', testParams(), seqRng([0])).accepted).toBe(true);
-    expect(applyRune(agi, { characteristicId: CHAR.CHANCE, value: 52 }, 'SC', testParams(), seqRng([0])).accepted).toBe(false);
+    expect(applyRune(agi, { characteristicId: CHAR.CHANCE, value: 51 }, 'SC', strict(), seqRng([0])).accepted).toBe(true);
+    expect(applyRune(agi, { characteristicId: CHAR.CHANCE, value: 52 }, 'SC', strict(), seqRng([0])).accepted).toBe(false);
     const base = makeState([line({ characteristicId: CHAR.FORCE, value: 50 })]);
-    expect(applyRune(base, { characteristicId: CHAR.VITALITE, value: 505 }, 'SC', testParams(), seqRng([0])).accepted).toBe(true);
-    expect(applyRune(base, { characteristicId: CHAR.VITALITE, value: 506 }, 'SC', testParams(), seqRng([0])).accepted).toBe(false);
+    expect(applyRune(base, { characteristicId: CHAR.VITALITE, value: 505 }, 'SC', strict(), seqRng([0])).accepted).toBe(true);
+    expect(applyRune(base, { characteristicId: CHAR.VITALITE, value: 506 }, 'SC', strict(), seqRng([0])).accepted).toBe(false);
   });
 
   it("over_part (option) restores the former reading: base 400 vita, +505 accepted, +506 refused", () => {
-    const p = testParams({ overCapLineBasis: 'over_part' });
+    const p = strict({ overCapLineBasis: 'over_part' });
     expect(applyRune(vita(400, 400), { characteristicId: CHAR.VITALITE, value: 505 }, 'SC', p, seqRng([0])).accepted).toBe(true);
     expect(applyRune(vita(400, 400), { characteristicId: CHAR.VITALITE, value: 506 }, 'SC', p, seqRng([0])).accepted).toBe(false);
   });
 
   it('the object cumul (rule 2) still counts only the over part: 370/350 vita (74 total, 4 over) + exo PM = 94 accepted', () => {
-    const r = applyRune(vita(370, 350), { characteristicId: CHAR.PM, value: 1 }, 'SC', testParams(), seqRng([0]));
+    const r = applyRune(vita(370, 350), { characteristicId: CHAR.PM, value: 1 }, 'SC', strict(), seqRng([0]));
     expect(r.accepted).toBe(true);
-    expect(checkOverCap(r.state, CHAR.PM, testParams())).toMatchObject({ overWeightAfter: 94, lineWeightAfter: 90 });
+    expect(checkOverCap(r.state, CHAR.PM, strict())).toMatchObject({ overWeightAfter: 94, lineWeightAfter: 90 });
   });
 });
 

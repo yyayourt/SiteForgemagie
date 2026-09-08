@@ -2,7 +2,7 @@
   "$comment": "Paramètres NON certains du simulateur. Chaque entrée porte value / status / source / note / bounds / default. Statuts : SOURCE PRIMAIRE, MODÈLE EMPIRIQUE, HYPOTHÈSE COMMUNAUTAIRE, CONTRADICTION, INCONNU (cf. CLAUDE.md). Les règles SOURCE PRIMAIRE ne sont pas ici : elles sont codées en dur et testées. Sources abrégées : A = docs/knowledge/audit-forgemagie-dofus3.md ; R = docs/knowledge/Reconstruction_of_the_DOFUS_3_Unity_Forgemagie_Algorithm__2026_V.md ; AP = docs/audit-projet-existant.md.",
   "schemaVersion": 1,
   "gameVersion": "3.6.10.11",
-  "updatedAt": "2026-09-06",
+  "updatedAt": "2026-09-08",
   "params": {
     "overCapWeight": {
       "value": 101,
@@ -40,6 +40,35 @@
         ]
       },
       "default": "total_value"
+    },
+    "overCapExcess": {
+      "$comment": "Que fait le moteur quand une rune amènerait la ligne (ou l'objet) au-delà de la borne d'over/exo ? Ex. : Ra Vi (+50) sur 480 vita, borne 505.",
+      "behaviour": {
+        "value": "truncate",
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "joueur expérimenté du projet (2026-09-08) : « même si j'utilise une rune +50 vita et que je force un succès critique, il faut que cette rune passe mais s'arrête à la limite : je mets la rune 50 à 480, elle passe jusqu'à 505 ; je crois que même en forgemagie classique il y a cette règle » ; aucune source écrite retrouvée",
+        "note": "truncate : la rune s'applique jusqu'à la borne (part over de la ligne et cumul de l'objet), l'excédent est perdu ; refusée seulement si plus rien ne peut s'appliquer. refuse : toute rune qui dépasserait est refusée entière (ancienne lecture du projet). Réfutation de truncate : une rune observée en jeu refusée, ou sans effet, alors qu'une partie aurait tenu sous la borne.",
+        "bounds": {
+          "enum": [
+            "truncate",
+            "refuse"
+          ]
+        },
+        "default": "truncate"
+      },
+      "lossBasis": {
+        "value": "full_rune",
+        "status": "INCONNU",
+        "source": "aucune ; le même joueur note « à voir si cela ne fait pas sauter des caractéristiques ou non, cela doit aussi dépendre du puits »",
+        "note": "Sur une rune tronquée, poids retenu pour la perte en succès neutre (et pour ecLossFactor en échec critique). full_rune : le poids entier de la rune (Ra Vi = 10 même si seuls 25 vita passent), lecture prudente posée par défaut. applied_only : seul le poids réellement appliqué (25 vita = 5). Dans les deux cas le reliquat absorbe d'abord. Sans effet sur une rune non tronquée. À trancher par observation en jeu.",
+        "bounds": {
+          "enum": [
+            "full_rune",
+            "applied_only"
+          ]
+        },
+        "default": "full_rune"
+      }
     },
     "ecLossFactor": {
       "value": 1,

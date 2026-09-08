@@ -58,6 +58,7 @@ export function testParams(overrides: DeepPartial<EngineParams> = {}): EnginePar
     ...overrides,
     densities: (overrides.densities as EngineParams['densities']) ?? base.densities,
     lossSelection: { ...base.lossSelection, ...overrides.lossSelection },
+    overCapExcess: { ...base.overCapExcess, ...overrides.overCapExcess },
     residualPool: { ...base.residualPool, ...overrides.residualPool },
     transcendence: {
       ...base.transcendence,

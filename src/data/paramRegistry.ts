@@ -61,6 +61,7 @@ function sectionOf(pathParts: string[]): { section: string; subgroup?: string } 
   if (pathParts[0] === 'densities') return { section: 'densities' };
   const [, first, second] = pathParts;
   if (first === 'overCapWeight' || first === 'overCapScope' || first === 'overCapLineBasis') return { section: 'overCap' };
+  if (first === 'overCapExcess') return { section: 'overCap', subgroup: 'dépassement' };
   if (first === 'ecLossFactor') return { section: 'ecLoss' };
   if (pathParts.length > 3) return { section: first, subgroup: second };
   return { section: first };

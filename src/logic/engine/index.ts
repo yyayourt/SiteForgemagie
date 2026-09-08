@@ -14,6 +14,6 @@ export {
   type LossSelectionStrategy,
   type LossCandidate,
 } from './lossSelection';
-export { checkOverCap, hasAnyOverOrExo } from './overCap';
+export { checkOverCap, hasAnyOverOrExo, maxApplicableRuneValue } from './overCap';
 export { onItemLeavesWorkshop, normalizeResidual, type ResidualResetEvent } from './residual';
 export { runeWeight, lineWeight, lineOverWeight, lineCapWeight, isOverOrExo, getLineDensity } from './weights';

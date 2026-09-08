@@ -23,6 +23,7 @@ import {
   overCapUsageAfter,
   type ProbabilityOutput,
 } from '../logic/probability';
+import { maxApplicableRuneValue } from '../logic/engine';
 import { simulateRuneAttempts, type MonteCarloResult } from '../logic/probability/monteCarlo';
 import { getAvailableRuneTiers, getCharacteristicName, getTranscendenceRunes, type TranscendenceRuneInfo } from '../data/dataset';
 import { getCraftParams, getDensity, getEngineParams, getProbabilityParams, type ParamOverrides, type ProbabilityModelName } from '../data/params';
@@ -47,6 +48,8 @@ export interface RuneEstimate extends ProbabilityOutput {
   isHeavyExo: boolean;
   /** Usage de la borne over/exo si la rune passe (cumul / borne), 1 = à la borne */
   overCapUsage: number;
+  /** Valeur qui s'appliquerait réellement (troncature à la borne) ; 0 = la rune serait refusée */
+  applicableValue: number;
 }
 
 const TIER_LABELS: Record<RuneTier, string> = { normal: '', pa: 'Pa', ra: 'Ra' };
@@ -228,6 +231,7 @@ export function useAtelier() {
       if (!target || !option || option.value <= 0) return null;
       const heavy = isHeavyExo(characteristicId, target.isExo, probabilityParams);
       const overCapUsage = overCapUsageAfter(engineState, { characteristicId, value: option.value }, engineParams);
+      const applicableValue = maxApplicableRuneValue(engineState, { characteristicId, value: option.value }, engineParams);
       const probs = computeOutcomeProbabilities(
         {
           itemLevel: level,
@@ -240,7 +244,7 @@ export function useAtelier() {
         },
         probabilityParams
       );
-      return { ...probs, model: probabilityParams.model, isHeavyExo: heavy, overCapUsage };
+      return { ...probs, model: probabilityParams.model, isHeavyExo: heavy, overCapUsage, applicableValue };
     },
     [stats, runeOptions, probabilityParams, level, state.residualPool, budget.remainingBudget, engineState, engineParams]
   );
@@ -263,6 +267,8 @@ export function useAtelier() {
         absorbedByResidual: result.absorbedByResidual,
         residualPoolBefore: result.residualPoolBefore,
         residualPoolAfter: result.residualPoolAfter,
+        appliedValue: result.appliedValue,
+        truncated: result.truncated,
       };
       const event: ForgeEvent = {
         id: state.logCounter + 1,
@@ -357,6 +363,8 @@ export function useAtelier() {
         state: r.state,
         outcome: 'SC',
         runeWeight: 0,
+        appliedValue: 0,
+        truncated: false,
         lossRequested: 0,
         absorbedByResidual: 0,
         losses: [],

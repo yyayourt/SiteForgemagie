@@ -37,6 +37,10 @@ export type ParamOverrides = Readonly<Record<string, unknown>>;
 export type OverCapScope = 'per_line' | 'global';
 /** Ce que la borne mesure sur une ligne en over/exo : valeur totale (défaut) ou seule la part over. */
 export type OverCapLineBasis = 'total_value' | 'over_part';
+/** Rune qui dépasserait la borne : tronquée à la borne (défaut) ou refusée entière. */
+export type OverCapExcessBehaviour = 'truncate' | 'refuse';
+/** Poids retenu pour la perte d'une rune tronquée : rune entière (défaut) ou part appliquée. */
+export type OverCapExcessLossBasis = 'full_rune' | 'applied_only';
 export type LossSelectionStrategyName =
   | 'uniform'
   | 'weighted_by_weight'
@@ -136,6 +140,12 @@ export interface EngineParams {
   overCapScope: OverCapScope;
   /** HYPOTHÈSE COMMUNAUTAIRE : la borne s'applique à la valeur totale d'une ligne en over (505 vita), pas à sa part over. */
   overCapLineBasis: OverCapLineBasis;
+  overCapExcess: {
+    /** HYPOTHÈSE COMMUNAUTAIRE : la rune s'arrête à la borne au lieu d'être refusée. */
+    behaviour: OverCapExcessBehaviour;
+    /** INCONNU : perte mesurée sur la rune entière ou sur la part appliquée. */
+    lossBasis: OverCapExcessLossBasis;
+  };
   /** Perte en EC = ecLossFactor × poids de la rune (INCONNU) */
   ecLossFactor: number;
   lossSelection: {
@@ -165,6 +175,10 @@ export function getEngineParams(overrides?: ParamOverrides): EngineParams {
     overCapWeight: r<number>('params.overCapWeight'),
     overCapScope: r<OverCapScope>('params.overCapScope'),
     overCapLineBasis: r<OverCapLineBasis>('params.overCapLineBasis'),
+    overCapExcess: {
+      behaviour: r<OverCapExcessBehaviour>('params.overCapExcess.behaviour'),
+      lossBasis: r<OverCapExcessLossBasis>('params.overCapExcess.lossBasis'),
+    },
     ecLossFactor: r<number>('params.ecLossFactor'),
     lossSelection: {
       strategy: r<LossSelectionStrategyName>('params.lossSelection.strategy'),

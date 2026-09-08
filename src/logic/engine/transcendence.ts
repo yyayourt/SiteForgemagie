@@ -46,6 +46,8 @@ function refused(
     absorbedByResidual: 0,
     losses: [],
     unabsorbedWeight: 0,
+    appliedValue: 0,
+    truncated: false,
     residualPoolBefore: state.residualPool,
     residualPoolAfter: state.residualPool,
   };
@@ -121,6 +123,8 @@ export function applyTranscendenceRune(
     absorbedByResidual: 0,
     losses: [],
     unabsorbedWeight: 0,
+    appliedValue: rune.value,
+    truncated: false,
     residualPoolBefore: state.residualPool,
     residualPoolAfter: state.residualPool,
   };
