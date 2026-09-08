@@ -109,7 +109,7 @@ describe('cohérence avec data/observations/schema.json', () => {
 
   it('every schema property is accepted by the validator', () => {
     const props = Object.keys(schema.properties);
-    const full: Record<string, unknown> = { ...valid(), residualVisible: true, residualBefore: 1, residualAfter: 1, server: 's', notes: 'n' };
+    const full: Record<string, unknown> = { ...valid(), lineStateBeforeDeduced: true, residualVisible: true, residualBefore: 1, residualAfter: 1, server: 's', notes: 'n' };
     for (const p of props) expect(p in full, `propriété ${p} couverte`).toBe(true);
     expect(validateObservation(full).valid).toBe(true);
   });

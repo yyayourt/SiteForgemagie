@@ -18,6 +18,8 @@ export interface Observation {
   itemId: number;
   itemLevel: number;
   lineStateBefore: ObservationLine[];
+  /** État avant déduit (après + modifications affichées), pas lu. */
+  lineStateBeforeDeduced?: boolean;
   runeId: number;
   outcome: RuneOutcome;
   lineStateAfter: ObservationLine[];
@@ -37,7 +39,7 @@ export interface ValidationResult {
 
 const OUTCOMES: readonly string[] = ['SC', 'SN', 'EC'];
 const ALLOWED_KEYS = new Set([
-  'schemaVersion', 'gameVersion', 'itemId', 'itemLevel', 'lineStateBefore', 'runeId', 'outcome',
+  'schemaVersion', 'gameVersion', 'itemId', 'itemLevel', 'lineStateBefore', 'lineStateBeforeDeduced', 'runeId', 'outcome',
   'lineStateAfter', 'residualVisible', 'residualBefore', 'residualAfter', 'source', 'date', 'server', 'notes',
 ]);
 const LINE_KEYS = new Set(['characteristicId', 'value', 'isExo']);
@@ -85,6 +87,7 @@ export function validateObservation(input: unknown): ValidationResult {
   if (!isInt(o.itemId) || o.itemId < 1) errors.push('itemId : entier ≥ 1 attendu');
   if (!isInt(o.itemLevel) || o.itemLevel < 1 || o.itemLevel > 200) errors.push('itemLevel : entier entre 1 et 200 attendu');
   validateLines(o.lineStateBefore, 'lineStateBefore', errors);
+  if (o.lineStateBeforeDeduced !== undefined && typeof o.lineStateBeforeDeduced !== 'boolean') errors.push('lineStateBeforeDeduced : booléen attendu');
   if (!isInt(o.runeId) || o.runeId < 1) errors.push('runeId : entier ≥ 1 attendu');
   if (typeof o.outcome !== 'string' || !OUTCOMES.includes(o.outcome)) errors.push('outcome : SC, SN ou EC attendu');
   validateLines(o.lineStateAfter, 'lineStateAfter', errors);

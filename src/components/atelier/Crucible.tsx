@@ -28,7 +28,7 @@ export function Crucible({ residualPool, event }: Props) {
           <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" />
           <InfoTip label="Ce qu'est le reliquat">
             <p className="m-0"><strong className="text-ash">Reliquat serveur</strong> : créé par un succès neutre ou un échec (poids perdu − poids de la rune), consommé en priorité à la perte suivante, jamais négatif. C'est un état propre du moteur, pas un calcul sur les lignes visibles.</p>
-            <p className="m-0 mt-2">Sa purge à l'équipement ou en HDV est une hypothèse (<StatusBadge status={reset?.status ?? 'HYPOTHÈSE COMMUNAUTAIRE'} />), et sa visibilité en jeu une <StatusBadge status={visible?.status ?? 'CONTRADICTION'} />.</p>
+            <p className="m-0 mt-2">Sa purge à l'équipement ou en HDV est une hypothèse (<StatusBadge status={reset?.status ?? 'HYPOTHÈSE COMMUNAUTAIRE'} />), et son affichage en jeu est établi : le client Unity montre « reliquat » et son historique (<StatusBadge status={visible?.status ?? 'SOURCE PRIMAIRE'} />).</p>
             <p className="m-0 mt-2">À ne pas confondre avec le <strong className="text-ash">budget de poids</strong>, qui est une planification.</p>
           </InfoTip>
         </div>

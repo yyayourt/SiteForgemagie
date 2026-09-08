@@ -1,0 +1,37 @@
+[
+  {
+    "schemaVersion": 1,
+    "gameVersion": "3.6.10.11",
+    "itemId": 2414,
+    "itemLevel": 20,
+    "lineStateBefore": [
+      {
+        "characteristicId": 11,
+        "value": 37
+      },
+      {
+        "characteristicId": 44,
+        "value": 166
+      }
+    ],
+    "lineStateBeforeDeduced": true,
+    "runeId": 1523,
+    "outcome": "SN",
+    "lineStateAfter": [
+      {
+        "characteristicId": 11,
+        "value": 42
+      },
+      {
+        "characteristicId": 44,
+        "value": 155
+      }
+    ],
+    "residualVisible": true,
+    "residualBefore": 0,
+    "residualAfter": 0.1,
+    "source": "Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "notes": "Cape Bouffante (Vitalité 36–40, Initiative 151–200). Valeurs AVANT déduites de l'après et des modifications affichées, pas lues. Perte 11 ini = 1,1 ; rune 1 ; reliquat 0,1 ; perte non multiple de la rune Ini (+10) ; vita passée en over par SN (37 → 42, max 40). Heure de la tentative non relevée (12:00Z posé)."
+  }
+]

@@ -17,9 +17,9 @@
     },
     "overCapScope": {
       "value": "global",
-      "status": "CONTRADICTION",
+      "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) : « Les statistiques en exo ne peuvent excéder 101 de densité (Ex : 10 ini et 1 PA, 55 vita 1 PM…) » et « lisser des statistiques avant de tenter un exo (Ex : 213 vita/200, placer une rune pods de 2,5 de densité qui retire 13 vita pour être à 200/200 vita) » ; R PARTIE 6 (« over+exo cumulés ≤ 101 global ») ; contra A §7 et §13 (par ligne, confiance C-D) ; AP §3.3 R1 ; X (rapport de croisement 2026-09-07) §6 lit la même phrase de Huz comme « par ligne / statistique » (cumul global non testé)",
-      "note": "global : la somme des poids over (valeur − jet max, × densité) et exo (valeur × densité) de l'objet est plafonnée à overCapWeight ; per_line : chaque ligne dispose de son propre plafond. Défaut global depuis le 2026-09-06 : les deux exemples de Huz additionnent deux lignes (10 ini = 1 + PA 100 = 101 ; 55 vita = 11 + PM 90 = 101) et son conseil de ramener un over 213/200 vita à 200 avant un exo PA n'a de sens que si l'over compte dans le même budget que l'exo. Hypothèse forte mais non démontrée : un objet observé en jeu avec un exo PA ET un over d'au moins 2 de poids sur une autre ligne (ex. 211/200 vita) réfuterait cette lecture et rendrait per_line. CONTRADICTION depuis le 2026-09-07 : le rapport X lit Huz « par ligne », l'errata du 2026-09-06 lit « cumul objet » d'après les exemples à deux lignes. Défaut global conservé, à trancher par une observation d'objet en HDV (data/observations/item-snapshot.schema.json) portant un exo PA et un over ≥ 2 de poids sur une autre ligne.",
+      "note": "global : la somme des poids over (valeur − jet max, × densité) et exo (valeur × densité) de l'objet est plafonnée à overCapWeight ; per_line : chaque ligne dispose de son propre plafond. Défaut global depuis le 2026-09-06 : les deux exemples de Huz additionnent deux lignes (10 ini = 1 + PA 100 = 101 ; 55 vita = 11 + PM 90 = 101) et son conseil de ramener un over 213/200 vita à 200 avant un exo PA n'a de sens que si l'over compte dans le même budget que l'exo. Hypothèse forte mais non démontrée : un objet observé en jeu avec un exo PA ET un over d'au moins 2 de poids sur une autre ligne (ex. 211/200 vita) réfuterait cette lecture et rendrait per_line. CONTRADICTION depuis le 2026-09-07 : le rapport X lit Huz « par ligne », l'errata du 2026-09-06 lit « cumul objet » d'après les exemples à deux lignes. Défaut global conservé, à trancher par une observation d'objet en HDV (data/observations/item-snapshot.schema.json) portant un exo PA et un over ≥ 2 de poids sur une autre ligne. Non réfuté par recherche HDV 2026-09-08 (Yanis, client 3.6.10.11) : aucun objet contredisant cette lecture trouvé.",
       "bounds": {
         "enum": [
           "per_line",
@@ -32,7 +32,7 @@
       "value": "total_value",
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "guide Huz (huzounet.fr/guides/forgemagie, 21/01/2026) : « L'over maximal d'un item ne peut excéder 101 de densité sur une statistique (Ex : 505 vita, 101 agilité…) », lu comme une VALEUR TOTALE de ligne par un joueur expérimenté du projet (2026-09-06 : « que l'item ait de base 200 ou 500 vita, en over il ne pourra pas dépasser 505 »)",
-      "note": "Ce que la borne overCapWeight mesure sur UNE ligne en over ou en exo. total_value : valeur totale × densité ≤ borne (505 vita au total, 101 agilité, 33 sagesse…), donc une ligne dont le jet naturel pèse déjà plus que la borne (ex. 40 sagesse = 120) ne peut plus être montée en over, et la marge d'over dépend de la base (base 400 vita : +105 ; base 500 : +5). over_part : seule la part au-delà du jet max compte (ancienne lecture du projet, base 400 vita : +505). La phrase du guide admet les deux lectures ; total_value vient de l'expérience en jeu. Réfutation de total_value : un objet observé avec une ligne au-dessus de son jet max ET un poids total supérieur à la borne (ex. 41 sagesse, 510 vita). Le cumul de l'objet (overCapScope = global) reste mesuré sur la part over, sinon l'exemple « 213/200 vita à lisser avant un exo PA » du même guide serait impossible.",
+      "note": "Ce que la borne overCapWeight mesure sur UNE ligne en over ou en exo. total_value : valeur totale × densité ≤ borne (505 vita au total, 101 agilité, 33 sagesse…), donc une ligne dont le jet naturel pèse déjà plus que la borne (ex. 40 sagesse = 120) ne peut plus être montée en over, et la marge d'over dépend de la base (base 400 vita : +105 ; base 500 : +5). over_part : seule la part au-delà du jet max compte (ancienne lecture du projet, base 400 vita : +505). La phrase du guide admet les deux lectures ; total_value vient de l'expérience en jeu. Réfutation de total_value : un objet observé avec une ligne au-dessus de son jet max ET un poids total supérieur à la borne (ex. 41 sagesse, 510 vita). Le cumul de l'objet (overCapScope = global) reste mesuré sur la part over, sinon l'exemple « 213/200 vita à lisser avant un exo PA » du même guide serait impossible. Non réfuté par recherche HDV 2026-09-08 (Yanis, client 3.6.10.11) : aucun objet contredisant cette lecture trouvé.",
       "bounds": {
         "enum": [
           "total_value",
@@ -125,17 +125,17 @@
         "default": true
       },
       "visibleInClient": {
-        "value": false,
-        "status": "CONTRADICTION",
-        "source": "docs internes (Cadernis via Reverse-Engineering §A : le client ne reçoit que magicPoolStatus, sens de variation, « le reliquat lui-même n'est pas exposé au client ») vs guide 2026 (affirme que le reliquat est affiché dans l'onglet FM du client Unity) ; guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) (côté « affiché ») : « nous n'avons plus besoin de calculer ce Reliquat, il s'affiche directement sur l'onglet de forgemagie » ; X (rapport de croisement 2026-09-07) §6 : Huz 2026 verbatim « Aujourd'hui, nous n'avons plus besoin de calculer ce Reliquat, il s'affiche directement sur l'onglet de forgemagie » (capture reliquat.png) contre le tutoriel Ankama (« ne pas afficher ces deux informations »)",
-        "note": "Le reliquat est-il visible en jeu ? Les rapports de docs/knowledge/ le disent invisible (2.x) ; un guide 2026 le dit affiché dans l'onglet de forgemagie. À vérifier directement dans le client Unity. Sans effet sur le moteur ; conditionne seulement ce que l'interface prétend montrer. Reste CONTRADICTION jusqu'à une capture d'écran Unity versionnée (data/observations : residualVisible).",
+        "value": true,
+        "status": "SOURCE PRIMAIRE",
+        "source": "observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) : le client Unity affiche « reliquat : 0,1 » dans l'interface Costumager et une entrée « + reliquat » dans l'historique de forgemagie. Anciennes sources : docs internes 2.x (invisible) vs guide Huz 2026 (affiché) — contradiction fermée par la capture.",
+        "note": "Le reliquat est affiché en jeu sur Unity (valeur et historique). Sans effet sur le moteur ; l'interface peut donc présenter le creuset comme une valeur que le joueur voit aussi dans le client. La lecture 2.x « non exposé au client » est caduque.",
         "bounds": {
           "enum": [
             true,
             false
           ]
         },
-        "default": false
+        "default": true
       }
     },
     "transcendence": {
@@ -640,6 +640,20 @@
         },
         "default": "skip"
       }
+    },
+    "potions": {
+      "$comment": "Potions de forgemagie élémentaire (typeId 26). Le dataset Unity n'a que deux paliers (niveau 20 : Étincelle/Crachin/Courant d'Air/Secousse ; niveau 80 : Incendie/Tsunami/Ouragan/Séisme) : le palier niveau 50 des tables 2.x n'existe pas. Module non modélisé tant que le taux n'est pas mesuré.",
+      "damageKeptPercentByLevel": {
+        "value": {},
+        "status": "INCONNU",
+        "source": "observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) : l'infobulle des potions ne montre AUCUN taux dans le client Unity ; l'API n'en fournit pas non plus. Tables anciennes (X §6) : 50/65/80 % (wiki-dofus, Rétro/2.x, trois paliers) ; 85 % (jeuxonline 14787, Rétro).",
+        "note": "Pourcentage des dommages neutres conservés lors du changement d'élément, par niveau de potion (clés « 20 », « 80 »). Vide = inconnu : le module potions reste désactivé dans l'atelier. La table 50/65/80 % est RETIRÉE du défaut le 2026-09-08 : elle décrit trois paliers d'une autre version du jeu. Mesure en jeu requise : dommages d'une arme avant/après potion, par palier.",
+        "bounds": {
+          "min": 0,
+          "max": 100
+        },
+        "default": {}
+      }
     }
   },
   "densities": {
@@ -670,9 +684,9 @@
     "11": {
       "name": "Vitalité",
       "value": 0.2,
-      "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "A §3.1 (B) ; R PARTIE 1 (« 0,2 ; 0,25 débattu »)",
-      "note": "Convention : 5 vitalité = 1 de poids (rune Vi +5 = 1). Valeur 0,25 rencontrée dans d'anciennes tables. Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 0,2 chez Millenium, dofastuces, KamelAkar, Huz, Xixou. La valeur « 0,25 » parfois citée est une CONFUSION avec la densité des Pods (0,25/pt) ; dofastuces : « 5 vita = 1 de poids… 1 de vita c'est 0,2 de poids » ; borne 505 × 0,2 = 101 (Huz).",
+      "status": "SOURCE PRIMAIRE",
+      "source": "calcul du reliquat sur une tentative observée en jeu (observations.json, Cape Bouffante, 2026-09-08 : Rune Vi +5 comptée 1 de poids, cohérent avec 11 ini × 0,1 − 1 = 0,1 affiché) ; A §3.1 (B) ; R PARTIE 1 (« 0,2 ; 0,25 débattu »)",
+      "note": "Convention : 5 vitalité = 1 de poids (rune Vi +5 = 1). Valeur 0,25 rencontrée dans d'anciennes tables. Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 0,2 chez Millenium, dofastuces, KamelAkar, Huz, Xixou. La valeur « 0,25 » parfois citée est une CONFUSION avec la densité des Pods (0,25/pt) ; dofastuces : « 5 vita = 1 de poids… 1 de vita c'est 0,2 de poids » ; borne 505 × 0,2 = 101 (Huz). Confirmée par l'arithmétique du reliquat affiché en jeu le 2026-09-08 (rune Vi = 1 de poids ⇒ 0,2 par point).",
       "bounds": {
         "min": 0.01,
         "max": 10
@@ -802,9 +816,9 @@
     "27": {
       "name": "Esquive PA",
       "value": 7,
-      "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "A §3.1 (B)",
-      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire).",
+      "status": "SOURCE PRIMAIRE",
+      "source": "infobulle de la rune normale +1 lue EN JEU, observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) ; A §3.1 (B)",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire). Lue 7 en jeu Unity le 2026-09-08 (data/observations/tooltips/tooltips.json) : la valeur 2.x est conservée sur Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -814,9 +828,9 @@
     "28": {
       "name": "Esquive PM",
       "value": 7,
-      "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "A §3.1 (B)",
-      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire).",
+      "status": "SOURCE PRIMAIRE",
+      "source": "infobulle de la rune normale +1 lue EN JEU, observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) ; A §3.1 (B)",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire). Lue 7 en jeu Unity le 2026-09-08 (data/observations/tooltips/tooltips.json) : la valeur 2.x est conservée sur Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -898,9 +912,9 @@
     "44": {
       "name": "Initiative",
       "value": 0.1,
-      "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 0,1 chez Millenium (rune Ini +10 = 1), Xixou.",
+      "status": "SOURCE PRIMAIRE",
+      "source": "calcul du reliquat sur une tentative observée en jeu (data/observations/observations.json, Cape Bouffante, 2026-09-08 : perte de 11 initiative = 1,1 de poids, rune Vi = 1, reliquat affiché 0,1 ⇒ 0,1 par point) ; A §3.1 (B) ; R PARTIE 1",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 0,1 chez Millenium (rune Ini +10 = 1), Xixou. Confirmée par l'arithmétique du reliquat affiché en jeu le 2026-09-08.",
       "bounds": {
         "min": 0.001,
         "max": 10
@@ -1006,9 +1020,9 @@
     "69": {
       "name": "Puissance pièges",
       "value": 2,
-      "status": "INCONNU",
-      "source": "aucune ; valeur posée par analogie avec Puissance",
-      "note": "Absente de toutes les tables consultées. Runes Per Pi / Pa Per Pi / Ra Per Pi existent (dataset). Valeur arbitraire pour faire tourner la simulation. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 2 par analogie avec Puissance chez Millenium seulement ; aucune source récente, aucun test reproductible.",
+      "status": "SOURCE PRIMAIRE",
+      "source": "infobulle de la rune normale +1 lue EN JEU, observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) ; auparavant : aucune ; valeur posée par analogie avec Puissance",
+      "note": "Absente de toutes les tables consultées. Runes Per Pi / Pa Per Pi / Ra Per Pi existent (dataset). Valeur arbitraire pour faire tourner la simulation. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 2 par analogie avec Puissance chez Millenium seulement ; aucune source récente, aucun test reproductible. Lue 2 en jeu Unity le 2026-09-08 (tooltips.json) : l'analogie avec Puissance est confirmée.",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -1018,9 +1032,9 @@
     "70": {
       "name": "Dommages pièges",
       "value": 5,
-      "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "A §3.1 (B, ligne « Pi »)",
-      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
+      "status": "SOURCE PRIMAIRE",
+      "source": "infobulle de la rune normale +1 lue EN JEU, observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) ; A §3.1 (B, ligne « Pi »)",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou. Lue 5 en jeu Unity le 2026-09-08 (tooltips.json).",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1054,9 +1068,9 @@
     "82": {
       "name": "Retrait PA",
       "value": 7,
-      "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "A §3.1 (B)",
-      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire).",
+      "status": "SOURCE PRIMAIRE",
+      "source": "infobulle de la rune normale +1 lue EN JEU, observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) ; A §3.1 (B)",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire). Lue 7 en jeu Unity le 2026-09-08 (data/observations/tooltips/tooltips.json) : la valeur 2.x est conservée sur Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1066,9 +1080,9 @@
     "83": {
       "name": "Retrait PM",
       "value": 7,
-      "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "A §3.1 (B)",
-      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire).",
+      "status": "SOURCE PRIMAIRE",
+      "source": "infobulle de la rune normale +1 lue EN JEU, observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) ; A §3.1 (B)",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire). Lue 7 en jeu Unity le 2026-09-08 (data/observations/tooltips/tooltips.json) : la valeur 2.x est conservée sur Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1197,15 +1211,15 @@
     },
     "121": {
       "name": "% Résistance distance",
-      "value": 15,
-      "status": "CONTRADICTION",
-      "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Di, poids 10)",
-      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 15 chez Millenium et dofastuces (2.x), INCONNU si conservé sur Unity ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity. Le désaccord KamelAkar 15 / Icksir 10 reste entier.",
+      "value": 10,
+      "status": "SOURCE PRIMAIRE",
+      "source": "infobulle de la rune normale +1 lue EN JEU, observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) : 10 ; auparavant : A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Di, poids 10)",
+      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 15 chez Millenium et dofastuces (2.x), INCONNU si conservé sur Unity ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity. Le désaccord KamelAkar 15 / Icksir 10 reste entier. CHANGÉ 15 → 10 le 2026-09-08 : lue 10 dans l'infobulle Unity (tooltips.json). Deuxième divergence Unity vs tables 2.x après Renvoi de dommages ; Icksir (10) avait raison, KamelAkar et les guides 2.x (15) non.",
       "bounds": {
         "min": 0.01,
         "max": 200
       },
-      "default": 15
+      "default": 10
     },
     "122": {
       "name": "% Dommages armes",
@@ -1233,15 +1247,15 @@
     },
     "124": {
       "name": "% Résistance mêlée",
-      "value": 15,
-      "status": "CONTRADICTION",
-      "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Mé, poids 10)",
-      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 15 chez Millenium et dofastuces (2.x), INCONNU si conservé sur Unity ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity. Le désaccord KamelAkar 15 / Icksir 10 reste entier.",
+      "value": 10,
+      "status": "SOURCE PRIMAIRE",
+      "source": "infobulle de la rune normale +1 lue EN JEU, observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) : 10 ; auparavant : A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Mé, poids 10)",
+      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 15 chez Millenium et dofastuces (2.x), INCONNU si conservé sur Unity ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity. Le désaccord KamelAkar 15 / Icksir 10 reste entier. CHANGÉ 15 → 10 le 2026-09-08 : lue 10 dans l'infobulle Unity (tooltips.json). Deuxième divergence Unity vs tables 2.x après Renvoi de dommages ; Icksir (10) avait raison, KamelAkar et les guides 2.x (15) non.",
       "bounds": {
         "min": 0.01,
         "max": 200
       },
-      "default": 15
+      "default": 10
     },
     "125": {
       "name": "% Dommages mêlée",
@@ -1285,6 +1299,6 @@
     "Rune de chasse (item 10057, effet 795) : characteristic 0 dans DofusDB, donc non indexable ici. Poids 5 selon A §3.1 (C-B). À traiter par un paramètre dédié quand le module armes sera abordé.",
     "Rune de Signature (item 7508) : aucun effet, hors périmètre.",
     "Runes de transcendance (typeId 211, 81 runes) : listées dans data/dataset.json. Verrou de l'objet (plus de forgemagie ni d'orbe) = devblog 2.58 (SOURCE PRIMAIRE, codé en dur) ; le devblog 2.72 concerne le migrateur d'objets, pas la transcendance.",
-    "Potions de forgemagie : 8 potions dans le dataset, aucune valeur dans l'API. Taux de dégâts conservés localisé par version (X §6) : 50 / 65 / 80 % selon wiki-dofus (Rétro/2.x, Étincelle/Flambée/Incendie) contre 85 % en Rétro (jeuxonline 14787 : la potion de niveau 50 « ne réduit les dégâts que de 15 % ») ; aucun changelog 3.x. CONTRADICTION non tranchée pour Unity : lire l'infobulle de chaque potion en jeu."
+    "Potions de forgemagie : 8 potions dans le dataset, DEUX paliers seulement (niveau 20 et 80 ; le palier 50 des tables 2.x n'existe pas), aucune valeur dans l'API, aucun taux dans l'infobulle du client Unity (observation du 2026-09-08). Taux : params.potions.damageKeptPercentByLevel, INCONNU, à mesurer en jeu."
   ]
 }

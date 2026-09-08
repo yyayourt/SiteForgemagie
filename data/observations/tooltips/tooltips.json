@@ -1,1 +1,90 @@
-[]
+[
+  {
+    "schemaVersion": 1,
+    "runeId": 11641,
+    "densityRead": 7,
+    "densityPerPoint": 7,
+    "gameVersion": "3.6.10.11",
+    "capture": "data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "source": "Yanis",
+    "notes": "Rune Ré Pa (+1) : Esquive PA. Nom du fichier de capture à préciser dans le dossier."
+  },
+  {
+    "schemaVersion": 1,
+    "runeId": 11643,
+    "densityRead": 7,
+    "densityPerPoint": 7,
+    "gameVersion": "3.6.10.11",
+    "capture": "data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "source": "Yanis",
+    "notes": "Rune Ré Pme (+1) : Esquive PM. Nom du fichier de capture à préciser dans le dossier."
+  },
+  {
+    "schemaVersion": 1,
+    "runeId": 11645,
+    "densityRead": 7,
+    "densityPerPoint": 7,
+    "gameVersion": "3.6.10.11",
+    "capture": "data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "source": "Yanis",
+    "notes": "Rune Ret Pa (+1) : Retrait PA. Nom du fichier de capture à préciser dans le dossier."
+  },
+  {
+    "schemaVersion": 1,
+    "runeId": 11647,
+    "densityRead": 7,
+    "densityPerPoint": 7,
+    "gameVersion": "3.6.10.11",
+    "capture": "data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "source": "Yanis",
+    "notes": "Rune Ret Pme (+1) : Retrait PM. Nom du fichier de capture à préciser dans le dossier."
+  },
+  {
+    "schemaVersion": 1,
+    "runeId": 7447,
+    "densityRead": 2,
+    "densityPerPoint": 2,
+    "gameVersion": "3.6.10.11",
+    "capture": "data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "source": "Yanis",
+    "notes": "Rune Per Pi (+1) : Puissance pièges. Nom du fichier de capture à préciser dans le dossier."
+  },
+  {
+    "schemaVersion": 1,
+    "runeId": 7446,
+    "densityRead": 5,
+    "densityPerPoint": 5,
+    "gameVersion": "3.6.10.11",
+    "capture": "data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "source": "Yanis",
+    "notes": "Rune Do Pi (+1) : Dommages pièges. Nom du fichier de capture à préciser dans le dossier."
+  },
+  {
+    "schemaVersion": 1,
+    "runeId": 18724,
+    "densityRead": 10,
+    "densityPerPoint": 10,
+    "gameVersion": "3.6.10.11",
+    "capture": "data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "source": "Yanis",
+    "notes": "Rune Ré Per Di (+1) : % Résistance distance (tables 2.x : 15). Nom du fichier de capture à préciser dans le dossier."
+  },
+  {
+    "schemaVersion": 1,
+    "runeId": 18723,
+    "densityRead": 10,
+    "densityPerPoint": 10,
+    "gameVersion": "3.6.10.11",
+    "capture": "data/observations/captures/2026-09-08/",
+    "date": "2026-09-08T12:00:00Z",
+    "source": "Yanis",
+    "notes": "Rune Ré Per Mé (+1) : % Résistance mêlée (tables 2.x : 15). Nom du fichier de capture à préciser dans le dossier."
+  }
+]

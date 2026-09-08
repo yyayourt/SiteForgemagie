@@ -39,10 +39,11 @@ export const SECTION_LABELS: Record<string, string> = {
   craft: 'Jet de craft',
   probability: 'Modèle probabiliste',
   brisage: 'Brisage',
+  potions: 'Potions de forgemagie',
   densities: 'Densités (poids par point)',
 };
 
-export const SECTION_ORDER = ['densities', 'overCap', 'lossSelection', 'ecLoss', 'residualPool', 'transcendence', 'craft', 'probability', 'brisage'];
+export const SECTION_ORDER = ['densities', 'overCap', 'lossSelection', 'ecLoss', 'residualPool', 'transcendence', 'craft', 'probability', 'brisage', 'potions'];
 
 function isEntry(node: unknown): node is ParamEntry<unknown> {
   return (

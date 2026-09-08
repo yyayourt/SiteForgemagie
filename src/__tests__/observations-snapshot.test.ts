@@ -8,6 +8,9 @@ import { validateTooltipReading, validateTooltipReadings, densityPerPointOf, typ
 import snapshotSchema from '../../data/observations/item-snapshot.schema.json';
 import tooltipSchema from '../../data/observations/tooltips/schema.json';
 import tooltips from '../../data/observations/tooltips/tooltips.json';
+import observations from '../../data/observations/observations.json';
+import { validateObservations } from '../logic/observations/validate';
+import { getRuneTiers } from '../data/dataset';
 
 const snapshot = (): ItemSnapshot => ({
   schemaVersion: 1,
@@ -70,6 +73,11 @@ describe('item snapshot', () => {
   });
 });
 
+function getRuneTiersIndex() {
+  const ids = [27, 28, 82, 83, 69, 70, 121, 124];
+  return Object.fromEntries(ids.map((id) => [id, getRuneTiers(id)!]));
+}
+
 describe('tooltip readings', () => {
   it('accepts a complete reading and derives the per-point density', () => {
     expect(validateTooltipReading(reading())).toEqual({ valid: true, errors: [] });
@@ -84,8 +92,23 @@ describe('tooltip readings', () => {
     expect(errors).toContain('gameVersion : chaîne "x.y[.z[.w]]" attendue');
   });
 
-  it('the shipped tooltips.json is a valid (empty) file, and the schema requires the capture', () => {
+  it('the shipped observations.json (Cape Bouffante, 2026-09-08) is valid, deduced-before flagged, residual arithmetic consistent', () => {
+    expect(validateObservations(observations)).toEqual({ valid: true, errors: [] });
+    const o = observations[0];
+    expect(o.lineStateBeforeDeduced).toBe(true);
+    // 11 initiative × 0,1 − rune Vi (1) = 0,1 = reliquat affiché
+    const iniBefore = o.lineStateBefore.find((l) => l.characteristicId === 44)!.value;
+    const iniAfter = o.lineStateAfter.find((l) => l.characteristicId === 44)!.value;
+    expect((iniBefore - iniAfter) * 0.1 - 1).toBeCloseTo(o.residualAfter!, 9);
+  });
+
+  it('the shipped tooltips.json (readings of 2026-09-08) is valid and matches the densities file', () => {
     expect(validateTooltipReadings(tooltips).valid).toBe(true);
+    expect(tooltips.length).toBe(8);
+    for (const t of tooltips) {
+      const entry = Object.values(getRuneTiersIndex()).find((e) => e.normal?.runeId === t.runeId);
+      expect(entry, `rune ${t.runeId} absente des paliers`).toBeDefined();
+    }
     expect(tooltipSchema.required).toContain('capture');
     expect(validateTooltipReadings([reading(), { runeId: 'x' }]).errors[0].startsWith('[1] ')).toBe(true);
   });

@@ -31,7 +31,7 @@ export const KNOWLEDGE_SECTIONS: KnowledgeSection[] = [
     paramSections: ['residualPool', 'lossSelection', 'ecLoss'],
     prose: [
       "Quand une rune passe en succès neutre, l'objet perd un poids égal à celui de la rune. Quand elle échoue, il perd du poids sans recevoir la rune. Une perte est d'abord absorbée par le reliquat, puis retirée sur une ligne par points entiers ; le surplus retiré au-delà de la perte demandée devient le nouveau reliquat, qui n'est jamais négatif.",
-      "Le reliquat est un état du serveur, invisible ou non selon les sources, et distinct du budget de poids que calcule l'atelier à partir des lignes visibles. Sa purge lorsque l'objet quitte l'atelier est rapportée par des guides, sans preuve directe.",
+      "Le reliquat est un état du serveur, affiché par le client Unity dans l'interface de forgemagie et son historique, observation datée à l'appui, et distinct du budget de poids que calcule l'atelier à partir des lignes visibles. Sa purge lorsque l'objet quitte l'atelier est rapportée par des guides, sans preuve directe.",
       "Quelle ligne perd ? Aucune expérience publiée ne le dit. Le simulateur propose plusieurs lois interchangeables, avec ou sans priorité aux lignes en over et aux exotiques, et le tirage est reproductible par graine. La quantité perdue lors d'un échec critique n'est documentée nulle part : c'est un paramètre posé pour faire tourner la simulation.",
     ],
     certain: [
@@ -87,9 +87,9 @@ export const KNOWLEDGE_SECTIONS: KnowledgeSection[] = [
   {
     id: 'potions',
     title: 'Potions de forgemagie',
-    paramSections: [],
+    paramSections: ['potions'],
     prose: [
-      "Les potions changent l'élément des dommages neutres d'une arme en conservant une part des dégâts. Les sources se contredisent sur cette part, et l'écart suit la version du jeu, wiki 2.x contre Rétro, sans qu'aucun changelog Unity ne l'ait tranché ; l'API ne la fournit pas : le module n'est pas modélisé tant qu'un datamining ne l'aura pas tranchée. Le dataset liste les potions existantes.",
+      "Les potions changent l'élément des dommages neutres d'une arme en conservant une part des dégâts. Sur Unity, l'infobulle des potions ne montre aucun taux et l'API n'en fournit pas ; le dataset ne compte que deux paliers, alors que les tables anciennes en décrivaient trois avec des pourcentages qui divergent selon la version. Aucune valeur n'est donc posée par défaut : le module reste désactivé tant qu'une mesure en jeu, dommages avant et après potion, n'aura pas fixé le taux de chaque palier.",
     ],
   },
   {

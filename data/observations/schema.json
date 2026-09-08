@@ -33,6 +33,10 @@
       "description": "Toutes les lignes visibles de l'objet AVANT la tentative, y compris malus et exos.",
       "items": { "$ref": "#/definitions/line" }
     },
+    "lineStateBeforeDeduced": {
+      "type": "boolean",
+      "description": "Vrai si l'état AVANT n'a pas été lu directement mais déduit de l'état après et des modifications affichées (historique du client). Une observation déduite reste auditable mais pèse moins qu'une lecture."
+    },
     "runeId": { "type": "integer", "minimum": 1, "description": "Identifiant DofusDB de la rune posée (data/dataset.json → runes[].id ou transcendenceRunes[].id)." },
     "outcome": { "type": "string", "enum": ["SC", "SN", "EC"], "description": "Issue affichée par le client." },
     "lineStateAfter": {
