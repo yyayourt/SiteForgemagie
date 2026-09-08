@@ -12,7 +12,7 @@ Données **figées** générées par `scripts/extract-dataset.ts` (`npm run extr
 
 - **Source** : `https://api.dofusdb.fr` — données **dataminées tierces**, non officielles. Version du jeu et date d'extraction dans `meta` de chaque fichier (`gameVersion` = `GET /version`, `extractedAt` = horodatage du script).
 - **Ce que le dataset ne contient PAS** :
-  - **Aucune densité / poids de forgemagie.** Vérifié sur `/items`, `/effects`, `/characteristics` : aucun champ. La « Densité » affichée sur le site DofusDB n'est pas exposée par son API. Les densités vivent dans `empirical_params.json` (statut `HYPOTHÈSE COMMUNAUTAIRE` ou `CONTRADICTION`).
+  - **Aucune densité / poids de forgemagie.** Vérifié sur `/items`, `/effects`, `/characteristics` : aucun champ. La « Densité » affichée sur le site DofusDB n'est pas exposée par son API, et aucun autre dépôt de datamining n'en a (doduapi, DDC, Datafus : résultat négatif, `docs/knowledge/2026-09-07-croisement-densites-reliquat.md` §7). Il n'existe **pas** de `data/densities.json` : les densités vivent dans `empirical_params.json` (statut par entrée), et leur seule lecture primaire est l'infobulle en jeu depuis la 2.58, à consigner dans `observations/tooltips/`.
   - **Aucun taux pour les potions de forgemagie** : leurs effets (`effectId 700`) n'encodent pas le pourcentage de dommages conservés.
   - Aucune règle de forgemagie (probabilités, reliquat, pertes) : ce sont des données d'objets, rien d'autre.
 
@@ -51,6 +51,18 @@ Champs volontairement **ignorés** : `realWeight` (poids d'inventaire/économie,
 Dérivé de `dataset.json → runes` : pour chaque `characteristicId`, les runes disponibles par palier. Le palier est **déduit du nom** (`Rune X` → `normal`, `Rune Pa X` → `pa`, `Rune Ra X` → `ra`) : l'API ne fournit pas d'information de palier. `unclassified[]` liste les runes exclues et pourquoi (Rune de Signature : aucun effet ; Rune de chasse : characteristic 0).
 
 Ce fichier remplace les valeurs `runeNormal / runePa / runeRa` autrefois écrites à la main : un palier absent ici n'existe pas en jeu (ex. pas de Ra pour Soins, Tacle, Fuite, Retrait, % résistances).
+
+## Observations en jeu (`observations/`)
+
+Trois formats, chacun avec son schéma JSON et son validateur dans `src/logic/observations/` :
+
+| Fichier | Contenu | Sert à |
+|---|---|---|
+| `schema.json` | une **tentative** de rune (état avant, rune, issue, état après, reliquat affiché ou non) | calibrer le modèle SC/SN/EC, trancher `residualPool.visibleInClient` |
+| `item-snapshot.schema.json` | un **objet vu en jeu** sans tentative (HDV, inventaire) : lignes avec `isExo` / `isOver` | trancher la portée et la base de la borne 101 (`overCapScope`, `overCapLineBasis`) par des objets existants |
+| `tooltips/schema.json` | une **densité lue dans l'infobulle** d'une rune (`runeId`, densité, version, capture) | faire passer une entrée de `densities` en `SOURCE PRIMAIRE` |
+
+Les fichiers de données sont des tableaux JSON de ces objets (`tooltips/tooltips.json` est vide au départ). Sans `source` ni `gameVersion`, une entrée n'est pas auditable et le validateur la refuse.
 
 ## Clé de jointure
 

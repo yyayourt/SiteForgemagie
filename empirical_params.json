@@ -1,5 +1,5 @@
 {
-  "$comment": "Paramètres NON certains du simulateur. Chaque entrée porte value / status / source / note / bounds / default. Statuts : SOURCE PRIMAIRE, MODÈLE EMPIRIQUE, HYPOTHÈSE COMMUNAUTAIRE, CONTRADICTION, INCONNU (cf. CLAUDE.md). Les règles SOURCE PRIMAIRE ne sont pas ici : elles sont codées en dur et testées. Sources abrégées : A = docs/knowledge/audit-forgemagie-dofus3.md ; R = docs/knowledge/Reconstruction_of_the_DOFUS_3_Unity_Forgemagie_Algorithm__2026_V.md ; AP = docs/audit-projet-existant.md.",
+  "$comment": "Paramètres NON certains du simulateur. Chaque entrée porte value / status / source / note / bounds / default. Statuts : SOURCE PRIMAIRE, MODÈLE EMPIRIQUE, HYPOTHÈSE COMMUNAUTAIRE, CONTRADICTION, INCONNU (cf. CLAUDE.md). Les règles SOURCE PRIMAIRE ne sont pas ici : elles sont codées en dur et testées. Sources abrégées : A = docs/knowledge/audit-forgemagie-dofus3.md ; R = docs/knowledge/Reconstruction_of_the_DOFUS_3_Unity_Forgemagie_Algorithm__2026_V.md ; AP = docs/audit-projet-existant.md ; X = docs/knowledge/2026-09-07-croisement-densites-reliquat.md (croisement des tables de densité et du reliquat, document source non modifiable).",
   "schemaVersion": 1,
   "gameVersion": "3.6.10.11",
   "updatedAt": "2026-09-08",
@@ -17,9 +17,9 @@
     },
     "overCapScope": {
       "value": "global",
-      "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) : « Les statistiques en exo ne peuvent excéder 101 de densité (Ex : 10 ini et 1 PA, 55 vita 1 PM…) » et « lisser des statistiques avant de tenter un exo (Ex : 213 vita/200, placer une rune pods de 2,5 de densité qui retire 13 vita pour être à 200/200 vita) » ; R PARTIE 6 (« over+exo cumulés ≤ 101 global ») ; contra A §7 et §13 (par ligne, confiance C-D) ; AP §3.3 R1",
-      "note": "global : la somme des poids over (valeur − jet max, × densité) et exo (valeur × densité) de l'objet est plafonnée à overCapWeight ; per_line : chaque ligne dispose de son propre plafond. Défaut global depuis le 2026-09-06 : les deux exemples de Huz additionnent deux lignes (10 ini = 1 + PA 100 = 101 ; 55 vita = 11 + PM 90 = 101) et son conseil de ramener un over 213/200 vita à 200 avant un exo PA n'a de sens que si l'over compte dans le même budget que l'exo. Hypothèse forte mais non démontrée : un objet observé en jeu avec un exo PA ET un over d'au moins 2 de poids sur une autre ligne (ex. 211/200 vita) réfuterait cette lecture et rendrait per_line.",
+      "status": "CONTRADICTION",
+      "source": "guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) : « Les statistiques en exo ne peuvent excéder 101 de densité (Ex : 10 ini et 1 PA, 55 vita 1 PM…) » et « lisser des statistiques avant de tenter un exo (Ex : 213 vita/200, placer une rune pods de 2,5 de densité qui retire 13 vita pour être à 200/200 vita) » ; R PARTIE 6 (« over+exo cumulés ≤ 101 global ») ; contra A §7 et §13 (par ligne, confiance C-D) ; AP §3.3 R1 ; X (rapport de croisement 2026-09-07) §6 lit la même phrase de Huz comme « par ligne / statistique » (cumul global non testé)",
+      "note": "global : la somme des poids over (valeur − jet max, × densité) et exo (valeur × densité) de l'objet est plafonnée à overCapWeight ; per_line : chaque ligne dispose de son propre plafond. Défaut global depuis le 2026-09-06 : les deux exemples de Huz additionnent deux lignes (10 ini = 1 + PA 100 = 101 ; 55 vita = 11 + PM 90 = 101) et son conseil de ramener un over 213/200 vita à 200 avant un exo PA n'a de sens que si l'over compte dans le même budget que l'exo. Hypothèse forte mais non démontrée : un objet observé en jeu avec un exo PA ET un over d'au moins 2 de poids sur une autre ligne (ex. 211/200 vita) réfuterait cette lecture et rendrait per_line. CONTRADICTION depuis le 2026-09-07 : le rapport X lit Huz « par ligne », l'errata du 2026-09-06 lit « cumul objet » d'après les exemples à deux lignes. Défaut global conservé, à trancher par une observation d'objet en HDV (data/observations/item-snapshot.schema.json) portant un exo PA et un over ≥ 2 de poids sur une autre ligne.",
       "bounds": {
         "enum": [
           "per_line",
@@ -127,8 +127,8 @@
       "visibleInClient": {
         "value": false,
         "status": "CONTRADICTION",
-        "source": "docs internes (Cadernis via Reverse-Engineering §A : le client ne reçoit que magicPoolStatus, sens de variation, « le reliquat lui-même n'est pas exposé au client ») vs guide 2026 (affirme que le reliquat est affiché dans l'onglet FM du client Unity) ; guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) (côté « affiché ») : « nous n'avons plus besoin de calculer ce Reliquat, il s'affiche directement sur l'onglet de forgemagie »",
-        "note": "Le reliquat est-il visible en jeu ? Les rapports de docs/knowledge/ le disent invisible (2.x) ; un guide 2026 le dit affiché dans l'onglet de forgemagie. À vérifier directement dans le client Unity. Sans effet sur le moteur ; conditionne seulement ce que l'interface prétend montrer.",
+        "source": "docs internes (Cadernis via Reverse-Engineering §A : le client ne reçoit que magicPoolStatus, sens de variation, « le reliquat lui-même n'est pas exposé au client ») vs guide 2026 (affirme que le reliquat est affiché dans l'onglet FM du client Unity) ; guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) (côté « affiché ») : « nous n'avons plus besoin de calculer ce Reliquat, il s'affiche directement sur l'onglet de forgemagie » ; X (rapport de croisement 2026-09-07) §6 : Huz 2026 verbatim « Aujourd'hui, nous n'avons plus besoin de calculer ce Reliquat, il s'affiche directement sur l'onglet de forgemagie » (capture reliquat.png) contre le tutoriel Ankama (« ne pas afficher ces deux informations »)",
+        "note": "Le reliquat est-il visible en jeu ? Les rapports de docs/knowledge/ le disent invisible (2.x) ; un guide 2026 le dit affiché dans l'onglet de forgemagie. À vérifier directement dans le client Unity. Sans effet sur le moteur ; conditionne seulement ce que l'interface prétend montrer. Reste CONTRADICTION jusqu'à une capture d'écran Unity versionnée (data/observations : residualVisible).",
         "bounds": {
           "enum": [
             true,
@@ -648,7 +648,7 @@
       "value": 100,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, convergence forte) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 100 chez Millenium, dofastuces, lilgallon, KamelAkar, Huz, Xixou ; cohérent avec la borne 101 (1 PA = 100). La coquille Millenium « Ga pa 90 » ne doit pas être propagée.",
       "bounds": {
         "min": 0.01,
         "max": 500
@@ -660,7 +660,7 @@
       "value": 1,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 1 chez Millenium, dofastuces, lilgallon, KamelAkar, Huz, Xixou (convergence forte).",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -672,7 +672,7 @@
       "value": 0.2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1 (« 0,2 ; 0,25 débattu »)",
-      "note": "Convention : 5 vitalité = 1 de poids (rune Vi +5 = 1). Valeur 0,25 rencontrée dans d'anciennes tables.",
+      "note": "Convention : 5 vitalité = 1 de poids (rune Vi +5 = 1). Valeur 0,25 rencontrée dans d'anciennes tables. Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 0,2 chez Millenium, dofastuces, KamelAkar, Huz, Xixou. La valeur « 0,25 » parfois citée est une CONFUSION avec la densité des Pods (0,25/pt) ; dofastuces : « 5 vita = 1 de poids… 1 de vita c'est 0,2 de poids » ; borne 505 × 0,2 = 101 (Huz).",
       "bounds": {
         "min": 0.01,
         "max": 10
@@ -684,7 +684,7 @@
       "value": 3,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1 (confirmé par exemples de reliquat)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 3 chez Millenium, dofastuces, lilgallon, KamelAkar, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -696,7 +696,7 @@
       "value": 1,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 1 chez Millenium, dofastuces, lilgallon, KamelAkar, Huz, Xixou (convergence forte).",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -708,7 +708,7 @@
       "value": 1,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 1 chez Millenium, dofastuces, lilgallon, KamelAkar, Huz, Xixou (convergence forte).",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -720,7 +720,7 @@
       "value": 1,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 1 chez Millenium, dofastuces, lilgallon, KamelAkar, Huz, Xixou (convergence forte).",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -732,7 +732,7 @@
       "value": 20,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "Dommages fixes génériques (rune Do).",
+      "note": "Dommages fixes génériques (rune Do). Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 20 chez Millenium, dofastuces, lilgallon, Huz, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 200
@@ -742,9 +742,9 @@
     "18": {
       "name": "% Critique",
       "value": 10,
-      "status": "CONTRADICTION",
-      "source": "A §3.1 (« 10 dans les tables récentes ; certaines tables anciennes divergent », C-B) ; R PARTIE 1 (10, auparavant 30, changelog 2.29) ; AP §3.2",
-      "note": "Le code précédent utilisait 5 en étiquetant à tort l'effet 115 « Dommages Critiques ». Valeur 10 retenue (tables récentes) ; 30 dans les tables pré-2.29.",
+      "status": "SOURCE PRIMAIRE",
+      "source": "lecture EN JEU Unity par un joueur du projet (rapport X §2, 2026-09, à consigner dans data/observations/tooltips) ; A §3.1 (« 10 dans les tables récentes ; certaines tables anciennes divergent », C-B) ; R PARTIE 1 (10, auparavant 30, changelog 2.29) ; AP §3.2",
+      "note": "Le code précédent utilisait 5 en étiquetant à tort l'effet 115 « Dommages Critiques ». Valeur 10 retenue (tables récentes) ; 30 dans les tables pré-2.29. Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 10 lu EN JEU Unity par un joueur du projet ; 10 chez Millenium 2.x et KamelAkar. La valeur 30 (Xixou, Alterya) est celle de Rétro 1.29/1.49 : écart de VERSION attesté (« sur 2.0 les runes critique ont un poids de 10 alors que sur 1.29 c'est 30 »), pas une contradiction. Lecture en jeu à consigner dans data/observations/tooltips pour audit.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -756,7 +756,7 @@
       "value": 51,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1 (« 51 et non 50 »)",
-      "note": "L'affirmation « 51 choisi délibérément par Ankama pour interdire le double PO » n'a pas de source primaire.",
+      "note": "L'affirmation « 51 choisi délibérément par Ankama pour interdire le double PO » n'a pas de source primaire. Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 51 chez Millenium, dofastuces, lilgallon, Xixou, test en jeu 2.x (blog laforgemagiedofus : « PO vaut bel et bien 51 ») ; le « 50 » n'apparaît que dans des vulgarisations.",
       "bounds": {
         "min": 0.01,
         "max": 500
@@ -768,7 +768,7 @@
       "value": 90,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, convergence forte) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 90 chez Millenium, dofastuces, lilgallon, KamelAkar, Huz, Xixou (convergence large).",
       "bounds": {
         "min": 0.01,
         "max": 500
@@ -780,7 +780,7 @@
       "value": 2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1 (moyenne)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 2 chez Millenium uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -792,7 +792,7 @@
       "value": 30,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 30 chez Millenium, dofastuces, lilgallon, Huz, Xixou ; test communautaire « invoc = 30 ».",
       "bounds": {
         "min": 0.01,
         "max": 500
@@ -804,7 +804,7 @@
       "value": 7,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire).",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -816,7 +816,7 @@
       "value": 7,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire).",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -828,7 +828,7 @@
       "value": 6,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 6 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -840,7 +840,7 @@
       "value": 6,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 6 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -852,7 +852,7 @@
       "value": 6,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 6 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -864,7 +864,7 @@
       "value": 6,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 6 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -876,7 +876,7 @@
       "value": 6,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 6 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -888,7 +888,7 @@
       "value": 0.25,
       "status": "CONTRADICTION",
       "source": "A §3.1 (0,25 par point ; rune Pod +10 = 2,5 ; C-B « désaccords historiques ») ; R PARTIE 1 (« 2,5 par pod ») ; AP §3.2",
-      "note": "Les deux rapports divergent d'un facteur 10. 0,25/pt retenu : cohérent avec la rune Pod +10 = 2,5 de poids. Lié à params.brisage.podsDivisor (2,5 = poids d'une Rune Pod), invariant vérifié par test.",
+      "note": "Les deux rapports divergent d'un facteur 10. 0,25/pt retenu : cohérent avec la rune Pod +10 = 2,5 de poids. Lié à params.brisage.podsDivisor (2,5 = poids d'une Rune Pod), invariant vérifié par test. Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 0,25/pt (rune Pod +10 = 2,5) chez Millenium, dofastuces, Huz, lu en jeu Unity par un joueur du projet ; la lecture « 0,2 » de KamelAkar est douteuse. Invariant testé (brisage.podsDivisor).",
       "bounds": {
         "min": 0.001,
         "max": 50
@@ -900,7 +900,7 @@
       "value": 0.1,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 0,1 chez Millenium (rune Ini +10 = 1), Xixou.",
       "bounds": {
         "min": 0.001,
         "max": 10
@@ -912,7 +912,7 @@
       "value": 3,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 3 chez Millenium, dofastuces, lilgallon, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -924,7 +924,7 @@
       "value": 10,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (C-B) ; R PARTIE 1 (10, auparavant 20/15)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §3 : 10 chez Millenium 2.x ; baisse 30 → 10 actée en 2.x (forum officiel 2283049 : « avant son poids était même de 30 ») ; 15 chez Xixou = Rétro.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -936,7 +936,7 @@
       "value": 5,
       "status": "CONTRADICTION",
       "source": "DofusDB (page item 30942 Rune Pa Do Ren, « Densité 15 » pour +3 → 5/pt) ; AP §3.2 ; code précédent : 10",
-      "note": "Absent des tables A et R. La densité affichée par le site DofusDB n'est pas exposée par son API. 5 retenu (source la plus proche d'une donnée client). Dépôts de brisage : KamelAkar 10, Icksir 5 (dernière affectation de sa table).",
+      "note": "Absent des tables A et R. La densité affichée par le site DofusDB n'est pas exposée par son API. 5 retenu (source la plus proche d'une donnée client). Dépôts de brisage : KamelAkar 10, Icksir 5 (dernière affectation de sa table). Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 5 lu EN JEU Unity par un joueur du projet (prime) ; 10 chez Millenium 2018 ET lilgallon 2.x (convergence sans valeur de preuve, recopie probable, X §4) ; 30 en Rétro (Rfx). Divergence 2.x → Unity sans changelog trouvé : changement silencieux ou erreur historique recopiée. À confirmer sur N tentatives (X §8).",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -948,7 +948,7 @@
       "value": 2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, « tables historiques divergentes »)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 2 chez Millenium ; dofastuces corrigé de 5 à 2 par ses commentaires datés (2016) ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -960,7 +960,7 @@
       "value": 2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, « tables historiques divergentes »)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 2 chez Millenium ; dofastuces corrigé de 5 à 2 par ses commentaires datés (2016) ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -972,7 +972,7 @@
       "value": 2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, « tables historiques divergentes »)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 2 chez Millenium ; dofastuces corrigé de 5 à 2 par ses commentaires datés (2016) ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -984,7 +984,7 @@
       "value": 2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, « tables historiques divergentes »)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 2 chez Millenium ; dofastuces corrigé de 5 à 2 par ses commentaires datés (2016) ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -996,7 +996,7 @@
       "value": 2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, « tables historiques divergentes »)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2-§3 : 2 chez Millenium ; dofastuces corrigé de 5 à 2 par ses commentaires datés (2016) ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1008,7 +1008,7 @@
       "value": 2,
       "status": "INCONNU",
       "source": "aucune ; valeur posée par analogie avec Puissance",
-      "note": "Absente de toutes les tables consultées. Runes Per Pi / Pa Per Pi / Ra Per Pi existent (dataset). Valeur arbitraire pour faire tourner la simulation.",
+      "note": "Absente de toutes les tables consultées. Runes Per Pi / Pa Per Pi / Ra Per Pi existent (dataset). Valeur arbitraire pour faire tourner la simulation. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 2 par analogie avec Puissance chez Millenium seulement ; aucune source récente, aucun test reproductible.",
       "bounds": {
         "min": 0.01,
         "max": 50
@@ -1020,7 +1020,7 @@
       "value": 5,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, ligne « Pi »)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1032,7 +1032,7 @@
       "value": 4,
       "status": "CONTRADICTION",
       "source": "A §3.1 (4, B) ; R PARTIE 1 (« 4 ou 5 selon sources ») ; AP §3.2",
-      "note": "Non tranché entre 4 et 5.",
+      "note": "Non tranché entre 4 et 5. Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 4 lu EN JEU Unity par un joueur du projet ; 4 chez Millenium, dofastuces ; 5 chez Xixou = Rétro 1.49 (écart de version probable). À consigner dans data/observations/tooltips avant promotion.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1044,7 +1044,7 @@
       "value": 4,
       "status": "CONTRADICTION",
       "source": "A §3.1 (4, B) ; R PARTIE 1 (« 4 ou 5 selon sources ») ; AP §3.2",
-      "note": "Non tranché entre 4 et 5.",
+      "note": "Non tranché entre 4 et 5. Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 4 lu EN JEU Unity par un joueur du projet ; 4 chez Millenium, dofastuces ; 5 chez Xixou = Rétro 1.49 (écart de version probable). À consigner dans data/observations/tooltips avant promotion.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1056,7 +1056,7 @@
       "value": 7,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire).",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1068,7 +1068,7 @@
       "value": 7,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 7 chez Millenium et dofastuces uniquement ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity (X §8 : test EC Unity à faire).",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1080,7 +1080,7 @@
       "value": 5,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, ligne « Do Pou »)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1092,7 +1092,7 @@
       "value": 2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §3 : 2 ; correction communautaire documentée 5 → 2 (dofastuces 2016 : « les re pou/crit ont un poids de 2 aussi ») ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1104,7 +1104,7 @@
       "value": 5,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, ligne « Do Cri »)",
-      "note": "Ne pas confondre avec % Critique (characteristic 18).",
+      "note": "Ne pas confondre avec % Critique (characteristic 18). Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1116,7 +1116,7 @@
       "value": 2,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1 (« correction communautaire, pas 5 »)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §3 : 2 ; correction communautaire documentée 5 → 2 (dofastuces 2016 : « les re pou/crit ont un poids de 2 aussi ») ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1128,7 +1128,7 @@
       "value": 5,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B, « vérifier les lignes exactes ») ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1140,7 +1140,7 @@
       "value": 5,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1152,7 +1152,7 @@
       "value": 5,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1164,7 +1164,7 @@
       "value": 5,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1176,7 +1176,7 @@
       "value": 5,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (B) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 5 (dommages élémentaires, poussée, critiques, pièges) chez Millenium, dofastuces, Xixou.",
       "bounds": {
         "min": 0.01,
         "max": 100
@@ -1188,7 +1188,7 @@
       "value": 15,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (C) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 15 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 200
@@ -1200,7 +1200,7 @@
       "value": 15,
       "status": "CONTRADICTION",
       "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Di, poids 10)",
-      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10.",
+      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 15 chez Millenium et dofastuces (2.x), INCONNU si conservé sur Unity ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity. Le désaccord KamelAkar 15 / Icksir 10 reste entier.",
       "bounds": {
         "min": 0.01,
         "max": 200
@@ -1212,7 +1212,7 @@
       "value": 15,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (C) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 15 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 200
@@ -1224,7 +1224,7 @@
       "value": 15,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (C) ; R PARTIE 1",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 15 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 200
@@ -1236,7 +1236,7 @@
       "value": 15,
       "status": "CONTRADICTION",
       "source": "A §3.1 (C) ; R PARTIE 1 (15) ; dépôts de brisage : KamelAkar 15, Icksir 10 (rune Ré Per Mé, poids 10)",
-      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10.",
+      "note": "Le code précédent utilisait 6 (confusion avec les % résistances élémentaires). 15 retenu (docs/knowledge) ; Icksir donne 10. Provenance (X (rapport de croisement 2026-09-07)) : X §2 et §8 : 15 chez Millenium et dofastuces (2.x), INCONNU si conservé sur Unity ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity. Le désaccord KamelAkar 15 / Icksir 10 reste entier.",
       "bounds": {
         "min": 0.01,
         "max": 200
@@ -1248,7 +1248,7 @@
       "value": 15,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (C, « confirmation Unity nécessaire ») ; R PARTIE 1 (15, auparavant 30)",
-      "note": "",
+      "note": "Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 15 chez Millenium et dofastuces ; convergence 2.x (Millenium 2018, dofastuces), recopie probable entre guides, non revérifié Unity.",
       "bounds": {
         "min": 0.01,
         "max": 200
@@ -1260,7 +1260,7 @@
       "value": 15,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (C) ; R PARTIE 1",
-      "note": "Aucune rune de forgemagie correspondante dans le dataset.",
+      "note": "Aucune rune de forgemagie correspondante dans le dataset. Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 15 par analogie avec les % résistances mêlée/distance (2.x) ; aucune rune correspondante, non testable.",
       "bounds": {
         "min": 0.01,
         "max": 200
@@ -1272,19 +1272,19 @@
       "value": 15,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "A §3.1 (C) ; R PARTIE 1",
-      "note": "Aucune rune de forgemagie correspondante dans le dataset (ligne non ciblable, mais potentiellement présente sur un objet).",
+      "note": "Aucune rune de forgemagie correspondante dans le dataset (ligne non ciblable, mais potentiellement présente sur un objet). Provenance (X (rapport de croisement 2026-09-07)) : X §2 : 15 par analogie avec les % résistances mêlée/distance (2.x) ; aucune rune correspondante, non testable.",
       "bounds": {
         "min": 0.01,
         "max": 200
       },
       "default": 15
     },
-    "$comment": "Poids de forgemagie par point, indexé par characteristicId DofusDB (voir data/dataset.json → characteristics). Aucun champ de densité n'existe dans l'API DofusDB ; ces valeurs viennent de tables communautaires (A §3.1, R PARTIE 1). À réextraire depuis le client Unity (infobulle des runes) pour passer en SOURCE PRIMAIRE."
+    "$comment": "Poids de forgemagie par point, indexé par characteristicId DofusDB (voir data/dataset.json → characteristics). Aucun champ de densité n'existe dans l'API DofusDB ni dans doduapi/DDC (X §7 : realWeight = pods d'inventaire) ; ces valeurs viennent de tables communautaires dont la généalogie est établie dans X §4 (racines 2.x Millenium/dofastuces recopiées séparément, racine Rétro Xixou/Alterya à ne jamais mélanger, lectures indépendantes : infobulle en jeu depuis la 2.58, tests en jeu, module SmithMagic, dépôts de brisage). Seules une citation Ankama ou une lecture en jeu (data/observations/tooltips) font passer une entrée en SOURCE PRIMAIRE."
   },
   "notes": [
     "Rune de chasse (item 10057, effet 795) : characteristic 0 dans DofusDB, donc non indexable ici. Poids 5 selon A §3.1 (C-B). À traiter par un paramètre dédié quand le module armes sera abordé.",
     "Rune de Signature (item 7508) : aucun effet, hors périmètre.",
     "Runes de transcendance (typeId 211, 81 runes) : listées dans data/dataset.json. Verrou de l'objet (plus de forgemagie ni d'orbe) = devblog 2.58 (SOURCE PRIMAIRE, codé en dur) ; le devblog 2.72 concerne le migrateur d'objets, pas la transcendance.",
-    "Potions de forgemagie : 8 potions dans le dataset, taux de conservation (50/65/80 % vs 85 % post-3.1) CONTRADICTION non tranchée, aucune valeur dans l'API."
+    "Potions de forgemagie : 8 potions dans le dataset, aucune valeur dans l'API. Taux de dégâts conservés localisé par version (X §6) : 50 / 65 / 80 % selon wiki-dofus (Rétro/2.x, Étincelle/Flambée/Incendie) contre 85 % en Rétro (jeuxonline 14787 : la potion de niveau 50 « ne réduit les dégâts que de 15 % ») ; aucun changelog 3.x. CONTRADICTION non tranchée pour Unity : lire l'infobulle de chaque potion en jeu."
   ]
 }

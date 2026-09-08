@@ -89,7 +89,7 @@ export const KNOWLEDGE_SECTIONS: KnowledgeSection[] = [
     title: 'Potions de forgemagie',
     paramSections: [],
     prose: [
-      "Les potions changent l'élément des dommages neutres d'une arme en conservant une part des dégâts. Les sources se contredisent sur cette part depuis une mise à jour récente, et l'API ne la fournit pas : le module n'est pas modélisé tant qu'un datamining ne l'aura pas tranchée. Le dataset liste les potions existantes.",
+      "Les potions changent l'élément des dommages neutres d'une arme en conservant une part des dégâts. Les sources se contredisent sur cette part, et l'écart suit la version du jeu, wiki 2.x contre Rétro, sans qu'aucun changelog Unity ne l'ait tranché ; l'API ne la fournit pas : le module n'est pas modélisé tant qu'un datamining ne l'aura pas tranchée. Le dataset liste les potions existantes.",
     ],
   },
   {

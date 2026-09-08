@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "siteforgemagie/observations/tooltip/v1",
+  "title": "Densité lue dans l'infobulle d'une rune",
+  "description": "Une lecture de la densité de forgemagie affichée par le client DOFUS Unity dans l'infobulle d'une rune (affichage introduit en 2.58 : « Le \"poids\" des runes est désormais affiché dans l'infobulle »). C'est la seule voie pour faire passer une entrée de empirical_params.json → densities en SOURCE PRIMAIRE : aucune API de datamining n'expose cette valeur. Une entrée par rune ; le fichier tooltips.json est un tableau de ces objets (validateur : src/logic/observations/validateTooltip.ts).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runeId", "densityRead", "gameVersion", "capture"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runeId": { "type": "integer", "minimum": 1, "description": "Identifiant DofusDB de la rune (data/dataset.json → runes[].id)." },
+    "densityRead": { "type": "number", "exclusiveMinimum": 0, "description": "Densité affichée pour la rune ENTIÈRE (ex. Rune Pa Vi +15 → 3), telle que lue, sans conversion." },
+    "densityPerPoint": { "type": "number", "exclusiveMinimum": 0, "description": "Densité par point déduite (densityRead / valeur de la rune), facultative : le validateur la recalcule si absente." },
+    "gameVersion": {
+      "type": "string",
+      "description": "Version du client au moment de la lecture, ex. \"3.6.10.11\".",
+      "pattern": "^[0-9]+(\\.[0-9]+){1,3}$"
+    },
+    "capture": { "type": "string", "minLength": 1, "description": "Capture d'écran : chemin dans le dépôt ou URL. Obligatoire : sans capture, la lecture n'est pas auditable." },
+    "date": { "type": "string", "format": "date-time" },
+    "source": { "type": "string", "description": "Pseudo de l'observateur, serveur." },
+    "notes": { "type": "string" }
+  }
+}

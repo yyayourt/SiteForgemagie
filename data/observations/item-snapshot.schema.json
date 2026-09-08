@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "siteforgemagie/observations/item-snapshot/v1",
+  "title": "Objet vu en jeu (sans tentative)",
+  "description": "Un objet observé tel quel dans le client DOFUS Unity (hôtel de vente, inventaire, capture), sans tentative de rune. Sert à trancher par l'existant ce que les guides se disputent : portée de la borne 101 (overCapScope : un objet avec exo PA et un over ≥ 2 de poids ailleurs réfute le cumul), base de mesure de la borne (overCapLineBasis : une ligne au-dessus de son jet max avec plus de 101 de poids total réfute la valeur totale). Un fichier est un tableau JSON de ces objets (validateur : src/logic/observations/validateSnapshot.ts).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "gameVersion", "itemId", "lines", "source", "date"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "gameVersion": {
+      "type": "string",
+      "description": "Version du client au moment de l'observation, ex. \"3.6.10.11\".",
+      "pattern": "^[0-9]+(\\.[0-9]+){1,3}$"
+    },
+    "itemId": { "type": "integer", "minimum": 1, "description": "Identifiant DofusDB de l'objet (data/items.json → id)." },
+    "itemName": { "type": "string", "description": "Nom affiché (contrôle de lecture, facultatif)." },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Toutes les lignes visibles de l'objet, y compris malus et exos.",
+      "items": { "$ref": "#/definitions/line" }
+    },
+    "transcended": { "type": "boolean", "description": "L'objet porte une rune de transcendance (verrou affiché)." },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Origine : pseudo de l'observateur, lien vers la capture, contexte (HDV, inventaire). Sans source, l'objet ne peut pas être audité."
+    },
+    "date": { "type": "string", "format": "date-time", "description": "Horodatage ISO 8601 de l'observation." },
+    "server": { "type": "string", "description": "Serveur de jeu (facultatif)." },
+    "notes": { "type": "string", "description": "Contexte libre : prix, vendeur, ce que l'objet est censé prouver." }
+  },
+  "definitions": {
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["characteristicId", "value", "isExo", "isOver"],
+      "properties": {
+        "characteristicId": { "type": "integer", "minimum": 1, "description": "Champ `characteristic` DofusDB (data/dataset.json → characteristics)." },
+        "value": { "type": "integer", "description": "Valeur affichée (négative pour un malus)." },
+        "isExo": { "type": "boolean", "description": "Ligne absente du patron de l'objet (affichée comme exotique)." },
+        "isOver": { "type": "boolean", "description": "Ligne naturelle au-dessus de son jet maximal (affichée en over). Faux pour un exo." },
+        "baseMax": { "type": "integer", "description": "Jet maximal du patron pour cette ligne, si connu (data/items.json), pour recalculer la part over." }
+      }
+    }
+  }
+}
