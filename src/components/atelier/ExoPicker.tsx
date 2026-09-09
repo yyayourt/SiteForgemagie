@@ -7,10 +7,22 @@ import type { SimulatedStat } from '../../types';
 interface Props {
   currentStats: SimulatedStat[];
   onAdd: (characteristicId: number) => void;
+  label?: string;
+  buttonLabel?: string;
+  hint?: string;
+  /** Disposition verticale (panneau étroit) */
+  stacked?: boolean;
 }
 
 /** Ajout d'une ligne exotique : toute caractéristique dotée d'une rune et d'une densité. */
-export function ExoPicker({ currentStats, onAdd }: Props) {
+export function ExoPicker({
+  currentStats,
+  onAdd,
+  label = 'Ajouter un exo',
+  buttonLabel = 'Ajouter à zéro',
+  hint = 'La ligne apparaît à 0 : montez-la avec une rune, ou réglez-la ici pour planifier.',
+  stacked = false,
+}: Props) {
   const { overrides } = useParams();
   const [value, setValue] = useState('');
   const id = useId();
@@ -24,7 +36,7 @@ export function ExoPicker({ currentStats, onAdd }: Props) {
 
   return (
     <form
-      className="flex flex-wrap items-center gap-2"
+      className={stacked ? 'grid gap-1.5' : 'flex flex-wrap items-center gap-2'}
       onSubmit={(e) => {
         e.preventDefault();
         if (value) {
@@ -33,15 +45,15 @@ export function ExoPicker({ currentStats, onAdd }: Props) {
         }
       }}
     >
-      <label htmlFor={id} className="text-sm text-ash-2">Ajouter un exo</label>
-      <select id={id} value={value} onChange={(e) => setValue(e.target.value)} className="well rounded-control px-3 py-1.5 text-sm text-ash min-w-[220px]">
+      <label htmlFor={id} className="text-sm text-ash-2">{label}</label>
+      <select id={id} value={value} onChange={(e) => setValue(e.target.value)} className={`well rounded-control px-3 py-1.5 text-sm text-ash ${stacked ? 'w-full' : 'min-w-[220px]'}`}>
         <option value="">Choisir une caractéristique…</option>
         {options.map((o) => (
           <option key={o.cid} value={o.cid}>{o.name} · {o.density} poids par point</option>
         ))}
       </select>
-      <button type="submit" disabled={!value} className="btn-well px-3 py-1.5 text-sm text-exo border-exo/50">Ajouter à zéro</button>
-      <span className="text-xs text-ash-3">La ligne apparaît à 0 : montez-la avec une rune, ou réglez-la ici pour planifier.</span>
+      <button type="submit" disabled={!value} className="btn-well px-3 py-1.5 text-sm text-exo border-exo/50">{buttonLabel}</button>
+      <span className="text-xs text-ash-3">{hint}</span>
     </form>
   );
 }

@@ -5,6 +5,7 @@ import { FM_ORBS, FM_POTIONS } from '../../data/dataset';
 import { getParamEntry } from '../../data/params';
 import { ModelBadge, StatusBadge } from '../shell/Badges';
 import { RuneGlyph } from './RuneGlyph';
+import { ExoPicker } from './ExoPicker';
 import { getStatCategory } from '../../data/statCaps';
 
 type Tab = 'rune' | 'transcendence' | 'orb' | 'potion';
@@ -28,7 +29,7 @@ const pct = (x: number) => `${Math.round(x * 100)} %`;
 export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
   const [tab, setTab] = useState<Tab>('rune');
   const [chosenTier, setTier] = useState<RuneTier>('normal');
-  const { selected, item, itemLocked, mode } = atelier;
+  const { selected, item, itemLocked, mode, stats } = atelier;
   const options = useMemo(() => (selected ? atelier.runeOptions(selected.characteristicId) : []), [selected, atelier]);
   // Palier effectif : le palier choisi s'il existe pour cette ligne, sinon le premier disponible
   const tier = options.some((o) => o.tier === chosenTier) ? chosenTier : (options[0]?.tier ?? 'normal');
@@ -57,7 +58,7 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
       {/* ── Rune ── */}
       {tab === 'rune' && item && !disabled && (
         <>
-          {!selected && <p className="text-sm text-ash-3">Cliquez une ligne de l'objet pour la viser.</p>}
+          {!selected && <p className="text-sm text-ash-3">Cliquez une ligne de l'objet pour la viser, ou posez un exo ci-dessous.</p>}
           {selected && (
             <>
               <div className="grid grid-cols-3 gap-2" role="group" aria-label="Palier de rune">
@@ -117,6 +118,18 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
               </div>
             </>
           )}
+
+          {/* Poser un exo : toute caractéristique dotée d'une rune, absente de l'objet */}
+          <div className="pt-3 mt-1 border-t border-iron-edge/60">
+            <ExoPicker
+              currentStats={stats}
+              onAdd={(cid) => { atelier.addExo(cid); atelier.selectLine(cid); }}
+              label="Poser un exo"
+              buttonLabel="Créer la ligne et la viser"
+              hint="La ligne exotique apparaît à 0 sur l'enclume et devient la cible : choisissez ensuite sa rune et tentez-la. Le moteur vérifie la borne d'over/exo à chaque frappe."
+              stacked
+            />
+          </div>
         </>
       )}
 

@@ -20,8 +20,8 @@ type Tone = 'natural' | 'over' | 'exo' | 'zero' | 'sacrificed' | 'locked';
 
 function toneOf(stat: SimulatedStat): Tone {
   if (stat.isLocked) return 'locked';
-  if (stat.currentValue === 0) return 'zero';
   if (stat.isExo) return 'exo';
+  if (stat.currentValue === 0) return 'zero';
   if (stat.currentValue > stat.baseMax) return 'over';
   if (stat.currentValue < stat.baseMax) return 'sacrificed';
   return 'natural';
@@ -53,14 +53,16 @@ const SPARKS = [
 ];
 
 /**
- * Une ligne de l'objet, gravée sur la dalle. En mode « forger », cliquer la ligne la
- * sélectionne comme cible ; en mode « ajuster », la valeur s'édite directement.
+ * Une ligne de l'objet, gravée sur la dalle. En mode « forger », cliquer n'importe où sur
+ * la ligne la sélectionne comme cible (le nom reste un bouton pour le clavier) ; en mode
+ * « ajuster », la valeur s'édite directement.
  * Les micro-interactions (frappe, perte, refus) sont rejouées par clé d'événement.
  */
 export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, onSelect, onUpdate, onRemoveExo }: Props) {
   const tone = toneOf(stat);
   const text = TONE_TEXT[tone];
-  const badge = TONE_BADGE[tone];
+  // Un exo encore à 0 (ligne créée, rune pas encore posée) reste lisible comme exo
+  const badge = tone === 'exo' && stat.currentValue === 0 ? { label: 'exo à poser', cls: 'border-exo/60 text-exo' } : TONE_BADGE[tone];
   const weight = stat.currentValue * stat.weightPerPoint;
   const currentOver = stat.isExo ? stat.currentValue : Math.max(0, stat.currentValue - stat.baseMax);
 
@@ -80,9 +82,10 @@ export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, o
   return (
     <li
       key={event?.id ?? 'idle'}
+      onClick={selectable ? () => onSelect(stat.characteristicId) : undefined}
       className={`relative grid items-center gap-x-3 gap-y-1 px-2 sm:px-3 py-2.5 rounded-[10px] border-b border-[rgb(255_255_255/0.035)] last:border-b-0 transition-colors
-        grid-cols-[28px_minmax(0,1fr)_auto] sm:grid-cols-[34px_minmax(140px,1.1fr)_84px_minmax(110px,1.3fr)_104px]
-        ${selected ? 'bg-[rgb(255_194_92/0.06)] ring-1 ring-molten-text/40' : selectable ? 'hover:bg-[rgb(255_255_255/0.025)]' : ''}
+        grid-cols-[28px_minmax(0,1fr)_auto] sm:grid-cols-[34px_minmax(140px,1.1fr)_minmax(84px,auto)_minmax(110px,1.3fr)_104px]
+        ${selected ? 'bg-[rgb(255_194_92/0.06)] ring-1 ring-molten-text/40' : selectable ? 'hover:bg-[rgb(255_255_255/0.025)] cursor-pointer' : ''}
         ${fxClass}`}
       aria-current={selected ? 'true' : undefined}
     >
@@ -124,7 +127,7 @@ export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, o
       {/* Valeur */}
       <div className="text-right">
         {mode === 'adjust' && !stat.isLocked ? (
-          <div className="inline-flex items-center gap-1">
+          <div className="inline-flex items-center gap-1 whitespace-nowrap">
             <button
               type="button"
               onClick={() => onUpdate(stat.characteristicId, stat.currentValue - 1)}
@@ -144,7 +147,7 @@ export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, o
                 const v = parseInt(e.target.value, 10);
                 if (!Number.isNaN(v)) onUpdate(stat.characteristicId, Math.max(0, Math.min(v, maxReachable)));
               }}
-              className={`w-16 text-center bg-well border border-iron-edge rounded-control py-1 font-display font-bold text-lg tnum ${text}`}
+              className={`w-14 text-center bg-well border border-iron-edge rounded-control py-1 font-display font-bold text-lg tnum ${text}`}
             />
             <button
               type="button"
