@@ -62,7 +62,7 @@ Trois formats, chacun avec son schéma JSON et son validateur dans `src/logic/ob
 | `item-snapshot.schema.json` | un **objet vu en jeu** sans tentative (HDV, inventaire) : lignes avec `isExo` / `isOver` | trancher la portée et la base de la borne 101 (`overCapScope`, `overCapLineBasis`) par des objets existants |
 | `tooltips/schema.json` | une **densité lue dans l'infobulle** d'une rune (`runeId`, densité, version, capture) | faire passer une entrée de `densities` en `SOURCE PRIMAIRE` |
 
-Les fichiers de données sont des tableaux JSON de ces objets (`tooltips/tooltips.json` est vide au départ). Sans `source` ni `gameVersion`, une entrée n'est pas auditable et le validateur la refuse.
+Les fichiers de données sont des tableaux JSON de ces objets : `observations.json` (tentatives), `item-snapshots.json` (objets vus), `tooltips/tooltips.json` (infobulles). Sans `source` ni `gameVersion`, une entrée n'est pas auditable et le validateur la refuse.
 
 ## Clé de jointure
 

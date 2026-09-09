@@ -91,6 +91,10 @@ export interface SimLogEntry {
   /** Valeur réellement appliquée (troncature à la borne d'over/exo) */
   appliedValue?: number;
   truncated?: boolean;
+  /** Poids demandé que l'objet n'a pas pu payer (EC : tout retiré puis arrêt) */
+  unabsorbedWeight?: number;
+  /** Succès neutre impayable converti en échec sans effet (règle provisoire, INCONNU) */
+  snConvertedToEc?: boolean;
 }
 
 /** Dernier événement appliqué, pour les micro-interactions (rejouées par clé) */

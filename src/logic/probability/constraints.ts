@@ -12,10 +12,15 @@
  * Seuls facteurs cités par Ankama dans le même tutoriel : le NIVEAU DE L'OBJET et la
  * PROXIMITÉ DU JET MAXIMAL. Aucune formule n'est publiée.
  *
+ * Portée du plancher de 15 % (correction du 2026-09-09, errata) : il vaut UNIQUEMENT pour
+ * une ligne naturelle qui reste ≤ son jet max après la rune. Une tentative d'overmax ou
+ * un exo non lourd n'ont AUCUN plancher officiel : 0 est autorisé, la valeur réelle est
+ * INCONNUE et vient entièrement du modèle. L'exo lourd (PA/PM/PO) garde le plancher 1 %.
+ *
  * Ces deux nombres sont les seules constantes autorisées en dur dans src/logic/probability.
  */
 
-import type { ProbabilityOutput } from './types';
+import type { AttemptKind, ProbabilityOutput } from './types';
 
 /** SOURCE PRIMAIRE : plancher de SC en forgemagie normale (hors overmax / exotique). */
 export const MIN_SC_NORMAL = 0.15;
@@ -27,8 +32,21 @@ export const MIN_SC_HEAVY_EXO = 0.01;
  * Applique le plancher de SC puis renormalise SN/EC en conservant leur rapport.
  * Retourne toujours un triplet dans [0, 1] de somme 1.
  */
-export function applyOfficialBounds(raw: ProbabilityOutput, isHeavyExo: boolean): ProbabilityOutput {
-  const floor = isHeavyExo ? MIN_SC_HEAVY_EXO : MIN_SC_NORMAL;
+/** Plancher officiel de SC selon la nature de la tentative (0 = aucun plancher, INCONNU). */
+export function officialFloorFor(kind: AttemptKind): number {
+  switch (kind) {
+    case 'normal':
+      return MIN_SC_NORMAL;
+    case 'heavy_exo':
+      return MIN_SC_HEAVY_EXO;
+    case 'over':
+    case 'exo':
+      return 0;
+  }
+}
+
+export function applyOfficialBounds(raw: ProbabilityOutput, kind: AttemptKind): ProbabilityOutput {
+  const floor = officialFloorFor(kind);
 
   let pSC = clamp01(raw.pSC);
   let pSN = clamp01(raw.pSN);

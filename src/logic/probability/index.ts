@@ -14,11 +14,11 @@ import { applyOfficialBounds } from './constraints';
 import { lookupTableModel } from './models/lookupTable';
 import { officialFactorsLinearModel } from './models/officialFactorsLinear';
 import { poolRatioLegacyModel } from './models/poolRatioLegacy';
-import type { ProbabilityInput, ProbabilityModel, ProbabilityOutput } from './types';
+import { attemptKindOf, type ProbabilityInput, type ProbabilityModel, type ProbabilityOutput } from './types';
 
-export type { ProbabilityInput, ProbabilityModel, ProbabilityOutput } from './types';
-export { distanceToMax, splitComplement } from './types';
-export { applyOfficialBounds, MIN_SC_NORMAL, MIN_SC_HEAVY_EXO } from './constraints';
+export type { ProbabilityInput, ProbabilityModel, ProbabilityOutput, AttemptKind } from './types';
+export { distanceToMax, splitComplement, attemptKindOf } from './types';
+export { applyOfficialBounds, officialFloorFor, MIN_SC_NORMAL, MIN_SC_HEAVY_EXO } from './constraints';
 export { createSeededRng, mathRandomRng } from './rng';
 export { overCapUsageAfter } from './overCapUsage';
 export { officialFactorsLinearModel, poolRatioLegacyModel, lookupTableModel };
@@ -49,7 +49,7 @@ export function computeOutcomeProbabilities(
   modelName: ProbabilityModelName = params.model
 ): ProbabilityOutput {
   const raw = getProbabilityModel(modelName).compute(input, params);
-  return applyOfficialBounds(raw, input.isHeavyExo);
+  return applyOfficialBounds(raw, attemptKindOf(input.line, input.runeValue, input.isHeavyExo));
 }
 
 /** Tirage d'une issue selon les probabilités, avec RNG injecté. */

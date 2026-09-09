@@ -49,10 +49,10 @@ describe('simulateRuneAttempts', () => {
     expect(r.refused).toBe(0);
   });
 
-  it('final states: SC → Force 41, SN → Force 41 + Sagesse 29 (residual 2), EC → Sagesse 29 (residual 2)', () => {
+  it('final states: SC → Force 41 ; SN and EC hit Force (ligne visée) or Sagesse → at most 5 states', () => {
     const r = simulateRuneAttempts(baseState(), rune, engine, probParams(), createSeededRng(5), { runs: 300 });
     const keys = [...r.finalStates.keys()];
-    expect(keys.length).toBeLessThanOrEqual(3);
+    expect(keys.length).toBeLessThanOrEqual(5);
     const sc = makeState([line({ characteristicId: CHAR.FORCE, value: 41, baseMin: 30, baseMax: 50 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
     expect(r.finalStates.get(stateKey(sc))?.count).toBe(r.outcomes.SC);
     const total = [...r.finalStates.values()].reduce((s, b) => s + b.count, 0);

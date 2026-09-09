@@ -77,19 +77,21 @@ describe('applyRune — truncate (défaut)', () => {
     expect(getLine(r.state, CHAR.VITALITE).value).toBe(505);
   });
 
-  it('SN without residual : the full rune weight (10) is taken on another line, the truncated line keeps 505', () => {
+  it('SN without residual : the full rune weight (10) is taken, the truncated over line itself being the first candidate', () => {
     const state = makeState([
       line({ characteristicId: CHAR.VITALITE, value: 480, baseMin: 351, baseMax: 400 }),
       line({ characteristicId: CHAR.FORCE, value: 50 }),
     ]);
     const r = applyRune(state, raVi, 'SN', testParams(), seqRng([0]));
     expect(r.accepted).toBe(true);
-    expect(getLine(r.state, CHAR.VITALITE).value).toBe(505);
-    expect(r.losses).toEqual([{ characteristicId: CHAR.FORCE, pointsLost: 10, weightLost: 10 }]);
+    // 505 après troncature, puis −50 vita (10 de poids) sur la part over de la ligne visée
+    expect(r.losses).toEqual([{ characteristicId: CHAR.VITALITE, pointsLost: 50, weightLost: 10 }]);
+    expect(getLine(r.state, CHAR.VITALITE).value).toBe(455);
+    expect(getLine(r.state, CHAR.FORCE).value).toBe(50);
   });
 
-  it('EC : nothing applied, loss measured on the full rune × ecLossFactor', () => {
-    const r = applyRune(vita(480, 400, 10), raVi, 'EC', testParams({ ecLossFactor: 1 }), seqRng([0]));
+  it('EC : nothing applied, loss measured on the full rune', () => {
+    const r = applyRune(vita(480, 400, 10), raVi, 'EC', testParams(), seqRng([0]));
     expect(r.appliedValue).toBe(0);
     expect(getLine(r.state, CHAR.VITALITE).value).toBe(480);
     expect(r.lossRequested).toBe(10);

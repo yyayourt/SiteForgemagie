@@ -28,15 +28,18 @@ export const KNOWLEDGE_SECTIONS: KnowledgeSection[] = [
   {
     id: 'reliquat',
     title: 'Le reliquat et les pertes',
-    paramSections: ['residualPool', 'lossSelection', 'ecLoss'],
+    paramSections: ['residualPool', 'lossSelection'],
     prose: [
       "Quand une rune passe en succès neutre, l'objet perd un poids égal à celui de la rune. Quand elle échoue, il perd du poids sans recevoir la rune. Une perte est d'abord absorbée par le reliquat, puis retirée sur une ligne par points entiers ; le surplus retiré au-delà de la perte demandée devient le nouveau reliquat, qui n'est jamais négatif.",
       "Le reliquat est un état du serveur, affiché par le client Unity dans l'interface de forgemagie et son historique, observation datée à l'appui, et distinct du budget de poids que calcule l'atelier à partir des lignes visibles. Sa purge lorsque l'objet quitte l'atelier est rapportée par des guides, sans preuve directe.",
-      "Quelle ligne perd ? Aucune expérience publiée ne le dit. Le simulateur propose plusieurs lois interchangeables, avec ou sans priorité aux lignes en over et aux exotiques, et le tirage est reproductible par graine. La quantité perdue lors d'un échec critique n'est documentée nulle part : c'est un paramètre posé pour faire tourner la simulation.",
+      "Quelle ligne perd ? Aucune expérience publiée ne le dit. Le simulateur propose plusieurs lois interchangeables, avec ou sans priorité aux lignes en over et aux exotiques, et le tirage est reproductible par graine. Deux choses sont en revanche observées en jeu : la ligne visée par la rune peut elle-même perdre, une fois son gain appliqué, et un échec critique retire exactement le poids de la rune, sur plusieurs lignes si besoin, ou tout ce qui reste quand l'objet ne peut plus payer. La quantité retirée sur une ligne en succès neutre, elle, dépasse parfois le minimum nécessaire sans loi connue.",
+      "Le plancher officiel de succès critique ne vaut que pour une ligne naturelle qui reste sous son jet maximal : une tentative d'over ou un exotique n'ont aucun plancher connu, et le modèle peut y descendre à zéro.",
     ],
     certain: [
       "Trois issues existent : succès critique, succès neutre, échec critique (tutoriel officiel).",
       "Un succès critique applique la rune sans perte.",
+      "Un échec critique retire exactement le poids de la rune, ligne visée comprise (observations en jeu du 2026-09-09).",
+      "La ligne visée par la rune est candidate à la perte après application de son gain (observations en jeu du 2026-09-09).",
     ],
   },
   {

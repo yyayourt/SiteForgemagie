@@ -28,11 +28,13 @@ function describe(e: SimLogEntry): string {
   if (e.kind === 'orb') return 'jet retiré au hasard, exos retirés, reliquat vidé';
   if (e.kind === 'transcendence') return 'posée sans perte ; objet verrouillé';
   const parts: string[] = [];
+  if (e.snConvertedToEc) parts.push('succès neutre impayable : converti en échec sans effet, rune consommée (règle provisoire, INCONNU)');
   if (e.truncated && e.outcome !== 'EC') parts.push(`tronquée à +${e.appliedValue ?? 0} sur ${e.runeValue} (borne over/exo)`);
   if (e.absorbedByResidual > 0) parts.push(`le reliquat absorbe ${e.absorbedByResidual.toFixed(1)}`);
   for (const l of e.losses) parts.push(`${l.statName} −${l.pointsLost} (${l.weightLost.toFixed(1)})`);
   const delta = e.residualPoolAfter - e.residualPoolBefore;
   if (delta > 0.0001) parts.push(`reliquat +${delta.toFixed(1)}`);
+  if ((e.unabsorbedWeight ?? 0) > 0.0001 && !e.snConvertedToEc) parts.push(`⚠ perte non absorbable : ${e.unabsorbedWeight!.toFixed(1)} de poids non retiré, l'objet ne peut plus payer`);
   if (parts.length === 0) return e.outcome === 'SC' ? 'aucune perte' : 'aucune ligne touchée';
   return parts.join(' · ');
 }
@@ -89,7 +91,7 @@ export function ForgeLog({ log, lastEvent, onClear }: Props) {
                   {e.kind === 'rune' && !e.drawnByModel && !e.refusedReason && (
                     <span className="ml-1.5 text-[10px] px-1.5 py-px rounded-full border border-ash-3 text-ash-3 align-middle" title="Issue forcée à la main (mode étude)">forcée</span>
                   )}
-                  <small className="block text-ash-3 text-xs leading-snug">{describe(e)}</small>
+                  <small className={`block text-xs leading-snug ${(e.unabsorbedWeight ?? 0) > 0.0001 || e.snConvertedToEc ? 'text-ec' : 'text-ash-3'}`}>{describe(e)}</small>
                 </span>
                 <span className="text-right text-[11px] text-ash-3 tnum">
                   reliquat

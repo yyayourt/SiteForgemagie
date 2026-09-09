@@ -88,8 +88,10 @@ export interface ApplyRuneResult {
   absorbedByResidual: number;
   /** Pertes appliquées sur des lignes, dans l'ordre. */
   losses: LossRecord[];
-  /** Poids de perte qu'aucune ligne n'a pu absorber (objet vide). */
+  /** Poids de perte qu'aucune ligne n'a pu absorber : l'EC retire tout ce qui reste puis s'arrête (SOURCE PRIMAIRE). */
   unabsorbedWeight: number;
+  /** Succès neutre impayable converti en échec sans effet (lossSelection.unpayableSn, INCONNU, jamais observé). */
+  snConvertedToEc: boolean;
   residualPoolBefore: number;
   residualPoolAfter: number;
 }

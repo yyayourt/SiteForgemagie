@@ -12,9 +12,15 @@
  * Règles appliquées :
  * - SC : rune appliquée, aucune perte, reliquat inchangé (tutoriel Ankama, A §5).
  * - SN : rune appliquée, perte = poids de la rune, absorbée d'abord par le reliquat puis
- *        retirée sur des lignes (stratégie configurable).
- * - EC : rune non appliquée, perte = ecLossFactor × poids de la rune (ecLossFactor :
- *        INCONNU, empirical_params.json), même mécanique d'absorption.
+ *        retirée sur des lignes (stratégie configurable), LIGNE VISÉE COMPRISE après
+ *        application de son gain (SOURCE PRIMAIRE, observations 2026-09-09).
+ * - EC : rune non appliquée, perte = poids de la rune EXACTEMENT (SOURCE PRIMAIRE,
+ *        observations 2026-09-09 : 10,0 sur deux Ra Vi ; l'ancien paramètre ecLossFactor
+ *        est supprimé), même mécanique d'absorption. Si l'objet ne peut pas tout payer,
+ *        l'EC retire tout ce qui reste puis s'arrête ; à lignes et reliquat nuls, « Échec »
+ *        sans effet, rune consommée (SOURCE PRIMAIRE : −30 vita = 6,0 pour 10 demandés).
+ * - SN impayable : jamais observé (INCONNU, lossSelection.unpayableSn) ; défaut provisoire :
+ *        converti en échec sans effet, rune consommée.
  * - Une rune sur une ligne verrouillée (transcendance) ou un objet verrouillé est refusée.
  * - Borne d'over/exo (overCapWeight / overCapLineBasis / overCapScope) : si la rune la
  *   dépasserait, elle est TRONQUÉE à la borne (overCapExcess.behaviour = truncate, HYPOTHÈSE
@@ -54,6 +60,7 @@ function refused(
     absorbedByResidual: 0,
     losses: [],
     unabsorbedWeight: 0,
+    snConvertedToEc: false,
     residualPoolBefore: state.residualPool,
     residualPoolAfter: state.residualPool,
   };
@@ -121,13 +128,33 @@ export function applyRune(
         absorbedByResidual: 0,
         losses: [],
         unabsorbedWeight: 0,
+        snConvertedToEc: false,
         residualPoolBefore,
         residualPoolAfter: hypothetical.residualPool,
       };
     }
 
     case 'SN': {
-      const loss = applyLoss(hypothetical, lossWeight, rune.characteristicId, params, rng);
+      // La ligne visée, gain appliqué, est candidate comme les autres (SOURCE PRIMAIRE)
+      const loss = applyLoss(hypothetical, lossWeight, params, rng);
+      if (loss.unabsorbedWeight > 0 && params.lossSelection.unpayableSn === 'ec_no_effect') {
+        // SN impayable (INCONNU, jamais observé) : converti en échec sans effet, rune consommée
+        return {
+          accepted: true,
+          state,
+          outcome: 'EC',
+          runeWeight: weight,
+          appliedValue: 0,
+          truncated,
+          lossRequested: lossWeight,
+          absorbedByResidual: 0,
+          losses: [],
+          unabsorbedWeight: lossWeight,
+          snConvertedToEc: true,
+          residualPoolBefore,
+          residualPoolAfter: state.residualPool,
+        };
+      }
       return {
         accepted: true,
         state: loss.state,
@@ -139,14 +166,16 @@ export function applyRune(
         absorbedByResidual: loss.absorbedByResidual,
         losses: loss.losses,
         unabsorbedWeight: loss.unabsorbedWeight,
+        snConvertedToEc: false,
         residualPoolBefore,
         residualPoolAfter: loss.state.residualPool,
       };
     }
 
     case 'EC': {
-      const lossRequested = lossWeight * params.ecLossFactor;
-      const loss = applyLoss(state, lossRequested, rune.characteristicId, params, rng);
+      // Perte = poids de la rune, exactement (SOURCE PRIMAIRE) ; tout ce qui reste si l'objet ne peut pas payer
+      const lossRequested = lossWeight;
+      const loss = applyLoss(state, lossRequested, params, rng);
       return {
         accepted: true,
         state: loss.state,
@@ -158,6 +187,7 @@ export function applyRune(
         absorbedByResidual: loss.absorbedByResidual,
         losses: loss.losses,
         unabsorbedWeight: loss.unabsorbedWeight,
+        snConvertedToEc: false,
         residualPoolBefore,
         residualPoolAfter: loss.state.residualPool,
       };

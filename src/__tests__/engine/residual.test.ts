@@ -31,8 +31,9 @@ describe('applyRune — SC', () => {
 
 describe('applyRune — SN : création du reliquat', () => {
   it('residual = weight actually removed − rune weight (Fo +1 removes 1 Sagesse = 3 → residual 2)', () => {
-    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
-    const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'SN', uniform(), seqRng([0]));
+    // Force 50/60 : le gain ne crée pas d'over ; rng 0,99 → dernière candidate = Sagesse
+    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50, baseMax: 60 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
+    const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'SN', uniform(), seqRng([0.99]));
     expect(r.accepted).toBe(true);
     expect(getLine(r.state, CHAR.FORCE).value).toBe(51);
     expect(getLine(r.state, CHAR.SAGESSE).value).toBe(29);
@@ -43,12 +44,26 @@ describe('applyRune — SN : création du reliquat', () => {
     expect(r.residualPoolAfter).toBe(2);
   });
 
-  it('the targeted line is never the victim', () => {
-    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
-    for (const roll of [0, 0.5, 0.999]) {
-      const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'SN', uniform(), seqRng([roll]));
-      expect(r.losses.every((l) => l.characteristicId !== CHAR.FORCE)).toBe(true);
-    }
+  it('SOURCE PRIMAIRE (2026-09-09) : the targeted line is a candidate once its gain is applied', () => {
+    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50, baseMax: 60 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
+    // rng 0 → première candidate = Force (51 après gain) : elle perd 1 et revient à 50
+    const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'SN', uniform(), seqRng([0]));
+    expect(r.losses).toEqual([{ characteristicId: CHAR.FORCE, pointsLost: 1, weightLost: 1 }]);
+    expect(getLine(r.state, CHAR.FORCE).value).toBe(50);
+    expect(r.residualPoolAfter).toBe(0);
+  });
+
+  it('observation 2026-09-09 : SN Ra Vi +50, the over part of the target is hit first, then another line', () => {
+    // Cape Bouffante-like : vita 40/40 + Ra Vi (+50 → 90, over 50 = 10 de poids) ; perte 10
+    const state = makeState([
+      line({ characteristicId: CHAR.VITALITE, value: 40, baseMin: 36, baseMax: 40 }),
+      line({ characteristicId: CHAR.INITIATIVE, value: 200, baseMin: 151, baseMax: 200 }),
+    ]);
+    const r = applyRune(state, { characteristicId: CHAR.VITALITE, value: 50 }, 'SN', uniform(), seqRng([0]));
+    expect(r.accepted).toBe(true);
+    expect(r.losses[0].characteristicId).toBe(CHAR.VITALITE);
+    expect(r.losses.reduce((s, l) => s + l.weightLost, 0)).toBeGreaterThanOrEqual(10 - 1e-9);
+    expect(getLine(r.state, CHAR.VITALITE).value).toBeLessThan(90);
   });
 
   it('a loss larger than one line cascades over several lines', () => {
@@ -58,7 +73,8 @@ describe('applyRune — SN : création du reliquat', () => {
       line({ characteristicId: CHAR.FORCE, value: 2 }),
       line({ characteristicId: CHAR.SAGESSE, value: 30 }),
     ]);
-    const r = applyRune(state, { characteristicId: CHAR.DOMMAGES, value: 1 }, 'SN', uniform(), seqRng([0]));
+    // candidates [Dommages, Force, Sagesse] : rng 0,5 → Force ; puis [Dommages, Sagesse] : 0,5 → Sagesse
+    const r = applyRune(state, { characteristicId: CHAR.DOMMAGES, value: 1 }, 'SN', uniform(), seqRng([0.5, 0.5]));
     expect(r.losses).toEqual([
       { characteristicId: CHAR.FORCE, pointsLost: 2, weightLost: 2 },
       { characteristicId: CHAR.SAGESSE, pointsLost: 6, weightLost: 18 },
@@ -82,8 +98,8 @@ describe('applyRune — absorption prioritaire par le reliquat', () => {
 
   it('a partial residual absorbs its share, the rest hits a line and rebuilds the residual', () => {
     // Rune Sa +1 = 3 ; reliquat 0,5 → reste 2,5 ; Force (1/pt) perd ceil(2,5) = 3 → reliquat 0,5
-    const state = makeState([line({ characteristicId: CHAR.SAGESSE, value: 30 }), line({ characteristicId: CHAR.FORCE, value: 50 })], 0.5);
-    const r = applyRune(state, { characteristicId: CHAR.SAGESSE, value: 1 }, 'SN', uniform(), seqRng([0]));
+    const state = makeState([line({ characteristicId: CHAR.SAGESSE, value: 30, baseMax: 40 }), line({ characteristicId: CHAR.FORCE, value: 50 })], 0.5);
+    const r = applyRune(state, { characteristicId: CHAR.SAGESSE, value: 1 }, 'SN', uniform(), seqRng([0.99]));
     expect(r.absorbedByResidual).toBe(0.5);
     expect(r.losses).toEqual([{ characteristicId: CHAR.FORCE, pointsLost: 3, weightLost: 3 }]);
     expect(getLine(r.state, CHAR.FORCE).value).toBe(47);
@@ -92,17 +108,17 @@ describe('applyRune — absorption prioritaire par le reliquat', () => {
 
   it('keeps fractional residuals (0,7 absorbed, 0,3 left → 1 Sagesse removed → residual 2,7)', () => {
     const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })], 0.7);
-    const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'EC', uniform(), seqRng([0]));
+    const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'EC', uniform(), seqRng([0.99]));
     expect(r.absorbedByResidual).toBeCloseTo(0.7, 9);
     expect(r.losses).toEqual([{ characteristicId: CHAR.SAGESSE, pointsLost: 1, weightLost: 3 }]);
     expect(r.residualPoolAfter).toBeCloseTo(2.7, 9);
   });
 });
 
-describe('applyRune — EC', () => {
-  it('does not apply the rune and loses ecLossFactor × rune weight (default 1)', () => {
+describe('applyRune — EC (SOURCE PRIMAIRE 2026-09-09 : perte = poids de la rune)', () => {
+  it('does not apply the rune and loses exactly the rune weight', () => {
     const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
-    const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'EC', uniform(), seqRng([0]));
+    const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'EC', uniform(), seqRng([0.99]));
     expect(r.accepted).toBe(true);
     expect(getLine(r.state, CHAR.FORCE).value).toBe(50);
     expect(r.lossRequested).toBe(1);
@@ -110,18 +126,36 @@ describe('applyRune — EC', () => {
     expect(r.residualPoolAfter).toBe(2);
   });
 
-  it('honours a custom ecLossFactor', () => {
-    const params = testParams({ ecLossFactor: 0.5, lossSelection: { strategy: 'uniform' } });
-    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
-    const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'EC', params, seqRng([0]));
-    expect(r.lossRequested).toBe(0.5);
-    expect(r.residualPoolAfter).toBe(2.5);
+  it('Ra Vi (10) : lossRequested is 10, there is no ecLossFactor parameter anymore', () => {
+    const state = makeState([line({ characteristicId: CHAR.VITALITE, value: 300, baseMin: 251, baseMax: 300 }), line({ characteristicId: CHAR.SAGESSE, value: 30 })]);
+    const r = applyRune(state, { characteristicId: CHAR.VITALITE, value: 50 }, 'EC', uniform(), seqRng([0]));
+    expect(r.lossRequested).toBe(10);
+    expect('ecLossFactor' in testParams()).toBe(false);
+  });
+
+  it('EC on an item that cannot pay : takes everything left, then stops (−30 vita = 6,0 for 10 asked)', () => {
+    const state = makeState([line({ characteristicId: CHAR.VITALITE, value: 30, baseMin: 36, baseMax: 40 })]);
+    const r = applyRune(state, { characteristicId: CHAR.VITALITE, value: 50 }, 'EC', uniform(), seqRng([0]));
+    expect(r.accepted).toBe(true);
+    expect(r.losses).toEqual([{ characteristicId: CHAR.VITALITE, pointsLost: 30, weightLost: 6 }]);
+    expect(getLine(r.state, CHAR.VITALITE).value).toBe(0);
+    expect(r.unabsorbedWeight).toBeCloseTo(4, 9);
+    expect(r.residualPoolAfter).toBe(0);
+  });
+
+  it('EC on an empty item (lines and residual at zero) : « Échec » without effect, rune consumed', () => {
+    const state = makeState([line({ characteristicId: CHAR.VITALITE, value: 0, baseMin: 36, baseMax: 40 })]);
+    const r = applyRune(state, { characteristicId: CHAR.VITALITE, value: 50 }, 'EC', uniform(), seqRng([0]));
+    expect(r.accepted).toBe(true);
+    expect(r.losses).toEqual([]);
+    expect(r.unabsorbedWeight).toBe(10);
+    expect(r.state.lines).toEqual(state.lines);
   });
 });
 
 describe('residual never negative', () => {
   it('when no line can absorb the loss, residual stays ≥ 0 and the loss is reported unabsorbed', () => {
-    const state = makeState([line({ characteristicId: CHAR.FORCE, value: 50 })], 0.25);
+    const state = makeState([], 0.25);
     const r = applyRune(state, { characteristicId: CHAR.FORCE, value: 1 }, 'EC', uniform(), seqRng([0]));
     expect(r.absorbedByResidual).toBe(0.25);
     expect(r.unabsorbedWeight).toBeCloseTo(0.75, 9);

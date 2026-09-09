@@ -46,6 +46,7 @@ export type LossSelectionStrategyName =
   | 'weighted_by_weight'
   | 'weighted_by_value_times_weight';
 export type NonPositiveLineContribution = 'skip' | 'offset';
+export type UnpayableSnBehaviour = 'ec_no_effect' | 'take_all_remaining';
 export type TranscendenceRank = 'Ta' | 'Pata' | 'Rata';
 /** { "<characteristicId>": { Ta?: n, Pata?: n, Rata?: n } } */
 export type TranscendenceThresholds = Record<string, Partial<Record<TranscendenceRank, number>>>;
@@ -146,11 +147,11 @@ export interface EngineParams {
     /** INCONNU : perte mesurée sur la rune entière ou sur la part appliquée. */
     lossBasis: OverCapExcessLossBasis;
   };
-  /** Perte en EC = ecLossFactor × poids de la rune (INCONNU) */
-  ecLossFactor: number;
   lossSelection: {
     strategy: LossSelectionStrategyName;
     prioritizeOverExo: boolean;
+    /** INCONNU, jamais observé : SN dont la perte ne peut pas être payée. */
+    unpayableSn: UnpayableSnBehaviour;
   };
   residualPool: {
     resetOnEquipOrMarket: boolean;
@@ -179,10 +180,10 @@ export function getEngineParams(overrides?: ParamOverrides): EngineParams {
       behaviour: r<OverCapExcessBehaviour>('params.overCapExcess.behaviour'),
       lossBasis: r<OverCapExcessLossBasis>('params.overCapExcess.lossBasis'),
     },
-    ecLossFactor: r<number>('params.ecLossFactor'),
     lossSelection: {
       strategy: r<LossSelectionStrategyName>('params.lossSelection.strategy'),
       prioritizeOverExo: r<boolean>('params.lossSelection.prioritizeOverExo'),
+      unpayableSn: r<UnpayableSnBehaviour>('params.lossSelection.unpayableSn'),
     },
     residualPool: {
       resetOnEquipOrMarket: r<boolean>('params.residualPool.resetOnEquipOrMarket'),

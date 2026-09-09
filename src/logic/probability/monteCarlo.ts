@@ -62,6 +62,7 @@ export function buildProbabilityInput(
     itemLevel: state.level,
     line: { value: line?.value ?? 0, baseMax: line?.baseMax ?? 0, isExo },
     runeWeight: rune.value * density,
+    runeValue: rune.value,
     isHeavyExo: isHeavyExo(rune.characteristicId, isExo, probabilityParams),
     residualPool: state.residualPool,
     weightBudget,

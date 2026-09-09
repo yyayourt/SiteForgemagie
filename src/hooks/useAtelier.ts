@@ -237,6 +237,7 @@ export function useAtelier() {
           itemLevel: level,
           line: { value: target.currentValue, baseMax: target.baseMax, isExo: target.isExo },
           runeWeight: option.weight,
+          runeValue: option.value,
           isHeavyExo: heavy,
           residualPool: state.residualPool,
           weightBudget: budget.remainingBudget,
@@ -269,11 +270,14 @@ export function useAtelier() {
         residualPoolAfter: result.residualPoolAfter,
         appliedValue: result.appliedValue,
         truncated: result.truncated,
+        unabsorbedWeight: result.unabsorbedWeight,
+        snConvertedToEc: result.snConvertedToEc,
+        outcome: result.outcome,
       };
       const event: ForgeEvent = {
         id: state.logCounter + 1,
         kind: entry.kind,
-        outcome: entry.outcome,
+        outcome: result.outcome,
         refused: !result.accepted,
         targetCharacteristicId: entry.targetCharacteristicId,
         lostCharacteristicIds: result.losses.map((l) => l.characteristicId),
@@ -369,6 +373,7 @@ export function useAtelier() {
         absorbedByResidual: 0,
         losses: [],
         unabsorbedWeight: 0,
+        snConvertedToEc: false,
         residualPoolBefore: engineState.residualPool,
         residualPoolAfter: r.state.residualPool,
       };

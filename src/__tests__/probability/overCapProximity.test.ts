@@ -18,6 +18,7 @@ const input = (partial: Partial<ProbabilityInput> = {}): ProbabilityInput => ({
   itemLevel: 200,
   line: { value: 25, baseMax: 50, isExo: false },
   runeWeight: 1,
+  runeValue: 1,
   isHeavyExo: false,
   residualPool: 0,
   weightBudget: 0,

@@ -10,7 +10,10 @@
  * 3. Reliquat créé = poids réellement retiré − perte demandée restante, jamais négatif
  *    (définition « reliquat = perte − rune », convergence communautaire, A §4.1).
  * 4. Si aucune ligne ne peut absorber le reste, il est perdu (unabsorbedWeight) et le
- *    reliquat n'en est pas affecté.
+ *    reliquat n'en est pas affecté (l'appelant décide de l'issue : EC partiel, SN converti).
+ * 5. La ligne visée par la rune est candidate comme les autres, une fois son gain appliqué
+ *    (SOURCE PRIMAIRE, observations en jeu du 2026-09-09 : SN Ra Vi +50, −28 vita −44 ini).
+ *    L'ancienne exclusion de la ligne visée est supprimée et n'est pas paramétrable.
  */
 
 import type { EngineParams } from '../../data/params';
@@ -35,15 +38,9 @@ function removablePoints(line: ItemLine): number {
   return Math.max(0, line.value);
 }
 
-function candidatesOf(
-  lines: ItemLine[],
-  excludeCharacteristicId: number | null,
-  params: EngineParams,
-  overExoOnly: boolean
-): LossCandidate[] {
+function candidatesOf(lines: ItemLine[], params: EngineParams, overExoOnly: boolean): LossCandidate[] {
   const out: LossCandidate[] = [];
   for (const line of lines) {
-    if (line.characteristicId === excludeCharacteristicId) continue;
     if (line.isLocked) continue;
     const density = params.densities.get(line.characteristicId);
     if (density === undefined || density <= 0) continue;
@@ -57,17 +54,8 @@ function candidatesOf(
   return out;
 }
 
-/**
- * Applique une perte de `lossWeight` (poids) à l'état.
- * `excludeCharacteristicId` : ligne à ne jamais cibler (la ligne visée par la rune), ou null.
- */
-export function applyLoss(
-  state: ForgemagieItemState,
-  lossWeight: number,
-  excludeCharacteristicId: number | null,
-  params: EngineParams,
-  rng: Rng
-): LossApplication {
+/** Applique une perte de `lossWeight` (poids) à l'état. Toute ligne non verrouillée est candidate. */
+export function applyLoss(state: ForgemagieItemState, lossWeight: number, params: EngineParams, rng: Rng): LossApplication {
   const EPS = 1e-9;
   let remaining = Math.max(0, lossWeight);
   let residual = state.residualPool;
@@ -86,11 +74,11 @@ export function applyLoss(
     let overExoPhase = false;
     let candidates: LossCandidate[] = [];
     if (params.lossSelection.prioritizeOverExo) {
-      candidates = candidatesOf(lines, excludeCharacteristicId, params, true);
+      candidates = candidatesOf(lines, params, true);
       overExoPhase = candidates.length > 0;
     }
     if (candidates.length === 0) {
-      candidates = candidatesOf(lines, excludeCharacteristicId, params, false);
+      candidates = candidatesOf(lines, params, false);
     }
     if (candidates.length === 0) break;
 

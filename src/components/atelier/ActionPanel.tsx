@@ -19,8 +19,8 @@ const TABS: { id: Tab; label: string }[] = [
 
 const OUTCOMES: { outcome: RuneOutcome; cls: string; title: string }[] = [
   { outcome: 'SC', cls: 'text-sc hover:border-sc', title: 'Forcer un succès critique : la rune passe sans perte' },
-  { outcome: 'SN', cls: 'text-sn hover:border-sn', title: 'Forcer un succès neutre : la rune passe, perte = poids de la rune, reliquat consommé d\'abord' },
-  { outcome: 'EC', cls: 'text-ec hover:border-ec', title: 'Forcer un échec critique : la rune ne passe pas, perte selon ecLossFactor' },
+  { outcome: 'SN', cls: 'text-sn hover:border-sn', title: 'Forcer un succès neutre : la rune passe, perte = poids de la rune, reliquat consommé d\'abord, ligne visée candidate' },
+  { outcome: 'EC', cls: 'text-ec hover:border-ec', title: 'Forcer un échec critique : la rune ne passe pas, perte égale au poids de la rune (observé en jeu)' },
 ];
 
 const pct = (x: number) => `${Math.round(x * 100)} %`;

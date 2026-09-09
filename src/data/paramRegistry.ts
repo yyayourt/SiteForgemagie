@@ -32,7 +32,6 @@ export interface ParamDescriptor {
 
 export const SECTION_LABELS: Record<string, string> = {
   overCap: 'Borne des over et exo',
-  ecLoss: 'Échec critique',
   lossSelection: 'Sélection des pertes',
   residualPool: 'Reliquat',
   transcendence: 'Transcendance',
@@ -43,7 +42,7 @@ export const SECTION_LABELS: Record<string, string> = {
   densities: 'Densités (poids par point)',
 };
 
-export const SECTION_ORDER = ['densities', 'overCap', 'lossSelection', 'ecLoss', 'residualPool', 'transcendence', 'craft', 'probability', 'brisage', 'potions'];
+export const SECTION_ORDER = ['densities', 'overCap', 'lossSelection', 'residualPool', 'transcendence', 'craft', 'probability', 'brisage', 'potions'];
 
 function isEntry(node: unknown): node is ParamEntry<unknown> {
   return (
@@ -63,7 +62,6 @@ function sectionOf(pathParts: string[]): { section: string; subgroup?: string } 
   const [, first, second] = pathParts;
   if (first === 'overCapWeight' || first === 'overCapScope' || first === 'overCapLineBasis') return { section: 'overCap' };
   if (first === 'overCapExcess') return { section: 'overCap', subgroup: 'dépassement' };
-  if (first === 'ecLossFactor') return { section: 'ecLoss' };
   if (pathParts.length > 3) return { section: first, subgroup: second };
   return { section: first };
 }

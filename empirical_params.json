@@ -2,7 +2,7 @@
   "$comment": "Paramètres NON certains du simulateur. Chaque entrée porte value / status / source / note / bounds / default. Statuts : SOURCE PRIMAIRE, MODÈLE EMPIRIQUE, HYPOTHÈSE COMMUNAUTAIRE, CONTRADICTION, INCONNU (cf. CLAUDE.md). Les règles SOURCE PRIMAIRE ne sont pas ici : elles sont codées en dur et testées. Sources abrégées : A = docs/knowledge/audit-forgemagie-dofus3.md ; R = docs/knowledge/Reconstruction_of_the_DOFUS_3_Unity_Forgemagie_Algorithm__2026_V.md ; AP = docs/audit-projet-existant.md ; X = docs/knowledge/2026-09-07-croisement-densites-reliquat.md (croisement des tables de densité et du reliquat, document source non modifiable).",
   "schemaVersion": 1,
   "gameVersion": "3.6.10.11",
-  "updatedAt": "2026-09-08",
+  "updatedAt": "2026-09-09",
   "params": {
     "overCapWeight": {
       "value": 101,
@@ -70,17 +70,6 @@
         "default": "full_rune"
       }
     },
-    "ecLossFactor": {
-      "value": 1,
-      "status": "INCONNU",
-      "source": "aucune ; A §5 et R PARTIE 3 décrivent seulement « l'EC n'applique pas le bonus et peut provoquer une perte »",
-      "note": "Quantité de poids perdue lors d'un échec critique, exprimée en multiple du poids de la rune. Défaut 1 (= poids de la rune) posé arbitrairement pour faire tourner la simulation ; l'ancien code utilisait 0,5 sans source non plus. Aucune donnée publique ne quantifie la perte en EC.",
-      "bounds": {
-        "min": 0,
-        "max": 10
-      },
-      "default": 1
-    },
     "lossSelection": {
       "strategy": {
         "value": "weighted_by_value_times_weight",
@@ -108,6 +97,19 @@
           ]
         },
         "default": true
+      },
+      "unpayableSn": {
+        "value": "ec_no_effect",
+        "status": "INCONNU",
+        "source": "aucune : jamais observé. observations en jeu du 2026-09-09 (Yanis, Costumager, Cape Bouffante, client 3.6.10.11, captures data/observations/captures/2026-09-09/) ne montrent que des EC impayables (l'EC retire tout ce qui reste puis s'arrête).",
+        "note": "Que fait le serveur si un succès neutre ne peut pas payer sa perte ? ec_no_effect (défaut provisoire) : la tentative est convertie en échec sans effet, rune consommée. take_all_remaining : la rune s'applique et l'objet perd tout ce qu'il peut. En pratique inatteignable dans le moteur : le gain de la rune est lui-même retirable et pèse au moins la perte demandée.",
+        "bounds": {
+          "enum": [
+            "ec_no_effect",
+            "take_all_remaining"
+          ]
+        },
+        "default": "ec_no_effect"
       }
     },
     "residualPool": {
@@ -1299,6 +1301,7 @@
     "Rune de chasse (item 10057, effet 795) : characteristic 0 dans DofusDB, donc non indexable ici. Poids 5 selon A §3.1 (C-B). À traiter par un paramètre dédié quand le module armes sera abordé.",
     "Rune de Signature (item 7508) : aucun effet, hors périmètre.",
     "Runes de transcendance (typeId 211, 81 runes) : listées dans data/dataset.json. Verrou de l'objet (plus de forgemagie ni d'orbe) = devblog 2.58 (SOURCE PRIMAIRE, codé en dur) ; le devblog 2.72 concerne le migrateur d'objets, pas la transcendance.",
-    "Potions de forgemagie : 8 potions dans le dataset, DEUX paliers seulement (niveau 20 et 80 ; le palier 50 des tables 2.x n'existe pas), aucune valeur dans l'API, aucun taux dans l'infobulle du client Unity (observation du 2026-09-08). Taux : params.potions.damageKeptPercentByLevel, INCONNU, à mesurer en jeu."
+    "Potions de forgemagie : 8 potions dans le dataset, DEUX paliers seulement (niveau 20 et 80 ; le palier 50 des tables 2.x n'existe pas), aucune valeur dans l'API, aucun taux dans l'infobulle du client Unity (observation du 2026-09-08). Taux : params.potions.damageKeptPercentByLevel, INCONNU, à mesurer en jeu.",
+    "Échec critique : perte exactement égale au poids de la rune, répartie sur plusieurs lignes si besoin, ligne visée comprise ; à lignes et reliquat nuls, « Échec » sans effet, rune consommée. SOURCE PRIMAIRE (observations en jeu du 2026-09-09 (Yanis, Costumager, Cape Bouffante, client 3.6.10.11, captures data/observations/captures/2026-09-09/)), codé en dur dans src/logic/engine/applyRune.ts ; l'ancien paramètre ecLossFactor est supprimé."
   ]
 }

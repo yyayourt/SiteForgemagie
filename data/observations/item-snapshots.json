@@ -1,0 +1,42 @@
+[
+  {
+    "schemaVersion": 1,
+    "gameVersion": "3.6.10.11",
+    "itemId": 971,
+    "itemName": "Cape du Wa Wabbit",
+    "lines": [
+      {
+        "characteristicId": 11,
+        "value": 233,
+        "isExo": false,
+        "isOver": true,
+        "baseMax": 100
+      },
+      {
+        "characteristicId": 25,
+        "value": 25,
+        "isExo": false,
+        "isOver": false,
+        "baseMax": 25
+      },
+      {
+        "characteristicId": 19,
+        "value": 1,
+        "isExo": false,
+        "isOver": false,
+        "baseMax": 1
+      },
+      {
+        "characteristicId": 79,
+        "value": 7,
+        "isExo": false,
+        "isOver": false,
+        "baseMax": 7
+      }
+    ],
+    "transcended": false,
+    "source": "Yanis, HDV, 2026-09-09, captures data/observations/captures/2026-09-09/",
+    "date": "2026-09-09T12:00:00Z",
+    "notes": "Over classique de +133 vita (26,6 de poids) sur un jet max de 100, autres lignes au max, aucune transcendance : preuve qu'un over par succès critique existe et n'est pas plafonné par le niveau de l'objet (niveau 60). Heure non relevée (12:00Z posé)."
+  }
+]

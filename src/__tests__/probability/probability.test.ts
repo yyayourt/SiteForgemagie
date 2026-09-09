@@ -10,6 +10,8 @@ import {
   getProbabilityModel,
   isHeavyExo,
   MIN_SC_NORMAL,
+  officialFloorFor,
+  attemptKindOf,
   MIN_SC_HEAVY_EXO,
   PROBABILITY_MODEL_NAMES,
   distanceToMax,
@@ -28,6 +30,7 @@ const input = (partial: Partial<ProbabilityInput> = {}): ProbabilityInput => ({
   itemLevel: 200,
   line: { value: 50, baseMax: 50, isExo: false },
   runeWeight: 1,
+  runeValue: 1,
   isHeavyExo: false,
   residualPool: 0,
   weightBudget: 0,
@@ -56,16 +59,16 @@ describe('bornes SOURCE PRIMAIRE (tutoriel officiel)', () => {
   });
 
   it('applyOfficialBounds raises pSC to the floor and keeps the SN/EC ratio', () => {
-    const r = applyOfficialBounds({ pSC: 0.05, pSN: 0.57, pEC: 0.38 }, false);
+    const r = applyOfficialBounds({ pSC: 0.05, pSN: 0.57, pEC: 0.38 }, 'normal');
     expect(r.pSC).toBeCloseTo(0.15, 9);
     expect(r.pSN / r.pEC).toBeCloseTo(0.57 / 0.38, 9);
     expect(sum(r)).toBeCloseTo(1, 9);
   });
 
   it('applyOfficialBounds normalises a badly-summing triplet and handles zero', () => {
-    expect(sum(applyOfficialBounds({ pSC: 0.5, pSN: 0.5, pEC: 0.5 }, false))).toBeCloseTo(1, 9);
-    expect(applyOfficialBounds({ pSC: 0, pSN: 0, pEC: 0 }, false)).toEqual({ pSC: 1, pSN: 0, pEC: 0 });
-    const heavy = applyOfficialBounds({ pSC: 0, pSN: 0, pEC: 1 }, true);
+    expect(sum(applyOfficialBounds({ pSC: 0.5, pSN: 0.5, pEC: 0.5 }, 'normal'))).toBeCloseTo(1, 9);
+    expect(applyOfficialBounds({ pSC: 0, pSN: 0, pEC: 0 }, 'normal')).toEqual({ pSC: 1, pSN: 0, pEC: 0 });
+    const heavy = applyOfficialBounds({ pSC: 0, pSN: 0, pEC: 1 }, 'heavy_exo');
     expect(heavy.pSC).toBeCloseTo(0.01, 9);
     expect(heavy.pEC).toBeCloseTo(0.99, 9);
   });
@@ -79,16 +82,18 @@ describe('bornes SOURCE PRIMAIRE (tutoriel officiel)', () => {
           expect(v).toBeGreaterThanOrEqual(0);
           expect(v).toBeLessThanOrEqual(1);
         }
-        expect(p.pSC).toBeGreaterThanOrEqual((i.isHeavyExo ? MIN_SC_HEAVY_EXO : MIN_SC_NORMAL) - 1e-12);
+        expect(p.pSC).toBeGreaterThanOrEqual(officialFloorFor(attemptKindOf(i.line, i.runeValue, i.isHeavyExo)) - 1e-12);
       }
     });
   }
 
   it('the floor is applied even when a model is deliberately mis-parameterised', () => {
     const p = params({ officialFactorsLinear: { a: -1, b: 0, c: 0, d: 0, levelNormalizer: 200 } });
-    expect(computeOutcomeProbabilities(input(), p).pSC).toBeCloseTo(MIN_SC_NORMAL, 9);
+    // ligne 40/50 + rune 1 : tentative « normale » (≤ jet max), seule concernée par le plancher
+    const normal = input({ line: { value: 40, baseMax: 50, isExo: false } });
+    expect(computeOutcomeProbabilities(normal, p).pSC).toBeCloseTo(MIN_SC_NORMAL, 9);
     const legacy = params({ poolRatioLegacy: { ...getProbabilityParams().poolRatioLegacy, minSc: 0 } });
-    expect(computeOutcomeProbabilities(input({ weightBudget: -1e6 }), legacy, 'pool_ratio_legacy').pSC).toBeCloseTo(MIN_SC_NORMAL, 9);
+    expect(computeOutcomeProbabilities(input({ weightBudget: -1e6, line: { value: 40, baseMax: 50, isExo: false } }), legacy, 'pool_ratio_legacy').pSC).toBeCloseTo(MIN_SC_NORMAL, 9);
   });
 });
 
@@ -128,7 +133,7 @@ describe('pool_ratio_legacy (comparaison seulement)', () => {
   });
 
   it('raw minSc (5 %) violates the official floor, which the bounds then restore', () => {
-    const i = input({ weightBudget: -1e6, runeWeight: 1 });
+    const i = input({ weightBudget: -1e6, runeWeight: 1, line: { value: 40, baseMax: 50, isExo: false } });
     const raw = getProbabilityModel('pool_ratio_legacy').compute(i, params());
     expect(raw.pSC).toBeLessThan(MIN_SC_NORMAL);
     expect(computeOutcomeProbabilities(i, params(), 'pool_ratio_legacy').pSC).toBeCloseTo(MIN_SC_NORMAL, 9);

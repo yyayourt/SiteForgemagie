@@ -15,6 +15,8 @@ export interface ProbabilityInput {
   line: { value: number; baseMax: number; isExo: boolean };
   /** Poids de la rune (valeur × densité). */
   runeWeight: number;
+  /** Valeur ajoutée par la rune (points) : décide si la tentative est un overmax. */
+  runeValue: number;
   /** Exo lourd (PA/PM/PO) : plancher officiel 1 % au lieu de 15 %. */
   isHeavyExo: boolean;
   /** Reliquat serveur (état propre). Aucun modèle certain ne l'utilise. */
@@ -39,6 +41,22 @@ export interface ProbabilityModel {
   readonly name: ProbabilityParams['model'];
   /** Probabilités BRUTES du modèle, avant les bornes officielles. Somme = 1. */
   compute(input: ProbabilityInput, params: ProbabilityParams): ProbabilityOutput;
+}
+
+/**
+ * Nature d'une tentative, au sens du tutoriel officiel : le plancher de 15 % vaut « hors
+ * tentative d'overmax ou de forgemagie exotique ».
+ * - normal : ligne naturelle qui reste ≤ son jet max après la rune ;
+ * - over : ligne naturelle qui dépasse (ou dépasse déjà) son jet max ;
+ * - exo : ligne exotique hors PA/PM/PO ;
+ * - heavy_exo : exo PA/PM/PO (plancher officiel 1 %).
+ */
+export type AttemptKind = 'normal' | 'over' | 'exo' | 'heavy_exo';
+
+export function attemptKindOf(line: ProbabilityInput['line'], runeValue: number, isHeavyExo: boolean): AttemptKind {
+  if (isHeavyExo) return 'heavy_exo';
+  if (line.isExo) return 'exo';
+  return line.value + Math.max(0, runeValue) > line.baseMax ? 'over' : 'normal';
 }
 
 /** Distance normalisée au jet maximal : 0 = ligne au jet parfait (ou exo), 1 = ligne vide. */

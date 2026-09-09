@@ -95,8 +95,8 @@ describe('prioritizeOverExo (HYPOTHÈSE COMMUNAUTAIRE)', () => {
       line({ characteristicId: CHAR.SAGESSE, value: 30 }),
       line({ characteristicId: CHAR.PO, value: 1, baseMin: 0, baseMax: 0, isExo: true }), // 51
     ]);
-    // Rune Sa +1 = 3 ; seule candidate over/exo : PO → perd 1 (51) → reliquat 48
-    const r = applyRune(state, { characteristicId: CHAR.SAGESSE, value: 1 }, 'SN', params, seqRng([0]));
+    // Rune Sa +1 = 3 ; candidates over/exo : Sagesse (over 1, ligne visée) puis PO ; rng 0,99 → PO perd 1 (51) → reliquat 48
+    const r = applyRune(state, { characteristicId: CHAR.SAGESSE, value: 1 }, 'SN', params, seqRng([0.99]));
     expect(r.losses).toEqual([{ characteristicId: CHAR.PO, pointsLost: 1, weightLost: 51 }]);
     expect(r.residualPoolAfter).toBe(48);
   });
@@ -111,8 +111,8 @@ describe('strategy selection through params', () => {
     ]);
     const heavy = testParams({ lossSelection: { strategy: 'weighted_by_value_times_weight', prioritizeOverExo: false } });
     const uni = testParams({ lossSelection: { strategy: 'uniform', prioritizeOverExo: false } });
-    // rng 0.6 : pondéré → roll 78 < 100 → Force ; uniforme → index 1 → Sagesse
+    // candidates [Vitalité 305 (61), Force (100), Sagesse (30)] : pondéré rng 0,6 → 114,6 ∈ [61, 161[ → Force ; uniforme rng 0,9 → index 2 → Sagesse
     expect(applyRune(state, { characteristicId: CHAR.VITALITE, value: 5 }, 'SN', heavy, seqRng([0.6])).losses[0].characteristicId).toBe(CHAR.FORCE);
-    expect(applyRune(state, { characteristicId: CHAR.VITALITE, value: 5 }, 'SN', uni, seqRng([0.6])).losses[0].characteristicId).toBe(CHAR.SAGESSE);
+    expect(applyRune(state, { characteristicId: CHAR.VITALITE, value: 5 }, 'SN', uni, seqRng([0.9])).losses[0].characteristicId).toBe(CHAR.SAGESSE);
   });
 });

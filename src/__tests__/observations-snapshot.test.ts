@@ -9,6 +9,7 @@ import snapshotSchema from '../../data/observations/item-snapshot.schema.json';
 import tooltipSchema from '../../data/observations/tooltips/schema.json';
 import tooltips from '../../data/observations/tooltips/tooltips.json';
 import observations from '../../data/observations/observations.json';
+import snapshots from '../../data/observations/item-snapshots.json';
 import { validateObservations } from '../logic/observations/validate';
 import { getRuneTiers } from '../data/dataset';
 
@@ -65,6 +66,14 @@ describe('item snapshot', () => {
     expect(validateItemSnapshots([snapshot()]).valid).toBe(true);
     expect(validateItemSnapshots([snapshot(), { itemId: 0 }]).errors.every((e) => e.startsWith('[1] '))).toBe(true);
     expect(validateItemSnapshots({}).valid).toBe(false);
+  });
+
+  it('the shipped item-snapshots.json (Cape du Wa Wabbit, 2026-09-09) is valid and shows a classic over', () => {
+    expect(validateItemSnapshots(snapshots)).toEqual({ valid: true, errors: [] });
+    const vita = snapshots[0].lines.find((l) => l.characteristicId === 11)!;
+    expect(vita.isOver).toBe(true);
+    expect(vita.value - vita.baseMax!).toBe(133);
+    expect(snapshots[0].transcended).toBe(false);
   });
 
   it('mirrors the JSON schema: required keys and line keys', () => {
