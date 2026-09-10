@@ -13,27 +13,37 @@
  * optimiste. C'est un défaut plus grave qu'une imprécision : un joueur brûle des runes.
  *
  * ─── Ce que le garde-fou fait ───────────────────────────────────────────────────────────
- * 1. EXO LOURD (PA, PM, PO) : pSC est **plafonné à 1 %**, la valeur primaire du tutoriel
- *    Ankama Unity. Le plancher officiel valant lui aussi 1 %, le SC est de fait épinglé
- *    exactement à 1 %. Le partage du complément reste `heavyExoEcShare`
- *    (HYPOTHÈSE COMMUNAUTAIRE, 1 par défaut → 1/0/99, l'ancre 5).
+ * 1. EXO LOURD (PA, PM, PO) : pSC est **épinglé à 1 %**. Attention à ce que cela veut dire :
+ *    le tutoriel Ankama écrit « peut **descendre jusqu'à** 1 % », donc 1 % est un
+ *    **plancher attesté**, pas la valeur du cas. Retenir ce plancher COMME valeur, c'est
+ *    appliquer au PA/PM/PO exactement la politique `unknownIntervalSampling = worst` que le
+ *    point 2 applique aux autres créations d'effet : un exo lourd est une création d'effet
+ *    comme une autre, son intervalle théorique va lui aussi de l'ancre 5 (1 %) à l'ancre 4
+ *    (32 %), et **rien ne documente où il tombe entre les deux**.
+ *    Le partage du complément reste `heavyExoEcShare` (HYPOTHÈSE COMMUNAUTAIRE, 1 par
+ *    défaut → 1/0/99, l'ancre 5).
  * 2. AUTRE CRÉATION D'EFFET : aucune estimation ponctuelle n'est renvoyée. Le résultat est
  *    un INTERVALLE explicite marqué `INCONNU`, borné par les ancres 4 et 5 du DevBlog
  *    (32/50/18 → 1/0/99). Mieux vaut une incertitude affichée qu'un chiffre faux.
  * 3. Le reste (normal, overmax) n'est pas touché : le modèle s'applique tel quel.
  *
  * ─── Statuts, sans mélange ──────────────────────────────────────────────────────────────
- * - La VALEUR 1 % : `SOURCE PRIMAIRE — Unity` (tutoriel « La forgemagie », dofus.com
- *   /fr/mmorpg/tutoriels/420190 : « Le taux de réussite des forgemagies exotiques est en
- *   revanche automatiquement très faible et peut descendre jusqu'à 1 % si l'on souhaite
- *   ajouter un PA… ») — **verbatim pour le PA, et pour lui seul**. Le PM et la Portée
- *   subissent le même clamp par **extrapolation communautaire convergente** : voir
- *   `HEAVY_EXO_VERBATIM` (constraints.ts). Le clamp est identique, l'étiquette ne l'est pas.
- * - L'USAGE de cette valeur comme PLAFOND : décision de projet, garde-fou conservateur.
- *   Le tutoriel dit « peut descendre jusqu'à », ce qui en fait littéralement un plancher.
- *   Le projet choisit de ne jamais annoncer mieux que le pire cas documenté sur une
- *   opération irréversible et coûteuse, tant qu'aucune mesure Unity n'existe. Ce choix est
- *   délibérément pessimiste, et il est écrit ici pour qu'on puisse le contester.
+ * - **1 % est ATTEIGNABLE en exo PA** : `SOURCE PRIMAIRE — Unity` (tutoriel « La
+ *   forgemagie », dofus.com/fr/mmorpg/tutoriels/420190 : « Le taux de réussite des
+ *   forgemagies exotiques est en revanche automatiquement très faible et peut descendre
+ *   jusqu'à 1 % si l'on souhaite ajouter un PA… »). C'est tout ce que la source garantit :
+ *   une borne basse, pour une caractéristique nommée.
+ * - **1 % EST le taux du PA** : `HYPOTHÈSE COMMUNAUTAIRE` forte, pas un fait. Ce qui la
+ *   soutient : le consensus des guides depuis quinze ans, et la densité de 100 — la plus
+ *   lourde du jeu — qui place l'opération à l'extrémité difficile de l'intervalle. Ce qui
+ *   manque : toute mesure, et toute indication d'Ankama sur la position du PA entre l'ancre
+ *   5 (1 %) et l'ancre 4 (32 %).
+ * - **PM et Portée** : même clamp, un niveau de preuve en moins — Ankama ne les nomme même
+ *   pas. `HEAVY_EXO_VERBATIM` (constraints.ts) porte cette distinction jusqu'à l'interface.
+ * - L'USAGE du plancher COMME valeur : décision de projet, identique à
+ *   `unknownIntervalSampling = worst`. Ne jamais annoncer mieux que le bas de l'intervalle
+ *   sur une opération irréversible et coûteuse, tant qu'aucune mesure Unity n'existe. Choix
+ *   délibérément pessimiste, écrit ici pour qu'on puisse le contester.
  * - Les BORNES de l'intervalle : `SOURCE PRIMAIRE — v1.27`, transposition `HYPOTHÈSE`.
  * - Le triplet servant à TIRER une issue en simulation (`sampling`) : **décision de modèle,
  *   pas détail d'affichage**, sortie en paramètre `probability.unknownIntervalSampling`
@@ -64,8 +74,13 @@ export type ProbabilityEstimate =
       kind: 'point';
       probabilities: ProbabilityOutput;
       sampling: ProbabilityOutput;
-      /** Statut à afficher avec le chiffre. */
-      status: 'MODÈLE' | 'SOURCE PRIMAIRE';
+      /**
+       * Statut à afficher avec le chiffre.
+       * `MODÈLE` : sortie du modèle paramétré.
+       * `POLITIQUE` : le chiffre ne vient pas d'un modèle mais d'une décision de projet —
+       * retenir la borne basse d'un intervalle non documenté (cas de l'exo lourd).
+       */
+      status: 'MODÈLE' | 'POLITIQUE';
       attemptKind: AttemptKind;
     }
   | {
@@ -81,7 +96,10 @@ export type ProbabilityEstimate =
       attemptKind: AttemptKind;
     };
 
-/** Triplet primaire d'un exo lourd : SC épinglé à 1 %, complément partagé par heavyExoEcShare. */
+/**
+ * Triplet d'un exo lourd : SC épinglé au plancher attesté (1 %), complément partagé par
+ * `heavyExoEcShare`. Le plancher est primaire ; en faire la valeur est la politique `worst`.
+ */
 export function heavyExoProbabilities(params: ProbabilityParams): ProbabilityOutput {
   return splitComplement(MIN_SC_HEAVY_EXO, params.heavyExoEcShare);
 }
@@ -95,8 +113,10 @@ export function guardExoticEstimate(
   params: ProbabilityParams
 ): ProbabilityEstimate | null {
   if (attemptKind === 'heavy_exo') {
+    // `POLITIQUE` et non `SOURCE PRIMAIRE` : la source garantit que 1 % est atteignable,
+    // pas que ce soit le taux. Retenir ce plancher comme valeur est la politique `worst`.
     const probabilities = heavyExoProbabilities(params);
-    return { kind: 'point', probabilities, sampling: probabilities, status: 'SOURCE PRIMAIRE', attemptKind };
+    return { kind: 'point', probabilities, sampling: probabilities, status: 'POLITIQUE', attemptKind };
   }
   if (attemptKind === 'exo') {
     const bound = params.unknownIntervalSampling;
@@ -147,7 +167,8 @@ export const SAMPLING_BOUND_LABEL: Record<UnknownIntervalSampling, string> = {
 /**
  * Plafond de pSC applicable à une tentative, ou `null` s'il n'y en a pas.
  * Symétrique de `officialFloorFor` : le plancher empêche de sous-estimer, le plafond
- * empêche de sur-estimer. Seul l'exo lourd en a un.
+ * empêche de sur-estimer. Seul l'exo lourd en a un — et ce plafond est une POLITIQUE, pas
+ * une borne officielle : Ankama n'en publie aucune. Voir `MIN_SC_HEAVY_EXO`.
  */
 export function guardCeilingFor(attemptKind: AttemptKind): number | null {
   return attemptKind === 'heavy_exo' ? MIN_SC_HEAVY_EXO : null;

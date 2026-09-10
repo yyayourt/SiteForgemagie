@@ -10,7 +10,7 @@
  * 1. la grille à trois colonnes prévue pour un nombre unique **coupe** un intervalle au
  *    milieu (« 1 % – 32 » puis « % ») : l'intervalle prend donc une ligne par issue ;
  * 2. le badge « modèle empirique » ne doit apparaître que si le chiffre vient **du modèle** —
- *    un exo lourd vient du tutoriel Ankama, un exo léger d'un intervalle sans source.
+ *    un exo lourd vient d'une politique de projet, un exo léger d'un intervalle sans source.
  */
 
 import type { ProbabilityModelName } from '../../data/params';
@@ -66,21 +66,24 @@ export function OutcomeEstimate({ estimate, model, isHeavyExo, characteristicId 
         </p>
       )}
 
-      {estimate.kind === 'point' && estimate.status === 'SOURCE PRIMAIRE' && (
+      {estimate.kind === 'point' && estimate.status === 'POLITIQUE' && (
         <p className="m-0 mt-2 text-[11px] text-molten-text leading-snug" data-testid="heavy-exo-note">
+          <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" />{' '}
           {isHeavyExoRateVerbatim(characteristicId) ? (
             <>
-              <StatusBadge status="SOURCE PRIMAIRE" /> Exotique PA : le taux d'un pour cent est
-              écrit tel quel dans le tutoriel d'Ankama. Le simulateur ne propose jamais mieux.
+              Exotique PA. Ankama écrit que le taux « peut descendre jusqu'à un pour cent » : c'est
+              un plancher attesté, pas la valeur du cas.
             </>
           ) : (
             <>
-              <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" /> Le taux d'un pour cent n'est écrit
-              par Ankama que pour le PA. Il est appliqué ici de la même façon, mais par
-              convergence des guides, sans citation : le calcul est identique, la preuve ne l'est
-              pas.
+              Exotique lourd. Ankama ne cite le « peut descendre jusqu'à un pour cent » que pour le
+              PA : pour cette caractéristique-ci, même le plancher n'est pas attesté, seuls les
+              guides la rangent avec le PA.
             </>
-          )}
+          )}{' '}
+          Le simulateur retient ce plancher comme valeur, par la même politique conservatrice que
+          pour les autres créations d'effet, dont l'intervalle monte jusqu'à trente-deux pour cent.
+          Où tombe cette rune entre les deux n'est documenté nulle part.
         </p>
       )}
     </>

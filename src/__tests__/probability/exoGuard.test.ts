@@ -75,10 +75,12 @@ describe('exo lourd (PA/PM/PO) : plafonné à 1 %', () => {
     expect(r.pEC).toBeCloseTo(0.495, 12);
   });
 
-  it("l'estimation est un POINT, marqué SOURCE PRIMAIRE (le 1 % vient du tutoriel Unity)", () => {
+  it("l'estimation est un POINT marqué POLITIQUE : la source garantit un plancher, pas une valeur", () => {
     const e = estimateOutcome(input(), params());
     expect(e.kind).toBe('point');
-    expect(e.status).toBe('SOURCE PRIMAIRE');
+    // Le tutoriel dit « peut descendre jusqu'à 1 % » : 1 % est ATTEIGNABLE. En faire la
+    // valeur est la politique `worst`, pas une lecture de la source.
+    expect(e.status).toBe('POLITIQUE');
     expect(e.attemptKind).toBe('heavy_exo');
   });
 });

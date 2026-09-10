@@ -62,6 +62,35 @@ C'est la partie que l'historique ne donne pas et sans laquelle rien ne se recons
 - [ ] Marquer `uncertain: true` toute entrée douteuse. Une entrée douteuse ne sert **ni à
       calibrer, ni à trancher une règle**. Mieux vaut dix entrées sûres que trente tièdes.
 
+### La règle des trois états — `[]` n'est pas `null`
+
+Pour `changes` et `residualMention`, **le champ n'est jamais absent**, et il porte trois
+valeurs qu'il ne faut pas confondre :
+
+| Valeur | Sens | C'est |
+|---|---|---|
+| `changes: [ … ]` · `residualMention: "gain"` / `"loss"` | ce que l'entrée montrait | une **lecture** |
+| `changes: []` · `residualMention: "none"` | l'entrée ne montrait **rien** | une **constatation**, aussi informative qu'une lecture |
+| `changes: null` · `residualMention: "unrecorded"` | **je n'ai pas regardé** | un **aveu** |
+
+- [ ] Ne jamais écrire `[]` ou `"none"` par défaut quand on n'a pas regardé. `[]` affirme
+      quelque chose ; `null` n'affirme rien. Les confondre transforme une ignorance en donnée.
+
+**Pourquoi cette règle vaut son poids.** Depuis que le succès neutre impossible et l'échec
+critique avec pertes portent **tous deux le libellé « Échec »**, l'**absence explicite de
+delta** est le seul discriminant entre les deux :
+
+| Ce qu'on voit | Ce que c'est |
+|---|---|
+| `Échec` + `changes: []` | tentative **sans effet** — l'objet ressort identique |
+| `Échec` + `changes: [pertes]` | **échec critique** qui a coûté |
+| `Échec` + `changes: null` | **rien du tout** : l'entrée ne tranche pas |
+
+C'est exactement ce qui a fait sortir l'anomalie A3 du corpus exploitable. Bien remplie,
+cette colonne permet de **lever A3 rétrospectivement sur des captures déjà prises**, sans
+retourner en jeu — il suffit de rouvrir la vidéo et de constater, pour chaque entrée
+« Échec », s'il y avait ou non un détail de pertes.
+
 ### ⚠️ Le piège central : l'affichage est NET
 
 L'historique semble additionner, sur une même ligne, le gain de la rune et la reprise qui

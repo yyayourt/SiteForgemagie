@@ -116,7 +116,7 @@ describe('forme « intervalle » — une création d’effet non lourde', () => 
   });
 });
 
-describe('forme « point » SOURCE PRIMAIRE — un exo lourd', () => {
+describe('forme « point » POLITIQUE — un exo lourd', () => {
   const estimate = () =>
     estimateOutcome(
       input({ line: { value: 0, baseMin: 0, baseMax: 0, isExo: true }, isHeavyExo: true }),
@@ -129,18 +129,21 @@ describe('forme « point » SOURCE PRIMAIRE — un exo lourd', () => {
     expect(container.textContent).not.toContain('modèle empirique');
   });
 
-  it('PA : le taux est présenté comme VERBATIM (source primaire)', () => {
+  it("PA : le 1 % est présenté comme un PLANCHER attesté, jamais comme la valeur du cas", () => {
     show(estimate(), CHAR_PA, true);
     const note = screen.getByTestId('heavy-exo-note').textContent ?? '';
-    expect(note).toContain('source primaire');
-    expect(note).toContain('écrit tel quel');
+    expect(note).toContain('hypothèse'); // et non « source primaire »
+    expect(note).toContain('peut descendre jusqu');
+    expect(note).toContain('plancher attesté, pas la valeur du cas');
+    // la borne haute théorique est nommée : rien ne dit où le PA tombe entre les deux
+    expect(note).toContain('trente-deux pour cent');
   });
 
-  it('PM : même clamp, mais présenté comme EXTRAPOLÉ (hypothèse communautaire)', () => {
+  it('PM : même clamp, un niveau de preuve en moins — Ankama ne le nomme même pas', () => {
     show(estimate(), CHAR_PM, true);
     const note = screen.getByTestId('heavy-exo-note').textContent ?? '';
     expect(note).toContain('hypothèse');
-    expect(note).toContain("n'est écrit par Ankama que pour le PA");
-    expect(note).toContain('le calcul est identique, la preuve ne l');
+    expect(note).toContain('ne cite le');
+    expect(note).toContain("même le plancher n'est pas attesté");
   });
 });

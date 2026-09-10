@@ -657,6 +657,27 @@ d'`overCapTruncate.test.ts` passent **sans une seule modification**.
 facteur de qualité globale est calculé et transmis au modèle, mais ne pèse rien tant qu'un
 dataset ne l'aura pas mesuré. C'était la condition posée.
 
+### Entorse de découpage, et sa condition d'expiration
+
+Le **câblage des entrées** de P1 et P6 — calcul de la qualité globale et des drapeaux
+structurels, puis passage au modèle dans `useAtelier` — voyage dans le **commit de P2**,
+faute d'un site d'appel séparé : c'est le même appel qui a changé de forme.
+
+> **Tant que ces pentes valent 0**, révoquer le commit P2 ne change aucune sortie : le
+> câblage retiré alimentait des termes nuls.
+>
+> **Dès que P1 ou P6 est calibré, ce n'est plus vrai.** Le câblage devient porteur, et un
+> `git revert` de P2 retirerait alors une **variable active** du modèle — silencieusement,
+> puisque les pentes resteraient dans `empirical_params.json` sans plus rien pour les
+> alimenter. Le modèle sortirait des chiffres différents sans qu'aucun paramètre n'ait bougé.
+>
+> **À faire à ce moment-là, et avant de toucher à la pente** : sortir le câblage dans son
+> propre commit, pour que P2 redevienne révocable seul.
+
+La condition est inscrite au plus près de qui la rencontrera : dans les notes de
+`probability.officialFactorsLinear.e` et de `probability.structuralFactors`, c'est-à-dire
+sous les yeux de celui qui s'apprêtera à calibrer.
+
 ### Tests
 
 | | Avant | Après |

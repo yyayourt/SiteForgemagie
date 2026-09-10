@@ -25,25 +25,45 @@ import type { AttemptKind, ProbabilityOutput } from './types';
 /** SOURCE PRIMAIRE : plancher de SC en forgemagie normale (hors overmax / exotique). */
 export const MIN_SC_NORMAL = 0.15;
 
-/** SOURCE PRIMAIRE : taux de SC d'un exo lourd (« jusqu'à 1 % »). */
+/**
+ * `SOURCE PRIMAIRE — Unity` : **1 % est ATTEIGNABLE** en exo lourd.
+ *
+ * Le tutoriel écrit « peut **descendre jusqu'à** 1 % » : c'est un **plancher**, pas une
+ * valeur. Le moteur, lui, en fait aussi un **plafond** — et cela n'est pas primaire.
+ * C'est l'application au cas de l'exo lourd de la même politique conservatrice que
+ * `probability.unknownIntervalSampling` applique aux autres créations d'effet : retenir la
+ * **borne basse** d'un intervalle dont on ne sait pas où l'on tombe.
+ *
+ * L'intervalle est le même que pour toute création d'effet : ancre 5 (1 %) à ancre 4
+ * (32 %), v1.27. **Rien ne documente où le PA tombe entre les deux.** Le consensus
+ * communautaire et la densité de 100 — la plus lourde du jeu, donc l'extrémité difficile —
+ * rendent le bas de l'intervalle très plausible, ce qui en fait une
+ * `HYPOTHÈSE COMMUNAUTAIRE` forte, jamais un fait.
+ *
+ * Le nom `MIN_` dit ce que la source garantit ; l'usage en plafond est une décision de
+ * projet, écrite ici pour être contestable.
+ */
 export const MIN_SC_HEAVY_EXO = 0.01;
 
 /**
- * Caractéristiques pour lesquelles le 1 % est VERBATIM dans le tutoriel Ankama : le **PA**
+ * Caractéristiques pour lesquelles Ankama **nomme** l'exotique en citant le 1 % : le **PA**
  * (caractéristique 1), et lui seul — « peut descendre jusqu'à 1 % si l'on souhaite ajouter
  * un PA… ».
  *
- * Le PM (23) et la Portée (19) subissent le MÊME garde-fou dans le moteur
- * (`params.heavyExoCharacteristics`), mais par **extrapolation communautaire convergente**,
- * pas par citation : aucune source primaire ne les nomme. Le clamp est identique,
- * l'étiquette ne doit pas l'être — c'est ce que cette constante permet à l'interface.
+ * ⚠️ Ce qui est verbatim, c'est **l'ATTEIGNABILITÉ du 1 % pour le PA**, pas le fait que ce
+ * soit le taux du PA en toutes circonstances (voir `MIN_SC_HEAVY_EXO`). La distinction que
+ * cette constante porte est donc : pour le PA, on sait que la borne basse existe ; pour le
+ * PM (23) et la Portée (19), on ne sait même pas cela — aucune source primaire ne les nomme,
+ * seule la convergence des guides les range avec le PA.
+ *
+ * Le clamp est identique pour les trois ; deux niveaux de preuve différents le justifient.
  *
  * Réserve : la citation se termine par des points de suspension. Le PM et la PO figurent
  * peut-être dans la partie élidée ; on ne le sait pas, donc on ne l'affirme pas.
  */
 export const HEAVY_EXO_VERBATIM: readonly number[] = [1];
 
-/** Le taux de 1 % est-il verbatim pour cette caractéristique, ou extrapolé ? */
+/** Ankama nomme-t-il cette caractéristique en citant le 1 %, ou est-elle rangée là par convergence ? */
 export function isHeavyExoRateVerbatim(characteristicId: number): boolean {
   return HEAVY_EXO_VERBATIM.includes(characteristicId);
 }
