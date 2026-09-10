@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "siteforgemagie/observations/history-import/v1",
+  "title": "Import d'une session de forgemagie depuis le panneau d'historique natif",
+  "description": "Transcription d'une session lue dans le client DOFUS Unity, au format que le JEU affiche réellement — et pas au format que le simulateur voudrait. Le panneau d'historique (colonne de gauche, bouton « VIDER L'HISTORIQUE ») donne par tentative : l'icône de la rune, les gains, les pertes, la mention « + reliquat » ou « - reliquat », et le libellé « Échec ». Il ne donne NI les valeurs absolues des lignes, NI la valeur du reliquat — celle-ci est dans l'en-tête de la fenêtre, pas dans l'entrée. D'où la forme de ce schéma : un ANCRAGE (l'état complet de l'objet, lu une fois dans le panneau d'objet) plus une SUITE ORDONNÉE de deltas. Les valeurs absolues de chaque tentative se reconstituent en parcourant la chaîne depuis l'ancrage ; c'est ce qui produit des entrées au format siteforgemagie/observations/v1. PIÈGE CENTRAL : l'historique semble afficher la variation NETTE d'une ligne, pas le couple (gain brut, perte brute) — un gain de +15 suivi d'une perte de 9 sur la même ligne s'affiche « 6 ». Ne jamais transcrire un `delta` comme un gain brut. Voir docs/knowledge/checklist-saisie-historique.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "gameVersion", "source", "date", "capture", "item", "anchor", "entries"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "forge-session" },
+    "gameVersion": {
+      "type": "string",
+      "description": "Version du client, ex. \"3.6.10.11\".",
+      "pattern": "^[0-9]+(\\.[0-9]+){1,3}$"
+    },
+    "source": { "type": "string", "minLength": 1, "description": "Pseudo de l'observateur, personnage, métier, niveau de métier." },
+    "date": { "type": "string", "format": "date-time", "description": "Horodatage ISO 8601 du DÉBUT de la session." },
+    "server": { "type": "string", "description": "Serveur de jeu (facultatif)." },
+    "capture": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Dossier ou fichier des captures/vidéo dans le dépôt. OBLIGATOIRE, sans exception : une lecture sans capture n'est pas auditable, quel que soit le rang de la source."
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["itemId", "itemLevel"],
+      "properties": {
+        "itemId": { "type": "integer", "minimum": 1, "description": "Identifiant DofusDB (data/items.json → id)." },
+        "itemLevel": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "ethereal": { "type": "boolean", "description": "Objet éthéré. Le DevBlog 1.27 en fait un facteur de difficulté ; le dataset n'expose pas encore la notion." }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["at", "lines", "read"],
+      "description": "État COMPLET de l'objet, lu dans le panneau d'objet et non dans l'historique. Un seul ancrage suffit pour toute la session : le reste se reconstitue par la chaîne des deltas.",
+      "properties": {
+        "at": {
+          "type": "string",
+          "enum": ["start", "end"],
+          "description": "Ancrage pris avant la première tentative (start) ou après la dernière (end). `end` est souvent plus commode : on ne sait pas toujours d'avance qu'on va forger."
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Vrai si l'état a été LU à l'écran. Faux = déduit : l'observation reste auditable mais pèse moins, et l'errata du 2026-09-09 impose de le signaler."
+        },
+        "residual": { "type": ["number", "null"], "minimum": 0, "description": "Reliquat affiché dans l'en-tête au moment de l'ancrage. null si non relevé." },
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "description": "TOUTES les lignes visibles, y compris celles à 0, les malus et les exos. Une ligne omise fausse la reconstitution.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["characteristicId", "value", "baseMin", "baseMax"],
+            "properties": {
+              "characteristicId": { "type": "integer", "minimum": 1 },
+              "value": { "type": "integer", "description": "Valeur affichée (négative pour un malus)." },
+              "baseMin": { "type": "integer", "description": "Borne basse du jet naturel, lue dans l'infobulle. 0 pour un exo." },
+              "baseMax": { "type": "integer", "description": "Borne haute du jet naturel. 0 pour un exo. baseMin = baseMax signale un jet fixe, que le DevBlog exempte du palier de 80 %." },
+              "isExo": { "type": "boolean" },
+              "isLocked": { "type": "boolean", "description": "Ligne verrouillée par une rune de transcendance." }
+            }
+          }
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Les entrées de l'historique, de la PLUS ANCIENNE à la plus récente. Le client les affiche en général dans l'autre sens : inverser à la transcription, et le vérifier sur un cas où l'on connaît l'ordre.",
+      "items": { "$ref": "#/definitions/entry" }
+    },
+    "notes": { "type": "string", "description": "Contexte libre : objet fraîchement crafté, passage en HDV entre deux tentatives, orbe utilisé, interruption de session." }
+  },
+  "definitions": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "runeId", "changes", "residualMention"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 0, "description": "Rang dans la session, à partir de 0, sans trou. C'est lui qui ordonne la chaîne, pas l'horodatage." },
+        "timestamp": {
+          "type": "string",
+          "description": "Position dans la vidéo, ex. \"00:17.9\". Facultatif mais fortement recommandé : deux entrées au même horodatage signalent une erreur de transcription et rendent les deux inexploitables (cf. anomalie A3 du 2026-09-10)."
+        },
+        "runeId": { "type": "integer", "minimum": 1, "description": "Identifiant DofusDB de la rune (data/dataset.json → runes[].id)." },
+        "runeValue": { "type": "integer", "description": "Valeur nominale de la rune telle qu'affichée dans son infobulle (ex. 15 pour une Rune Pa Vi). Facultatif : le dataset la connaît déjà, mais la relever détecte un dataset périmé." },
+        "runeDensityRead": { "type": "number", "exclusiveMinimum": 0, "description": "Champ « DENSITÉ » de l'infobulle de la rune, pour la rune ENTIÈRE (Rune Pa Vi +15 → 3). Facultatif ici : sa place normale est data/observations/tooltips/." },
+        "outcomeLabel": {
+          "type": ["string", "null"],
+          "enum": ["Échec", null],
+          "description": "Le libellé que le CLIENT écrit, pas l'issue qu'on en déduit. Le client n'écrit « Échec » que dans certains cas ; l'absence de libellé n'est pas une information sur l'issue. Ne jamais écrire ici « SC », « SN » ou « EC » : ces noms sont une INTERPRÉTATION, et c'est le rôle de la conversion de la produire."
+        },
+        "changes": {
+          "type": "array",
+          "description": "Les variations affichées par l'entrée, telles quelles, une par ligne touchée. Tableau vide = entrée sans effet visible. ⚠️ Ce sont des variations NETTES : sur la ligne visée, le gain de la rune et une éventuelle reprise sur cette même ligne sont déjà additionnés. Transcrire ce qui est écrit, jamais ce qu'on croit reconstituer.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["characteristicId", "delta"],
+            "properties": {
+              "characteristicId": { "type": "integer", "minimum": 1 },
+              "delta": { "type": "integer", "description": "Variation signée affichée (« 15 Vitalité » → 15 ; « -26 Initiative » → -26)." }
+            }
+          }
+        },
+        "residualMention": {
+          "type": "string",
+          "enum": ["none", "gain", "loss"],
+          "description": "La mention portée par l'entrée : aucune, « + reliquat » (gain) ou « - reliquat » (loss). C'est une information de SENS, distincte de la valeur."
+        },
+        "residualAfter": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Valeur du reliquat lue dans l'EN-TÊTE de la fenêtre juste après cette tentative. Exige une capture par tentative ; null si la session n'a été capturée que par lots. C'est la mesure la plus précieuse de tout le protocole : elle rend le puits directement observable."
+        },
+        "capture": { "type": "string", "description": "Capture spécifique à cette entrée, si elle diffère de celle de la session." },
+        "uncertain": { "type": "boolean", "description": "Transcription douteuse (image floue, chevauchement, horodatage en conflit). Une entrée marquée ainsi ne doit servir à aucune calibration ni à trancher aucune règle." },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
