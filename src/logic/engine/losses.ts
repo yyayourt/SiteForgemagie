@@ -14,6 +14,9 @@
  * 5. La ligne visée par la rune est candidate comme les autres, une fois son gain appliqué
  *    (SOURCE PRIMAIRE, observations en jeu du 2026-09-09 : SN Ra Vi +50, −28 vita −44 ini).
  *    L'ancienne exclusion de la ligne visée est supprimée et n'est pas paramétrable.
+ * 6. BONUS : plancher à 0 (SOURCE PRIMAIRE — v1.27, DevBlog : « les bonus d'un objet peuvent
+ *    redescendre jusqu'à 0 au minimum »).
+ * 7. MALUS : voir `removablePoints`. Deux règles primaires v1.27, ajoutées le 2026-09-10.
  *
  * L'absorption par le reliquat passe par un SEAM (poolConsumption.ts) : une seule règle
  * aujourd'hui, le comportement actuel.
@@ -32,13 +35,47 @@ export interface LossApplication {
   unabsorbedWeight: number;
 }
 
+/**
+ * Une ligne de MALUS : effet naturellement négatif de l'objet (jet maximal naturel < 0).
+ * Les lignes exotiques n'en font jamais partie.
+ */
+export function isMalusLine(line: ItemLine): boolean {
+  return !line.isExo && line.baseMax < 0;
+}
+
 /** Points qu'une ligne peut perdre quand elle est ciblée comme over/exo (jusqu'au jet parfait / à 0). */
 function removablePointsAsOverExo(line: ItemLine): number {
   return line.isExo ? line.value : Math.max(0, line.value - line.baseMax);
 }
 
-/** Points qu'une ligne peut perdre en général (jusqu'à 0). */
+/**
+ * Points qu'une ligne peut perdre.
+ *
+ * BONUS — jusqu'à 0. `SOURCE PRIMAIRE — v1.27` : « Après un échec, les bonus d'un objet
+ * peuvent redescendre jusqu'à 0 au minimum. »
+ *
+ * MALUS — jusqu'à son jet maximal naturel (`baseMax`), et pas plus loin. Deux phrases du
+ * DevBlog s'articulent ici, et elles ne se comprennent qu'ensemble :
+ *   • « il est impossible de "puiser" dans les malus, c'est-à-dire les effets négatifs de
+ *     l'objet, **à moins que ceux-ci ne soient overmaxés**, car ils joueraient souvent le
+ *     rôle de puits sans fonds » ;
+ *   • « les malus ne peuvent dépasser le malus maximum naturel ».
+ * Un malus « overmaxé » est un malus **meilleur que son jet naturel** (moins négatif que
+ * `baseMax`) — c'est la seule lecture qui rend les deux phrases compatibles, et elle est
+ * cohérente avec `isOverOrExo`, qui classe déjà une telle ligne en over. On peut donc
+ * reprendre ce qui a été gagné au-dessus du naturel, jamais creuser en dessous : sinon le
+ * malus redevient le puits sans fond qu'Ankama décrit.
+ *
+ * Avant le 2026-09-10, `max(0, value)` renvoyait 0 pour toute ligne négative : une ligne de
+ * malus n'était donc **jamais** candidate, même overmaxée. Le résultat était voisin pour les
+ * malus non overmaxés, mais par accident et non par règle.
+ */
 function removablePoints(line: ItemLine): number {
+  if (isMalusLine(line)) {
+    const naturalWorst = Math.min(line.baseMin, line.baseMax);
+    // Borne de sécurité : on ne descend jamais sous le malus maximum naturel.
+    return Math.max(0, Math.min(line.value - line.baseMax, line.value - naturalWorst));
+  }
   return Math.max(0, line.value);
 }
 

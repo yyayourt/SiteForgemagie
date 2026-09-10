@@ -12,6 +12,19 @@ const OUTCOME = {
   EC: { cls: 'text-ec bg-ec/10', label: 'EC', long: 'échec critique' },
 } as const;
 
+/**
+ * Un succès neutre impossible s'affiche « Échec », pas « SN ».
+ *
+ * La RÈGLE (« rien ne se passe ») vient du DevBlog 1.27 et régit la transition d'état.
+ * Le LIBELLÉ, lui, n'a qu'une seule attestation Unity : l'observation du 2026-09-09, où un
+ * échec sans effet (lignes et reliquat à zéro) s'affiche « Échec » dans le client. Aucune
+ * observation ne montre le client écrire « succès neutre » sur une tentative sans effet.
+ * On reprend donc le seul libellé attesté plutôt que d'en déduire un du nom interne de
+ * l'issue. L'anomalie A3 du 2026-09-10, qui montrait aussi « Échec », est HORS du corpus
+ * exploitable (horodatage confondu avec A2) et n'est pas ce qui tranche ici.
+ */
+const NO_OP = { cls: 'text-ec bg-ec/10', label: 'Éch', long: 'échec sans effet' } as const;
+
 const REFUSAL: Record<string, string> = {
   item_locked: 'objet transcendé : plus de forgemagie ni d\'orbe (devblog 2.58)',
   line_locked: 'ligne verrouillée',
@@ -28,13 +41,14 @@ function describe(e: SimLogEntry): string {
   if (e.kind === 'orb') return 'jet retiré au hasard, exos retirés, reliquat vidé';
   if (e.kind === 'transcendence') return 'posée sans perte ; objet verrouillé';
   const parts: string[] = [];
-  if (e.snConvertedToEc) parts.push('succès neutre impayable : converti en échec sans effet, rune consommée (règle provisoire, INCONNU)');
+  if (e.snNoOp) parts.push("rien ne se passe : l'objet ressort identique, reliquat compris ; la rune est consommée (règle du devblog 1.27 ; le sort de la rune est aligné sur l'échec sans effet observé en jeu, INCONNU)");
+  if (e.snConvertedToEc) parts.push('succès neutre impayable : converti en échec sans effet, rune consommée (ancienne règle, option)');
   if (e.truncated && e.outcome !== 'EC') parts.push(`tronquée à +${e.appliedValue ?? 0} sur ${e.runeValue} (borne over/exo)`);
   if (e.absorbedByResidual > 0) parts.push(`le reliquat absorbe ${e.absorbedByResidual.toFixed(1)}`);
   for (const l of e.losses) parts.push(`${l.statName} −${l.pointsLost} (${l.weightLost.toFixed(1)})`);
   const delta = e.residualPoolAfter - e.residualPoolBefore;
   if (delta > 0.0001) parts.push(`reliquat +${delta.toFixed(1)}`);
-  if ((e.unabsorbedWeight ?? 0) > 0.0001 && !e.snConvertedToEc) parts.push(`⚠ perte non absorbable : ${e.unabsorbedWeight!.toFixed(1)} de poids non retiré, l'objet ne peut plus payer`);
+  if ((e.unabsorbedWeight ?? 0) > 0.0001 && !e.snConvertedToEc && !e.snNoOp) parts.push(`⚠ perte non absorbable : ${e.unabsorbedWeight!.toFixed(1)} de poids non retiré, l'objet ne peut plus payer`);
   if (parts.length === 0) return e.outcome === 'SC' ? 'aucune perte' : 'aucune ligne touchée';
   return parts.join(' · ');
 }
@@ -76,10 +90,10 @@ export function ForgeLog({ log, lastEvent, onClear }: Props) {
                 className={`well rounded-control grid grid-cols-[34px_1fr_auto] gap-2.5 items-center px-3 py-2.5 text-[13px] ${latest ? 'entry-forged border-ash-3' : ''} ${e.refusedReason ? 'opacity-70' : ''}`}
               >
                 <span
-                  className={`w-[30px] h-[30px] rounded-full grid place-items-center font-display font-bold text-xs border border-current ${e.refusedReason ? 'text-ash-3' : o.cls}`}
-                  title={e.refusedReason ? 'refusée' : o.long}
+                  className={`w-[30px] h-[30px] rounded-full grid place-items-center font-display font-bold text-[10px] border border-current ${e.refusedReason ? 'text-ash-3' : e.snNoOp ? NO_OP.cls : o.cls}`}
+                  title={e.refusedReason ? 'refusée' : e.snNoOp ? NO_OP.long : o.long}
                 >
-                  {e.refusedReason ? '×' : e.kind === 'orb' ? '◌' : o.label}
+                  {e.refusedReason ? '×' : e.kind === 'orb' ? '◌' : e.snNoOp ? NO_OP.label : o.label}
                 </span>
                 <span className="min-w-0">
                   <b className="text-ash">{e.actionLabel}</b>
@@ -91,7 +105,7 @@ export function ForgeLog({ log, lastEvent, onClear }: Props) {
                   {e.kind === 'rune' && !e.drawnByModel && !e.refusedReason && (
                     <span className="ml-1.5 text-[10px] px-1.5 py-px rounded-full border border-ash-3 text-ash-3 align-middle" title="Issue forcée à la main (mode étude)">forcée</span>
                   )}
-                  <small className={`block text-xs leading-snug ${(e.unabsorbedWeight ?? 0) > 0.0001 || e.snConvertedToEc ? 'text-ec' : 'text-ash-3'}`}>{describe(e)}</small>
+                  <small className={`block text-xs leading-snug ${((e.unabsorbedWeight ?? 0) > 0.0001 && !e.snNoOp) || e.snConvertedToEc ? 'text-ec' : 'text-ash-3'}`}>{describe(e)}</small>
                 </span>
                 <span className="text-right text-[11px] text-ash-3 tnum">
                   reliquat

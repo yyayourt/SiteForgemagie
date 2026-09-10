@@ -291,6 +291,7 @@ export function useAtelier() {
         truncated: result.truncated,
         unabsorbedWeight: result.unabsorbedWeight,
         snConvertedToEc: result.snConvertedToEc,
+        snNoOp: result.snNoOp,
         outcome: result.outcome,
       };
       const event: ForgeEvent = {
@@ -394,6 +395,7 @@ export function useAtelier() {
         losses: [],
         unabsorbedWeight: 0,
         snConvertedToEc: false,
+        snNoOp: false,
         residualPoolBefore: engineState.residualPool,
         residualPoolAfter: r.state.residualPool,
       };

@@ -93,8 +93,10 @@ export interface SimLogEntry {
   truncated?: boolean;
   /** Poids demandé que l'objet n'a pas pu payer (EC : tout retiré puis arrêt) */
   unabsorbedWeight?: number;
-  /** Succès neutre impayable converti en échec sans effet (règle provisoire, INCONNU) */
+  /** Succès neutre impayable converti en échec sans effet (ancienne règle, option) */
   snConvertedToEc?: boolean;
+  /** Succès neutre impossible : rien ne s'est passé (SOURCE PRIMAIRE — v1.27) */
+  snNoOp?: boolean;
 }
 
 /** Dernier événement appliqué, pour les micro-interactions (rejouées par clé) */

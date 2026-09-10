@@ -92,6 +92,12 @@ export interface ApplyRuneResult {
   unabsorbedWeight: number;
   /** Succès neutre impayable converti en échec sans effet (lossSelection.unpayableSn, INCONNU, jamais observé). */
   snConvertedToEc: boolean;
+  /**
+   * Succès neutre sans effet : aucune AUTRE ligne ne pouvait diminuer, donc rien ne se passe.
+   * SOURCE PRIMAIRE — v1.27 : « Si ce résultat n'est pas possible (objet qui ne dispose que
+   * d'un seul jet par exemple), rien ne se passe en cas de succès partiel. »
+   */
+  snNoOp: boolean;
   residualPoolBefore: number;
   residualPoolAfter: number;
 }

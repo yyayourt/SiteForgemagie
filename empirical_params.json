@@ -110,17 +110,18 @@
         "default": true
       },
       "unpayableSn": {
-        "value": "ec_no_effect",
-        "status": "INCONNU",
-        "source": "aucune : jamais observé. observations en jeu du 2026-09-09 (Yanis, Costumager, Cape Bouffante, client 3.6.10.11, captures data/observations/captures/2026-09-09/) ne montrent que des EC impayables (l'EC retire tout ce qui reste puis s'arrête).",
-        "note": "Que fait le serveur si un succès neutre ne peut pas payer sa perte ? ec_no_effect (défaut provisoire) : la tentative est convertie en échec sans effet, rune consommée. take_all_remaining : la rune s'applique et l'objet perd tout ce qu'il peut. En pratique inatteignable dans le moteur : le gain de la rune est lui-même retirable et pèse au moins la perte demandée.",
+        "value": "no_effect",
+        "status": "SOURCE PRIMAIRE",
+        "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) : « Si ce resultat n'est pas possible (objet qui ne dispose que d'un seul jet par exemple), RIEN NE SE PASSE en cas de succes partiel. » Jamais observe en Unity : les observations du 2026-09-09 (Yanis, Costumager, Cape Bouffante, client 3.6.10.11) ne montrent que des EC impayables, ou l'EC retire tout ce qui reste puis s'arrete.",
+        "note": "Que fait le serveur si un succes neutre ne peut pas payer sa perte ? no_effect (DEFAUT depuis le 2026-09-10, SOURCE PRIMAIRE - v1.27) : rien ne se passe, aucun gain, aucune perte, reliquat intact. ec_no_effect (ancien defaut, choix de projet sans source) : converti en echec sans effet. take_all_remaining : la rune s'applique et l'objet perd tout ce qu'il peut. PORTEE : le DECLENCHEUR de 1.27 (« un AUTRE jet ») n'est pas repris tel quel, la ligne visee pouvant payer en Unity (SOURCE PRIMAIRE 2026-09-09, rang superieur) ; c'est la condition generale « si ce resultat n'est pas possible » qui est codee, mesuree avec les regles de paiement d'Unity. En pratique quasi inatteignable : le gain de la rune est lui-meme retirable. SORT DE LA RUNE : elle est CONSOMMEE (la tentative est acceptee, donc comptee dans le cout de session). Le DevBlog ne dit rien du sort de la rune ; c'est aligne sur l'echec sans effet observe en jeu le 2026-09-09, INCONNU pour ce cas. LIBELLE : le journal affiche « Echec » et non « SN » - seul libelle atteste en jeu pour une tentative sans effet (2026-09-09). L'anomalie A3 du 2026-09-10 montrait aussi « Echec » mais est HORS corpus exploitable (horodatage confondu avec A2) : elle ne tranche pas cet affichage.",
         "bounds": {
           "enum": [
+            "no_effect",
             "ec_no_effect",
             "take_all_remaining"
           ]
         },
-        "default": "ec_no_effect"
+        "default": "no_effect"
       }
     },
     "residualPool": {
