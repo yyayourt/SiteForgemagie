@@ -50,7 +50,13 @@ export type UnpayableSnBehaviour = 'ec_no_effect' | 'take_all_remaining';
 export type TranscendenceRank = 'Ta' | 'Pata' | 'Rata';
 /** { "<characteristicId>": { Ta?: n, Pata?: n, Rata?: n } } */
 export type TranscendenceThresholds = Record<string, Partial<Record<TranscendenceRank, number>>>;
-export type ProbabilityModelName = 'official_factors_linear' | 'pool_ratio_legacy' | 'lookup_table';
+export type ProbabilityModelName =
+  | 'official_factors_linear'
+  | 'pool_ratio_legacy'
+  | 'lookup_table'
+  | 'devblog_1_27';
+/** Consommation du reliquat lors d'une perte. Une seule implementation : le comportement actuel. */
+export type PoolConsumptionRuleName = 'absorb_first';
 /** Loi du jet de craft (INCONNU) : voir src/logic/craft/rollDistributions.ts. */
 export type RollDistributionName = 'uniform' | 'triangular';
 
@@ -124,6 +130,10 @@ export const OVER_CAP_SCOPE: OverCapScope = readParam<OverCapScope>('params.over
 export function getOverCapWeight(overrides?: ParamOverrides): number {
   return readParam<number>('params.overCapWeight', overrides);
 }
+/** Plafond PAR OBJET du cumul over/exo (INCONNU, initialise a 101 : comportement inchange). */
+export function getObjectNonNaturalCap(overrides?: ParamOverrides): number {
+  return readParam<number>('params.objectNonNaturalCap', overrides);
+}
 export function getOverCapScope(overrides?: ParamOverrides): OverCapScope {
   return readParam<OverCapScope>('params.overCapScope', overrides);
 }
@@ -137,7 +147,13 @@ export function getOverCapLineBasis(overrides?: ParamOverrides): OverCapLineBasi
 export interface EngineParams {
   /** characteristicId → poids par point */
   densities: ReadonlyMap<number, number>;
+  /** Plafond PAR EFFET (DevBlog 1.27) : ce que peut peser une ligne en over/exo. */
   overCapWeight: number;
+  /**
+   * Plafond PAR OBJET des puissances non-naturelles (DevBlog 1.27, plafond DISTINCT dont
+   * Ankama ne donne pas la valeur). INCONNU, encadre [100 ; 190[, initialise a 101.
+   */
+  objectNonNaturalCap: number;
   overCapScope: OverCapScope;
   /** HYPOTHÈSE COMMUNAUTAIRE : la borne s'applique à la valeur totale d'une ligne en over (505 vita), pas à sa part over. */
   overCapLineBasis: OverCapLineBasis;
@@ -157,6 +173,8 @@ export interface EngineParams {
     resetOnEquipOrMarket: boolean;
     /** Informatif (CONTRADICTION) : le client affiche-t-il le reliquat ? Sans effet sur le moteur. */
     visibleInClient: boolean;
+    /** SEAM : regle de consommation du reliquat. Une seule implementation aujourd'hui. */
+    poolConsumptionRule: PoolConsumptionRuleName;
   };
   transcendence: {
     /** HYPOTHÈSE COMMUNAUTAIRE (JeuxOnLine, annonce 2.49) : refus si un exo est présent. */
@@ -174,6 +192,7 @@ export function getEngineParams(overrides?: ParamOverrides): EngineParams {
   return {
     densities: getDensityMap(overrides),
     overCapWeight: r<number>('params.overCapWeight'),
+    objectNonNaturalCap: r<number>('params.objectNonNaturalCap'),
     overCapScope: r<OverCapScope>('params.overCapScope'),
     overCapLineBasis: r<OverCapLineBasis>('params.overCapLineBasis'),
     overCapExcess: {
@@ -188,6 +207,7 @@ export function getEngineParams(overrides?: ParamOverrides): EngineParams {
     residualPool: {
       resetOnEquipOrMarket: r<boolean>('params.residualPool.resetOnEquipOrMarket'),
       visibleInClient: r<boolean>('params.residualPool.visibleInClient'),
+      poolConsumptionRule: r<PoolConsumptionRuleName>('params.residualPool.poolConsumptionRule'),
     },
     transcendence: {
       refuseIfExo: r<boolean>('params.transcendence.refuseIfExo'),
@@ -266,6 +286,32 @@ export interface PoolRatioLegacyCoefficients {
   maxEc: number;
 }
 
+/**
+ * Facteurs de difficulté cités par le DevBlog Ankama 1.27 : leur EXISTENCE est
+ * SOURCE PRIMAIRE — v1.27, leur pente est INCONNUE et vaut 0. Ils sont tenus hors du
+ * vecteur ajusté (a/b/c/d/e) pour qu'un ajustement ne les emporte pas avec lui.
+ */
+export interface StructuralFactors {
+  /** Palier FRANC à 80 % de la fourchette du jet : retiré en bloc, pas de montée continue. */
+  palier80: number;
+  /** SOURCE PRIMAIRE — v1.27 : « si le bonus a un jet fixe, ce facteur n'est pas pris en compte ». */
+  fixedRollExempt: boolean;
+  /** Objet à un seul jet naturel : plus facile (ajouté à pSC). */
+  singleNaturalRoll: number;
+  /** Objet éthéré : plus difficile (retiré de pSC). */
+  ethereal: number;
+  /** Par ligne en over/exo, LIGNE VISÉE COMPRISE : plus difficile (retiré de pSC). */
+  overExoCount: number;
+}
+
+/** Poids du mélange qui produit le scalaire de difficulté du modèle devblog_1_27. */
+export interface DevblogDifficultyWeights {
+  rollQuality: number;
+  itemQuality: number;
+  level: number;
+  overCapUsage: number;
+}
+
 /** Paramètres du MODÈLE probabiliste. Tous INCONNU sauf heavyExoCharacteristics et heavyExoEcShare. */
 export interface ProbabilityParams {
   model: ProbabilityModelName;
@@ -275,8 +321,16 @@ export interface ProbabilityParams {
   ecShare: number;
   /** Part du complément allant à l'EC en exo lourd (HYPOTHÈSE COMMUNAUTAIRE, 1 = pas de SN). */
   heavyExoEcShare: number;
-  /** d : pente selon l'usage de la borne over/exo après la rune (INCONNU, 0 par défaut = sans effet). */
-  officialFactorsLinear: { a: number; b: number; c: number; d: number; levelNormalizer: number };
+  /**
+   * Vecteur de paramètres AJUSTÉS. d : pente selon l'usage de la borne over/exo après la
+   * rune ; e : pente selon la qualité globale de l'objet, hors ligne visée (DevBlog 1.27,
+   * facteur le plus important). Tous INCONNU, 0 par défaut pour d et e = sans effet.
+   */
+  officialFactorsLinear: { a: number; b: number; c: number; d: number; e: number; levelNormalizer: number };
+  /** Facteurs structurels du DevBlog 1.27, HORS du vecteur ajusté, pentes nulles. */
+  structuralFactors: StructuralFactors;
+  /** Poids de difficulté du modèle devblog_1_27 (INCONNU : seul leur ORDRE est sourcé). */
+  devblog127: { difficultyWeights: DevblogDifficultyWeights };
   poolRatioLegacy: PoolRatioLegacyCoefficients;
   lookupTable: LookupTableSpec;
 }
@@ -293,8 +347,17 @@ export function getProbabilityParams(overrides?: ParamOverrides): ProbabilityPar
       b: r<number>('officialFactorsLinear.b'),
       c: r<number>('officialFactorsLinear.c'),
       d: r<number>('officialFactorsLinear.d'),
+      e: r<number>('officialFactorsLinear.e'),
       levelNormalizer: r<number>('officialFactorsLinear.levelNormalizer'),
     },
+    structuralFactors: {
+      palier80: r<number>('structuralFactors.palier80'),
+      fixedRollExempt: r<boolean>('structuralFactors.fixedRollExempt'),
+      singleNaturalRoll: r<number>('structuralFactors.singleNaturalRoll'),
+      ethereal: r<number>('structuralFactors.ethereal'),
+      overExoCount: r<number>('structuralFactors.overExoCount'),
+    },
+    devblog127: { difficultyWeights: { ...r<DevblogDifficultyWeights>('devblog127.difficultyWeights') } },
     poolRatioLegacy: { ...r<PoolRatioLegacyCoefficients>('poolRatioLegacy.coefficients') },
     lookupTable: JSON.parse(JSON.stringify(r<LookupTableSpec>('lookupTable.table'))),
   };

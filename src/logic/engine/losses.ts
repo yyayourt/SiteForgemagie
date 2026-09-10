@@ -14,11 +14,15 @@
  * 5. La ligne visée par la rune est candidate comme les autres, une fois son gain appliqué
  *    (SOURCE PRIMAIRE, observations en jeu du 2026-09-09 : SN Ra Vi +50, −28 vita −44 ini).
  *    L'ancienne exclusion de la ligne visée est supprimée et n'est pas paramétrable.
+ *
+ * L'absorption par le reliquat passe par un SEAM (poolConsumption.ts) : une seule règle
+ * aujourd'hui, le comportement actuel.
  */
 
 import type { EngineParams } from '../../data/params';
 import type { ForgemagieItemState, ItemLine, LossRecord, Rng } from '../../types/forgemagie';
 import { getLossSelectionStrategy, type LossCandidate } from './lossSelection';
+import { getPoolConsumptionRule } from './poolConsumption';
 import { isOverOrExo } from './weights';
 
 export interface LossApplication {
@@ -54,16 +58,31 @@ function candidatesOf(lines: ItemLine[], params: EngineParams, overExoOnly: bool
   return out;
 }
 
-/** Applique une perte de `lossWeight` (poids) à l'état. Toute ligne non verrouillée est candidate. */
-export function applyLoss(state: ForgemagieItemState, lossWeight: number, params: EngineParams, rng: Rng): LossApplication {
+/**
+ * Applique une perte de `lossWeight` (poids) à l'état. Toute ligne non verrouillée est candidate.
+ * `runeWeight` n'est utilisé que par le seam de consommation du reliquat ; il vaut `lossWeight`
+ * par défaut, ce qui est le cas de toutes les tentatives sauf une rune tronquée facturée sur
+ * la part appliquée.
+ */
+export function applyLoss(
+  state: ForgemagieItemState,
+  lossWeight: number,
+  params: EngineParams,
+  rng: Rng,
+  runeWeight: number = lossWeight
+): LossApplication {
   const EPS = 1e-9;
   let remaining = Math.max(0, lossWeight);
   let residual = state.residualPool;
   const losses: LossRecord[] = [];
   const lines = state.lines.map((l) => ({ ...l }));
 
-  // 1. Absorption prioritaire par le reliquat
-  const absorbedByResidual = Math.min(residual, remaining);
+  // 1. Absorption par le reliquat (SEAM : poolConsumption.ts, une seule règle aujourd'hui)
+  const absorbedByResidual = getPoolConsumptionRule(params.residualPool.poolConsumptionRule).absorb({
+    residual,
+    lossRequested: remaining,
+    runeWeight,
+  });
   residual -= absorbedByResidual;
   remaining -= absorbedByResidual;
 

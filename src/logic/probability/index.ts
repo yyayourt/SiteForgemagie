@@ -11,22 +11,57 @@
 import type { ProbabilityModelName, ProbabilityParams } from '../../data/params';
 import type { Rng, RuneOutcome } from '../../types/forgemagie';
 import { applyOfficialBounds } from './constraints';
+import { devblog127Model } from './models/devblog127';
 import { lookupTableModel } from './models/lookupTable';
 import { officialFactorsLinearModel } from './models/officialFactorsLinear';
 import { poolRatioLegacyModel } from './models/poolRatioLegacy';
 import { attemptKindOf, type ProbabilityInput, type ProbabilityModel, type ProbabilityOutput } from './types';
 
-export type { ProbabilityInput, ProbabilityModel, ProbabilityOutput, AttemptKind } from './types';
-export { distanceToMax, splitComplement, attemptKindOf } from './types';
+export type {
+  ProbabilityInput,
+  ProbabilityModel,
+  ProbabilityOutput,
+  AttemptKind,
+  StructuralFlags,
+} from './types';
+export {
+  distanceToMax,
+  splitComplement,
+  attemptKindOf,
+  structuralFlagsOf,
+  NEUTRAL_STRUCTURAL_FLAGS,
+} from './types';
 export { applyOfficialBounds, officialFloorFor, MIN_SC_NORMAL, MIN_SC_HEAVY_EXO } from './constraints';
+export {
+  ANCHOR_BEST_REROLL,
+  ANCHOR_PERFECT_ROLL,
+  ANCHOR_WORST_REROLL,
+  ANCHOR_BEST_CREATION,
+  ANCHOR_WORST_CREATION,
+  NORMAL_ANCHORS,
+  MAX_SN,
+} from './devblogAnchors';
+export { itemQualityExcluding, naturalLineCount, overExoLineCount } from './itemQuality';
 export { createSeededRng, mathRandomRng } from './rng';
 export { overCapUsageAfter } from './overCapUsage';
-export { officialFactorsLinearModel, poolRatioLegacyModel, lookupTableModel };
+export { officialFactorsLinearModel, poolRatioLegacyModel, lookupTableModel, devblog127Model };
 
 const MODELS: Record<ProbabilityModelName, ProbabilityModel> = {
   official_factors_linear: officialFactorsLinearModel,
   pool_ratio_legacy: poolRatioLegacyModel,
   lookup_table: lookupTableModel,
+  devblog_1_27: devblog127Model,
+};
+
+/**
+ * Libellés d'affichage. Un modèle daté PORTE SA DATE : c'est ce qui empêche de prendre les
+ * chiffres de 2010 pour une mesure Unity.
+ */
+export const PROBABILITY_MODEL_LABELS: Record<ProbabilityModelName, string> = {
+  official_factors_linear: 'facteurs officiels (linéaire)',
+  pool_ratio_legacy: 'ratio de puits (ancien)',
+  lookup_table: 'table éditable',
+  devblog_1_27: 'ancres DevBlog 1.27 (2010)',
 };
 
 export function getProbabilityModel(name: ProbabilityModelName): ProbabilityModel {

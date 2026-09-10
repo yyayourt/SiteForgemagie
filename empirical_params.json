@@ -2,16 +2,27 @@
   "$comment": "Paramètres NON certains du simulateur. Chaque entrée porte value / status / source / note / bounds / default. Statuts : SOURCE PRIMAIRE, MODÈLE EMPIRIQUE, HYPOTHÈSE COMMUNAUTAIRE, CONTRADICTION, INCONNU (cf. CLAUDE.md). Les règles SOURCE PRIMAIRE ne sont pas ici : elles sont codées en dur et testées. Sources abrégées : A = docs/knowledge/audit-forgemagie-dofus3.md ; R = docs/knowledge/Reconstruction_of_the_DOFUS_3_Unity_Forgemagie_Algorithm__2026_V.md ; AP = docs/audit-projet-existant.md ; X = docs/knowledge/2026-09-07-croisement-densites-reliquat.md (croisement des tables de densité et du reliquat, document source non modifiable).",
   "schemaVersion": 1,
   "gameVersion": "3.6.10.11",
-  "updatedAt": "2026-09-09",
+  "updatedAt": "2026-09-10",
   "params": {
     "overCapWeight": {
       "value": 101,
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
-      "source": "A §7 (borne pratique, confiance B) ; R PARTIE 6 ; guides 2025-2026 (dafous.app, dofustool)",
-      "note": "Poids maximal d'over/exo. Existence d'une borne pratique à 101 bien attestée ; formule exacte de validation serveur inconnue. Ce qu'elle mesure sur une ligne : overCapLineBasis ; sa portée sur l'objet : overCapScope.",
+      "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27, exemple des 101 points de Force) ; A §7 (borne pratique, confiance B) ; R PARTIE 6 ; guides 2025-2026 (dafous.app, dofustool)",
+      "note": "PLAFOND PAR EFFET (DevBlog 1.27, SOURCE PRIMAIRE - v1.27) : « impossible de dépasser un jet naturel maximum si la somme du power-rate non-naturel et du power-rate actuel de l'effet dépasse une limite fixe. Il est par exemple impossible de dépasser 101 points de force sur un objet dont le jet maximum de base est de 60. » 101 est l'EXEMPLE d'Ankama, pas une constante nommée. Ce qu'elle mesure sur une ligne : overCapLineBasis ; la portée objet est désormais objectNonNaturalCap, plafond DISTINCT (arbitrage 4.1). La forme exacte (somme de deux termes) n'est pas celle du code : trois lectures L1/L2/L3, CONTRADICTION non tranchée, voir docs/knowledge/arbitrages-2026-09-10.md §4.1(i).",
       "bounds": {
         "min": 1,
         "max": 500
+      },
+      "default": 101
+    },
+    "objectNonNaturalCap": {
+      "value": 101,
+      "status": "INCONNU",
+      "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) pour l'EXISTENCE du plafond : « Il est impossible de dépasser une limite fixe de puissance d'effets non-naturels, pour l'intégralité des objets (cette limite empêche par exemple d'ajouter à la fois un PA et un PM aux objets qui ne possèdent ni l'un ni l'autre de base). » Ankama NE DONNE PAS sa valeur.",
+      "note": "Plafond PAR OBJET du cumul des puissances non-naturelles (parts over + exo), distinct du plafond par effet (overCapWeight). Valeur INCONNUE, initialisée à 101 pour que le comportement reste identique à l'état antérieur à la scission. Encadrement déduit : un exo PA seul est possible (donc >= 100) et PA+PM est impossible (donc < 190), soit [100 ; 190[. TROIS HYPOTHÈSES sous cet encadrement : (a) la « puissance d'effets non-naturels » se mesure dans l'unité de densité FM ; (b) PA = 100 et PM = 90 (densités 1 et 23, HYPOTHÈSE COMMUNAUTAIRE) ; (c) les densités de 1.27 valent celles d'Unity. Si l'une tombe, l'encadrement tombe. QUESTION OUVERTE, aucune observation à ce jour : un exo PA (100) et un exo PO (51) coexistent-ils sur un même objet ? Si oui la borne basse remonte à 151 et 101 est réfuté. Test à mener en HDV (data/observations/item-snapshot.schema.json).",
+      "bounds": {
+        "min": 100,
+        "max": 189
       },
       "default": 101
     },
@@ -19,7 +30,7 @@
       "value": "global",
       "status": "HYPOTHÈSE COMMUNAUTAIRE",
       "source": "guide Huz (huzounet.fr/guides/forgemagie, mis à jour le 21/01/2026) : « Les statistiques en exo ne peuvent excéder 101 de densité (Ex : 10 ini et 1 PA, 55 vita 1 PM…) » et « lisser des statistiques avant de tenter un exo (Ex : 213 vita/200, placer une rune pods de 2,5 de densité qui retire 13 vita pour être à 200/200 vita) » ; R PARTIE 6 (« over+exo cumulés ≤ 101 global ») ; contra A §7 et §13 (par ligne, confiance C-D) ; AP §3.3 R1 ; X (rapport de croisement 2026-09-07) §6 lit la même phrase de Huz comme « par ligne / statistique » (cumul global non testé)",
-      "note": "global : la somme des poids over (valeur − jet max, × densité) et exo (valeur × densité) de l'objet est plafonnée à overCapWeight ; per_line : chaque ligne dispose de son propre plafond. Défaut global depuis le 2026-09-06 : les deux exemples de Huz additionnent deux lignes (10 ini = 1 + PA 100 = 101 ; 55 vita = 11 + PM 90 = 101) et son conseil de ramener un over 213/200 vita à 200 avant un exo PA n'a de sens que si l'over compte dans le même budget que l'exo. Hypothèse forte mais non démontrée : un objet observé en jeu avec un exo PA ET un over d'au moins 2 de poids sur une autre ligne (ex. 211/200 vita) réfuterait cette lecture et rendrait per_line. CONTRADICTION depuis le 2026-09-07 : le rapport X lit Huz « par ligne », l'errata du 2026-09-06 lit « cumul objet » d'après les exemples à deux lignes. Défaut global conservé, à trancher par une observation d'objet en HDV (data/observations/item-snapshot.schema.json) portant un exo PA et un over ≥ 2 de poids sur une autre ligne. Non réfuté par recherche HDV 2026-09-08 (Yanis, client 3.6.10.11) : aucun objet contredisant cette lecture trouvé.",
+      "note": "global : la somme des poids over (valeur − jet max, × densité) et exo (valeur × densité) de l'objet est plafonnée à overCapWeight ; per_line : chaque ligne dispose de son propre plafond. Défaut global depuis le 2026-09-06 : les deux exemples de Huz additionnent deux lignes (10 ini = 1 + PA 100 = 101 ; 55 vita = 11 + PM 90 = 101) et son conseil de ramener un over 213/200 vita à 200 avant un exo PA n'a de sens que si l'over compte dans le même budget que l'exo. Hypothèse forte mais non démontrée : un objet observé en jeu avec un exo PA ET un over d'au moins 2 de poids sur une autre ligne (ex. 211/200 vita) réfuterait cette lecture et rendrait per_line. CONTRADICTION depuis le 2026-09-07 : le rapport X lit Huz « par ligne », l'errata du 2026-09-06 lit « cumul objet » d'après les exemples à deux lignes. Défaut global conservé, à trancher par une observation d'objet en HDV (data/observations/item-snapshot.schema.json) portant un exo PA et un over ≥ 2 de poids sur une autre ligne. Non réfuté par recherche HDV 2026-09-08 (Yanis, client 3.6.10.11) : aucun objet contredisant cette lecture trouvé. Depuis la scission du 2026-09-10 (arbitrage 4.1), la portée « global » mesure le cumul objet contre objectNonNaturalCap et non plus contre overCapWeight : les deux plafonds du DevBlog 1.27 sont distincts.",
       "bounds": {
         "enum": [
           "per_line",
@@ -138,6 +149,18 @@
           ]
         },
         "default": true
+      },
+      "poolConsumptionRule": {
+        "value": "absorb_first",
+        "status": "INCONNU",
+        "source": "Comportement ACTUEL du moteur (R PARTIE 2, HYPOTHÈSE COMMUNAUTAIRE forte : « le puits est consommé en priorité avant les stats »). Une observation Unity du 2026-09-10 le contredit (anomalie A1 : puits 0,2 disponible, rune de poids 1, EC donne -5 Vitalité = 1,0 et puits INCHANGÉ ; le moteur prédisait -4 et puits à 0) et le DevBlog 1.27 dit que le reliquat « absorbera EN PARTIE les échecs futurs ». N = 1 : rien n'est tranché.",
+        "note": "SEAM (point d'extension) posé le 2026-09-10 avec UNE SEULE implémentation, le comportement actuel : la perte est absorbée par le reliquat en priorité et en totalité. Les trois lectures alternatives de l'anomalie A1 (consommation non systématique / par tranches / seulement au-delà du poids de la rune) ne sont PAS écrites : elles attendent la campagne de reproduction (~20 EC sur objet à puits non nul, relevé avant/après). L'interface existe pour éviter un refactor plus tard ; elle ne change rien aux sorties.",
+        "bounds": {
+          "enum": [
+            "absorb_first"
+          ]
+        },
+        "default": "absorb_first"
       }
     },
     "transcendence": {
@@ -220,13 +243,14 @@
       "model": {
         "value": "official_factors_linear",
         "status": "INCONNU",
-        "source": "aucune : choix de projet. official_factors_linear n'utilise que les deux facteurs cités par le tutoriel officiel ; pool_ratio_legacy est l'ancien modèle inventé, conservé pour comparaison ; lookup_table est une table éditable pour les estimations de joueurs expérimentés",
-        "note": "Modèle actif. Tous les modèles sont des hypothèses paramétrées, comparables entre eux par Monte Carlo (src/logic/probability/monteCarlo.ts) et, à terme, avec des observations réelles (data/observations/).",
+        "source": "aucune : choix de projet. official_factors_linear n'utilise que les deux facteurs cités par le tutoriel officiel ; pool_ratio_legacy est l'ancien modèle inventé, conservé pour comparaison ; lookup_table est une table éditable pour les estimations de joueurs expérimentés ; devblog_1_27 interpole les ancres 1 à 3 du DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) - il porte sa version dans son nom parce que ses chiffres datent de 2010 et que leur transposition à Unity est une HYPOTHÈSE.",
+        "note": "Modèle actif. Tous les modèles sont des hypothèses paramétrées, comparables entre eux par Monte Carlo (src/logic/probability/monteCarlo.ts) et, à terme, avec des observations réelles (data/observations/). devblog_1_27 n'est JAMAIS le défaut : un modèle qui reproduit exactement cinq chiffres inspire une confiance que sa source (2010) ne justifie pas.",
         "bounds": {
           "enum": [
             "official_factors_linear",
             "pool_ratio_legacy",
-            "lookup_table"
+            "lookup_table",
+            "devblog_1_27"
           ]
         },
         "default": "official_factors_linear"
@@ -273,7 +297,7 @@
         "default": 1
       },
       "officialFactorsLinear": {
-        "$comment": "pSC_brut = a + b × distance − c × (niveau / levelNormalizer) − d × usageBorne, distance = (jetMax − valeur) / jetMax ∈ [0, 1] (0 = ligne au jet parfait ; exo = 0), usageBorne = cumul over+exo APRÈS la rune / overCapWeight, borné à [0, 1]. Puis bornes officielles. a, b, c : seuls les deux facteurs cités par Ankama ; d : facteur proposé par le projet, nul par défaut.",
+        "$comment": "pSC_brut = a + b x distance - c x (niveau / levelNormalizer) - d x usageBorne - e x qualitéGlobale, distance = (jetMax - valeur) / jetMax dans [0, 1] (0 = ligne au jet parfait ; null, donc sans effet, pour un exo ou un jet fixe), usageBorne = cumul over+exo APRÈS la rune / overCapWeight borné à [0, 1], qualitéGlobale = somme(valeur x densité) / somme(jetMax x densité) sur les lignes naturelles AUTRES que la ligne visée, dans [0, 1]. Puis les garde-fous d'exotisme, puis les bornes officielles. a, b, c, d, e forment le VECTEUR DE PARAMÈTRES AJUSTÉS ; les facteurs structurels du DevBlog sont hors de ce vecteur (params.probability.structuralFactors).",
         "a": {
           "value": 0.15,
           "status": "INCONNU",
@@ -318,6 +342,17 @@
           },
           "default": 0
         },
+        "e": {
+          "value": 0,
+          "status": "INCONNU",
+          "source": "SOURCE PRIMAIRE - v1.27 pour l'EXISTENCE et le RANG de ce facteur, pente INCONNUE. DevBlog Ankama 1.27 : « Elle dépend désormais, PAR ORDRE DÉCROISSANT D'IMPORTANCE : de la qualité globale de l'objet ; de la qualité du jet modifié ; du niveau de l'objet. » La qualité globale est le facteur LE PLUS IMPORTANT et il était totalement absent du modèle avant le 2026-09-10.",
+          "note": "Pente selon la qualité globale de l'objet dans [0, 1] (1 = toutes les autres lignes au jet parfait). EXCLUT la ligne en cours de modification, conformément au DevBlog : « le jet en cours de modification n'est pas pris en compte dans le calcul de la qualité, afin de limiter l'impact de ce facteur sur les objets bas-niveau ou avec un seul jet ». À ne pas confondre avec le terme d, qui compte les over/exo et qui, lui, INCLUT la ligne en cours de modification (deux traitements différents du même jet dans la même formule). 0 = aucun effet : les sorties par défaut sont inchangées. C'est cette pente nulle qui explique que le modèle sorte 16/42/42 là où l'ancre 2 donne 43/50/7 (arbitrage 4.2).",
+          "bounds": {
+            "min": -1,
+            "max": 1
+          },
+          "default": 0
+        },
         "levelNormalizer": {
           "value": 200,
           "status": "HYPOTHÈSE COMMUNAUTAIRE",
@@ -328,6 +363,90 @@
             "max": 1000
           },
           "default": 200
+        }
+      },
+      "structuralFactors": {
+        "$comment": "Facteurs de difficulté cités par le DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27 pour leur EXISTENCE), codés comme DRAPEAUX booléens à pente nulle et tenus HORS du vecteur de paramètres ajustés (officialFactorsLinear a/b/c/d/e). Aucun n'a d'effet numérique tant qu'un dataset ne l'a pas distingué de zéro (N documenté, CLAUDE.md). Les ajouter tous d'un coup avec des pentes libres produirait un modèle à huit degrés de liberté qui s'ajuste à n'importe quoi : c'est le surajustement présenté comme reconstitution.",
+        "palier80": {
+          "value": 0,
+          "status": "INCONNU",
+          "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) : « Si le jet que l'on modifie est au-delà de 80 % du jet max naturel (plus précisément à 80 % de la fourchette du jet), la difficulté augmente. IL S'AGIT D'UN PALLIER, la difficulté augmente brutalement à 80 % du jet. » R PARTIE 3 classait ce palier « HYPOTHÈSE COMMUNAUTAIRE répétée partout mais sans source primaire » : il en a une, v1.27.",
+          "note": "Pente d'une FONCTION EN ESCALIER : retirée de pSC en bloc dès que la valeur de la ligne atteint baseMin + 0,8 x (baseMax - baseMin), rien en dessous. Ce n'est PAS une montée continue. Désactivée si le jet est fixe (voir fixedRollExempt). Évaluée sur la valeur AVANT la rune (« le jet que l'on modifie ») ; l'évaluation après la rune est une lecture concurrente, INCONNU.",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": 0
+        },
+        "fixedRollExempt": {
+          "value": true,
+          "status": "SOURCE PRIMAIRE",
+          "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) : « Si le bonus a un jet fixe, ce facteur n'est pas pris en compte. »",
+          "note": "Si vrai, le palier de 80 % ne s'applique pas aux lignes à jet fixe (baseMin = baseMax). Règle primaire, sans effet numérique tant que palier80 vaut 0. À noter : avant le 2026-09-10 distanceToMax traitait un jet fixe comme un jet PARFAIT (distance 0, donc difficulté maximale) - l'effet inverse de la règle d'Ankama.",
+          "bounds": {
+            "enum": [
+              true,
+              false
+            ]
+          },
+          "default": true
+        },
+        "singleNaturalRoll": {
+          "value": 0,
+          "status": "INCONNU",
+          "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) : « La forgemagie des objets disposant naturellement d'un seul jet est plus facile. » Jamais reprise par aucun guide.",
+          "note": "Pente AJOUTÉE à pSC quand l'objet n'a qu'un seul jet naturel. Drapeau booléen, pente nulle par défaut.",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": 0
+        },
+        "ethereal": {
+          "value": 0,
+          "status": "INCONNU",
+          "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) : « La forgemagie des objets éthérés est plus difficile. » Jamais reprise par aucun guide.",
+          "note": "Pente RETIRÉE de pSC quand l'objet est éthéré. Drapeau booléen, pente nulle par défaut. La notion d'objet éthéré n'existe pas encore dans le dataset : le drapeau est toujours faux tant qu'elle n'y est pas.",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": 0
+        },
+        "overExoCount": {
+          "value": 0,
+          "status": "INCONNU",
+          "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) : « Plus l'objet dispose d'overmax/bonus exotiques (en prenant en compte celui en cours de modification), plus la difficulté augmente. »",
+          "note": "Pente RETIRÉE de pSC par ligne en over ou exotique, la ligne en cours de modification COMPRISE. Distinct du terme d, qui mesure un POIDS (cumul over+exo / borne) et non un NOMBRE de lignes : le DevBlog parle bien d'un décompte. Pente nulle par défaut.",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": 0
+        }
+      },
+      "devblog127": {
+        "$comment": "Modèle devblog_1_27 : interpolation linéaire par morceaux des ANCRES 1 à 3 du DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) le long d'un scalaire de difficulté D dans [0, 1] - D = 0 donne 66/34/0 (ancre 1), D = 0,5 donne 43/50/7 (ancre 2), D = 1 donne 15/50/35 (ancre 3). Le SN y est plafonné à 50 % (« Les chances d'obtenir un succès partiel sont au maximum de 50 % »). Les ancres 4 (32/50/18) et 5 (1/0/99) ne sont pas dans le modèle : elles bornent l'INTERVALLE renvoyé pour toute création d'effet (garde-fou d'exotisme, src/logic/probability/exoGuard.ts). Les cinq ancres sont donc couvertes, trois par la courbe et deux par l'intervalle. TRANSPOSITION À UNITY = HYPOTHÈSE : ces chiffres datent de 2010.",
+        "difficultyWeights": {
+          "value": {
+            "rollQuality": 0.35,
+            "itemQuality": 0.5,
+            "level": 0.15,
+            "overCapUsage": 0
+          },
+          "status": "INCONNU",
+          "source": "Seul l'ORDRE d'importance est sourcé (DevBlog 1.27 : « par ordre décroissant d'importance : qualité globale de l'objet, qualité du jet modifié, niveau de l'objet »). Les VALEURS sont arbitraires, choisies pour respecter cet ordre et sommer à 1.",
+          "note": "Poids du mélange qui produit le scalaire de difficulté D = w1 x (1 - distance) + w2 x qualitéGlobale + w3 x (niveau/200) + w4 x usageBorne, borné à [0, 1]. Les ancres fixent la COURBE (que vaut le triplet à une difficulté donnée) ; ces poids fixent la POSITION sur la courbe. Les deux sont indépendants, et seuls les premiers sont primaires.",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": {
+            "rollQuality": 0.35,
+            "itemQuality": 0.5,
+            "level": 0.15,
+            "overCapUsage": 0
+          }
         }
       },
       "poolRatioLegacy": {

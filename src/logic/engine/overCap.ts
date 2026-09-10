@@ -11,11 +11,30 @@
  *   Une ligne naturelle qui reste ≤ son jet max n'est jamais concernée.
  *
  * Règle 2, selon overCapScope (HYPOTHÈSE COMMUNAUTAIRE, global par défaut) :
- * - global   : la somme des parts over + exo de TOUTES les lignes ≤ overCapWeight
+ * - global   : la somme des parts over + exo de TOUTES les lignes ≤ objectNonNaturalCap
  *              (Huz : « 10 ini et 1 PA », « 55 vita 1 PM » = 101 cumulés) ;
  * - per_line : rien de plus que la règle 1 (chaque ligne a son propre plafond).
  * Le cumul de la règle 2 est toujours mesuré sur la part over (valeur − jet max) et l'exo :
  * l'exemple du guide « 213/200 vita à lisser avant un exo PA » n'a de sens qu'ainsi.
+ *
+ * ─── DEUX PLAFONDS, PAS UN (scission du 2026-09-10, arbitrage 4.1) ────────────────────────
+ * Le DevBlog Ankama 1.27 décrit DEUX limites distinctes, que le corpus communautaire avait
+ * fusionnées sous un unique « cap 101 » :
+ *   1. PAR EFFET (`overCapWeight`) — « impossible de dépasser un jet naturel maximum si la
+ *      somme du power-rate non-naturel et du power-rate actuel de l'effet dépasse une limite
+ *      fixe. Il est par exemple impossible de dépasser 101 points de force sur un objet dont
+ *      le jet maximum de base est de 60. » 101 est l'EXEMPLE d'Ankama, pas une constante.
+ *   2. PAR OBJET (`objectNonNaturalCap`) — « une limite fixe de puissance d'effets
+ *      non-naturels, pour l'intégralité des objets », celle qui interdit d'ajouter à la fois
+ *      un PA et un PM à un objet qui n'a ni l'un ni l'autre. **Ankama n'en donne pas la
+ *      valeur** : `INCONNU`, encadré [100 ; 190[ (un exo PA seul passe ⇒ ≥ 100 ; PA+PM est
+ *      impossible ⇒ < 190), initialisé à 101 pour que rien ne change.
+ *
+ * ⚠️ La FORME du plafond par effet n'est toujours pas celle de ce code : Ankama borne une
+ * SOMME DE DEUX TERMES, ici on borne un seul terme (overCapLineBasis). Trois lectures
+ * possibles (L1/L2/L3), `CONTRADICTION` non tranchée — voir
+ * docs/knowledge/arbitrages-2026-09-10.md §4.1(i). La scission ne la tranche pas : elle
+ * sépare seulement ce qui était confondu.
  */
 
 import type { EngineParams } from '../../data/params';
@@ -29,6 +48,7 @@ export interface OverCapCheck {
   overWeightAfter: number;
   /** Poids de la ligne visée au sens de overCapLineBasis (règle 1), 0 si elle n'est ni over ni exo. */
   lineWeightAfter: number;
+  /** Plafond PAR EFFET (overCapWeight). Le plafond par objet est objectNonNaturalCap. */
   cap: number;
 }
 
@@ -52,9 +72,11 @@ export function checkOverCap(
     return { allowed: lineOk, overWeightAfter: line ? lineOverWeight(line, params) : 0, lineWeightAfter, cap };
   }
 
-  // Règle 2 (global) : le cumul des parts over + exo de l'objet ne dépasse pas la borne non plus
+  // Règle 2 (global) : le cumul des parts over + exo de l'objet ne dépasse pas le plafond
+  // PAR OBJET, qui est un paramètre distinct du plafond par effet depuis le 2026-09-10.
+  const objectCap = params.objectNonNaturalCap;
   const overWeightAfter = after.lines.reduce((sum, l) => sum + lineOverWeight(l, params), 0);
-  return { allowed: lineOk && overWeightAfter <= cap + EPS, overWeightAfter, lineWeightAfter, cap };
+  return { allowed: lineOk && overWeightAfter <= objectCap + EPS, overWeightAfter, lineWeightAfter, cap };
 }
 
 /**
@@ -78,12 +100,12 @@ export function maxApplicableRuneValue(state: ForgemagieItemState, rune: Rune, p
   const maxTotal = params.overCapLineBasis === 'total_value' || isExo ? Math.floor(cap / density + 1e-9) : baseMax + Math.floor(cap / density + 1e-9);
   let candidate = Math.max(isExo ? -Infinity : baseMax - value, maxTotal - value);
 
-  // Règle 2 (global) : la part over de la ligne ≤ borne − parts over/exo des autres lignes
+  // Règle 2 (global) : la part over de la ligne ≤ plafond OBJET − parts over/exo des autres
   if (params.overCapScope === 'global') {
     const others = state.lines
       .filter((l) => l.characteristicId !== rune.characteristicId)
       .reduce((sum, l) => sum + lineOverWeight(l, params), 0);
-    const room = Math.floor((cap - others) / density + 1e-9);
+    const room = Math.floor((params.objectNonNaturalCap - others) / density + 1e-9);
     candidate = Math.min(candidate, Math.max(isExo ? -Infinity : baseMax - value, baseMax + room - value));
   }
 
