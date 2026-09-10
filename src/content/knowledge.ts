@@ -79,12 +79,16 @@ export const KNOWLEDGE_SECTIONS: KnowledgeSection[] = [
     paramSections: ['probability'],
     prose: [
       "La formule du serveur est secrète et n'existe dans aucun dépôt public. Le simulateur ne la reproduit pas : il propose des modèles paramétrés, tous marqués inconnus, et affiche chaque estimation avec le badge « modèle empirique » et le nom du modèle actif.",
-      "Deux bornes sont officielles et appliquées après tout modèle : un plancher de succès critique en forgemagie normale, et un plancher bien plus bas pour les exotiques PA, PM et PO. Les seuls facteurs cités par Ankama sont le niveau de l'objet et la proximité du jet maximal ; le modèle par défaut n'utilise que ces deux facteurs. Il comporte aussi un terme de proximité de la borne d'over/exo, proposé par le projet d'après l'observation d'objets rares proches de cette borne : sa pente est nulle par défaut, donc sans effet tant qu'un relevé ne l'aura pas mesurée.",
+      "Deux valeurs sont officielles et appliquées après tout modèle : un plancher de succès critique en forgemagie normale, et un taux bien plus bas pour les exotiques PA, PM et PO, auquel le simulateur se tient sans jamais proposer mieux. Le devblog de deux mille dix énumère six facteurs de difficulté, dans un ordre d'importance explicite : la qualité globale de l'objet d'abord, hors ligne visée, puis la proximité du jet maximal, puis le niveau de l'objet, avec un palier franc à quatre-vingts pour cent de la fourchette, une exemption pour les jets fixes, un bonus de facilité aux objets à un seul jet, une pénalité aux objets éthérés, et le nombre d'over et d'exotiques déjà présents, ligne visée comprise cette fois. Le modèle porte tous ces facteurs, avec des pentes nulles : rien ne bouge tant qu'un relevé ne les aura pas mesurées, et les facteurs structurels sont tenus à l'écart des paramètres ajustés pour qu'un ajustement ne les emporte pas avec lui.",
+      "Le facteur le plus important selon Ankama, la qualité globale de l'objet, manquait au modèle jusqu'au dix septembre. C'est lui, et non un mauvais réglage, qui explique l'écart entre ce que le simulateur annonce sur une ligne presque au maximum et le chiffre publié par Ankama : le modèle ne pouvait pas distinguer une ligne parfaite sur un objet simple d'une ligne parfaite sur un objet entièrement parfait, alors que le devblog leur donne des chances très différentes.",
+      "Une création d'effet ne reçoit plus d'estimation ponctuelle. Pour un exotique PA, PM ou PO, le taux officiel s'applique tel quel. Pour tout autre exotique, le simulateur affiche un intervalle et le dit inconnu : le devblog donne la meilleure et la pire création d'effet possibles, mais rien ne dit où se place une tentative donnée entre les deux, et inventer cette position produirait un chiffre faussement précis sur l'opération la plus coûteuse du jeu.",
       "Le journal d'observations en jeu est la seule voie pour faire passer un paramètre au statut de modèle empirique.",
     ],
     certain: [
       "Plancher officiel de succès critique en forgemagie normale, hors over et exotique (tutoriel officiel).",
-      "Plancher officiel plus bas pour les exotiques PA, PM et PO (tutoriel officiel).",
+      "Taux officiel bien plus bas pour les exotiques PA, PM et PO, appliqué comme plafond autant que comme plancher (tutoriel officiel).",
+      "Le succès neutre ne dépasse jamais la moitié des chances (devblog 1.27).",
+      "Un succès neutre impossible ne fait rien : ni gain, ni perte, ni reliquat (devblog 1.27).",
     ],
   },
   {

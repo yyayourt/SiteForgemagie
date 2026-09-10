@@ -277,8 +277,8 @@
       "ecShare": {
         "value": 0.5,
         "status": "INCONNU",
-        "source": "aucune. Les triplets « 66/34/0, 43/50/7, 15/50/35 » cités par R PARTIE 3 viennent d'une seule source ancienne recopiée (forgemagie.net) et ne sont pas utilisables",
-        "note": "Part du complément (1 − pSC) attribuée à l'échec critique en FM normale ; le reste va au succès neutre. 0,5 posé arbitrairement pour faire tourner la simulation.",
+        "source": "VALEUR INCHANGÉE, JUSTIFICATION REVUE le 2026-09-10. L'ancienne note disait que les triplets « 66/34/0, 43/50/7, 15/50/35 » venaient « d'une seule source ancienne recopiée » et n'étaient « pas utilisables » : CADUC. Le DevBlog Ankama original a été retrouvé (docs/knowledge/sources/S1-devblog-ankama-1.27.md) - ce sont des chiffres d'Ankama, SOURCE PRIMAIRE - v1.27. Leur transposition à Unity reste une HYPOTHÈSE. La valeur 0,5 reste posée arbitrairement : elle n'a jamais été dérivée de ces ancres.",
+        "note": "Part du complément (1 - pSC) attribuée à l'échec critique en FM normale ; le reste va au succès neutre. 0,5 posé arbitrairement pour faire tourner la simulation. À noter : les ancres 2, 3 et 4 du DevBlog donnent SN = 50 dans les trois cas, ce qu'une part fixe du complément ne peut pas reproduire (elle donne 42,5 % à pSC = 0,15). Le modèle devblog_1_27 traite ce point ; official_factors_linear non.",
         "bounds": {
           "min": 0,
           "max": 1
@@ -301,8 +301,8 @@
         "a": {
           "value": 0.15,
           "status": "INCONNU",
-          "source": "aucune ; posé égal au plancher officiel de 15 % pour qu'une ligne au jet parfait soit au minimum",
-          "note": "Ordonnée à l'origine (pSC quand la ligne est au jet parfait, niveau 0).",
+          "source": "VALEUR INCHANGÉE, JUSTIFICATION REVUE le 2026-09-10. Ancienne justification : « posé égal au plancher officiel de 15 % pour qu'une ligne au jet parfait soit au minimum ». C'est une CONFUSION entre deux situations distinctes du DevBlog 1.27 : l'ancre 3 (15 %) est le minimum atteint sur des « bonus maximums sur objets complexes haut-niveau » - c'est TOUT L'OBJET qui est parfait -, alors que l'ancre 2 (43 %) décrit « les bonus simples sur objets simples pour tenter d'atteindre un jet parfait ». Le modèle ne peut pas distinguer les deux tant que la pente e (qualité globale de l'objet) est nulle.",
+          "note": "Ordonnée à l'origine (pSC quand la ligne est au jet parfait, niveau 0, objet de qualité nulle). Sur une ligne 49/50 le modèle sort 16/42/42 là où l'ancre 2 donne 43/50/7 : l'écart vient de l'ABSENCE du facteur de qualité globale (pente e = 0), pas d'un mauvais réglage de a. Voir docs/knowledge/arbitrages-2026-09-10.md §4.2.",
           "bounds": {
             "min": 0,
             "max": 1
@@ -312,7 +312,7 @@
         "b": {
           "value": 0.5,
           "status": "INCONNU",
-          "source": "aucune ; posé pour qu'une ligne vide (distance 1) donne ≈ 65 %, écho du « 66 % » d'un vieux guide (une seule source, R PARTIE 3)",
+          "source": "VALEUR INCHANGÉE, JUSTIFICATION REVUE le 2026-09-10. Ancienne justification : « posé pour qu'une ligne vide donne environ 65 %, écho du 66 % d'un vieux guide (une seule source) ». Le 66 % n'est pas l'écho d'un guide : c'est l'ancre 1 du DevBlog Ankama, SOURCE PRIMAIRE - v1.27 (« les meilleures probabilités atteignables »). La calibration était numériquement saine ; seule sa justification était fausse.",
           "note": "Pente selon la distance au jet maximal.",
           "bounds": {
             "min": -1,
@@ -323,8 +323,8 @@
         "c": {
           "value": 0,
           "status": "INCONNU",
-          "source": "aucune ; Ankama cite le niveau de l'objet comme facteur sans en donner le sens",
-          "note": "Pente selon le niveau de l'objet (normalisé /200). 0 = aucun effet tant que le sens n'est pas connu.",
+          "source": "DevBlog Ankama 1.27 (SOURCE PRIMAIRE - v1.27) : « La difficulté augmente FAIBLEMENT avec le niveau de l'objet ». Le sens (positif : le niveau augmente la difficulté, donc baisse pSC) et l'ordre de grandeur (faible) sont donc connus depuis le 2026-09-10 ; seule la pente reste INCONNUE. L'ancienne note « Ankama cite le niveau sans en donner le sens » est caduque.",
+          "note": "Pente selon le niveau de l'objet (normalisé /levelNormalizer). 0 = aucun effet tant qu'aucune mesure ne fixe la pente. Le signe attendu est POSITIF et l'effet FAIBLE (DevBlog 1.27).",
           "bounds": {
             "min": -1,
             "max": 1
@@ -334,7 +334,7 @@
         "d": {
           "value": 0,
           "status": "INCONNU",
-          "source": "aucune source publiée. Proposition du projet (2026-09-06) d'après l'observation d'objets rares proches de la borne over/exo : « plus on s'approche de la limite, plus la chance de passer la rune doit être réduite ». Apparentée, sans être identique, à la règle 1 du guide Huz (« plus un item est lourd, plus les runes auront du mal à passer », qui parle du poids total).",
+          "source": "SOURCE PRIMAIRE - v1.27 depuis le 2026-09-10 pour l'EXISTENCE et le SIGNE de ce facteur : « Si le jet que l'on modifie est un overmax, ou n'est pas un bonus existant naturellement sur l'objet, la difficulté augmente encore davantage. Plus l'objet dispose d'overmax/bonus exotiques (EN PRENANT EN COMPTE CELUI EN COURS DE MODIFICATION), plus la difficulté augmente. » Le terme n'est donc plus « une proposition du projet sans source » : seule sa PENTE est INCONNUE. La mesure retenue (cumul over+exo APRÈS la rune) inclut bien le jet en cours de modification, conformément au texte. Apparentée, sans être identique, à la règle 1 du guide Huz (« plus un item est lourd, plus les runes auront du mal à passer », qui parle du poids total).",
           "note": "Pente selon l'usage de la borne d'over/exo après la rune (cumul over+exo / overCapWeight, borné à [0, 1]). 0 = aucun effet : le modèle par défaut reste celui des deux facteurs officiels tant qu'aucune mesure ne fixe cette pente. Une valeur de 0,3 retire 30 points de pSC brut à une rune qui amènerait l'objet exactement à la borne, avant les planchers officiels. À estimer par le journal d'observations (N documenté) avant toute autre valeur.",
           "bounds": {
             "min": -1,
@@ -766,9 +766,9 @@
       "$comment": "Potions de forgemagie élémentaire (typeId 26). Le dataset Unity n'a que deux paliers (niveau 20 : Étincelle/Crachin/Courant d'Air/Secousse ; niveau 80 : Incendie/Tsunami/Ouragan/Séisme) : le palier niveau 50 des tables 2.x n'existe pas. Module non modélisé tant que le taux n'est pas mesuré.",
       "damageKeptPercentByLevel": {
         "value": {},
-        "status": "INCONNU",
-        "source": "observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) : l'infobulle des potions ne montre AUCUN taux dans le client Unity ; l'API n'en fournit pas non plus. Tables anciennes (X §6) : 50/65/80 % (wiki-dofus, Rétro/2.x, trois paliers) ; 85 % (jeuxonline 14787, Rétro).",
-        "note": "Pourcentage des dommages neutres conservés lors du changement d'élément, par niveau de potion (clés « 20 », « 80 »). Vide = inconnu : le module potions reste désactivé dans l'atelier. La table 50/65/80 % est RETIRÉE du défaut le 2026-09-08 : elle décrit trois paliers d'une autre version du jeu. Mesure en jeu requise : dommages d'une arme avant/après potion, par palier.",
+        "status": "CONTRADICTION",
+        "source": "TROIS versions incompatibles en circulation, aucune écartable par la hiérarchie des preuves seule (docs/knowledge/arbitrages-2026-09-10.md §4.5). V1, rang R1 - observation en jeu du 2026-09-08 (Yanis, client 3.6.10.11, captures data/observations/captures/2026-09-08/) : DEUX paliers seulement (niveau 20 et 80), AUCUN taux affiché dans l'infobulle Unity, aucun dans l'API. V2, rang R5 - 50 / 65 / 80 % de dégâts conservés, trois qualités (Dofus Pages, wiki-dofus.eu, via R PARTIE 10 et X §6), version Rétro / 2.x. V3, rang R5 - le palier 65 % SUPPRIMÉ EN 3.1, les armes ainsi forgemagées CONVERTIES À 85 % (Dofus Wiki Fandom, via le rapport de rétro-ingénierie §G) : affirmation DISTINCTE du « 85 % » de jeuxonline 14787, qui décrivait la potion niveau 50 de Rétro.",
+        "note": "Pourcentage des dommages neutres conservés lors du changement d'élément, par niveau de potion (clés « 20 », « 80 »). Vide = aucune valeur ne doit entrer dans le code : le module potions reste désactivé dans l'atelier. Statut passé de INCONNU à CONTRADICTION le 2026-09-10 : il ne s'agit pas d'une absence de source mais de trois sources qui se contredisent. V1 (R1) réfute V2 sur le NOMBRE DE PALIERS sans rien dire des pourcentages ; V3 expliquerait V1 mais reste R5 et décrit une migration d'objets, pas le taux du palier haut. MESURE QUI TRANCHE : dégâts d'une arme avant et après potion, pour chaque palier (20 et 80), sur deux armes de fourchettes différentes pour séparer le taux d'un arrondi. Deux mesures par palier suffisent : le taux est une constante, pas une distribution.",
         "bounds": {
           "min": 0,
           "max": 100
