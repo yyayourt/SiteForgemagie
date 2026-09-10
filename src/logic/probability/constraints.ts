@@ -25,8 +25,28 @@ import type { AttemptKind, ProbabilityOutput } from './types';
 /** SOURCE PRIMAIRE : plancher de SC en forgemagie normale (hors overmax / exotique). */
 export const MIN_SC_NORMAL = 0.15;
 
-/** SOURCE PRIMAIRE : plancher de SC pour un exo lourd (« jusqu'à 1 % »). */
+/** SOURCE PRIMAIRE : taux de SC d'un exo lourd (« jusqu'à 1 % »). */
 export const MIN_SC_HEAVY_EXO = 0.01;
+
+/**
+ * Caractéristiques pour lesquelles le 1 % est VERBATIM dans le tutoriel Ankama : le **PA**
+ * (caractéristique 1), et lui seul — « peut descendre jusqu'à 1 % si l'on souhaite ajouter
+ * un PA… ».
+ *
+ * Le PM (23) et la Portée (19) subissent le MÊME garde-fou dans le moteur
+ * (`params.heavyExoCharacteristics`), mais par **extrapolation communautaire convergente**,
+ * pas par citation : aucune source primaire ne les nomme. Le clamp est identique,
+ * l'étiquette ne doit pas l'être — c'est ce que cette constante permet à l'interface.
+ *
+ * Réserve : la citation se termine par des points de suspension. Le PM et la PO figurent
+ * peut-être dans la partie élidée ; on ne le sait pas, donc on ne l'affirme pas.
+ */
+export const HEAVY_EXO_VERBATIM: readonly number[] = [1];
+
+/** Le taux de 1 % est-il verbatim pour cette caractéristique, ou extrapolé ? */
+export function isHeavyExoRateVerbatim(characteristicId: number): boolean {
+  return HEAVY_EXO_VERBATIM.includes(characteristicId);
+}
 
 /**
  * Applique le plancher de SC puis renormalise SN/EC en conservant leur rapport.

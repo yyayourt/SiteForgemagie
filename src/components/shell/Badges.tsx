@@ -37,7 +37,7 @@ export function ModelBadge({ model, heavyExo = false, className = '' }: { model:
   return (
     <span
       className={`inline-flex items-center gap-1.5 text-[11px] leading-none px-2 py-1 rounded-full border border-model text-model whitespace-nowrap ${className}`}
-      title={`Modèle « ${model} » (empirical_params.json → probability), statut INCONNU. La formule du serveur est secrète : ceci est une estimation paramétrée, pas une reproduction. Seules les bornes 15 % (FM normale) et 1 % (exo PA/PM/PO) sont officielles.${heavyExo ? ' Exo lourd : plancher 1 %.' : ''}`}
+      title={`Modèle « ${model} » (empirical_params.json → probability), statut INCONNU. La formule du serveur est secrète : ceci est une estimation paramétrée, pas une reproduction. Seules les bornes 15 % (FM normale) et 1 % (exo PA/PM/PO) sont officielles.${heavyExo ? " Exo lourd : le modèle ne s'applique pas, le taux est fixé à 1 % (tutoriel Ankama)." : ''}`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-model shadow-[0_0_8px_var(--color-model)]" aria-hidden="true" />
       modèle empirique

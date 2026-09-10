@@ -5,6 +5,10 @@
  * destinée à recueillir les estimations de joueurs expérimentés. Les valeurs par défaut sont
  * un gabarit sans aucune mesure derrière. En exo lourd, le complément de pSC est réparti
  * selon heavyExoEcShare et non selon la cellule.
+ *
+ * Une ligne sans distance au jet max (exo, jet fixe) tombe dans la classe de distance 0.
+ * C'est un choix de TABLE, pas une affirmation sur la difficulté : depuis le 2026-09-10, tout
+ * exotique est de toute façon repris par le garde-fou (exoGuard.ts) avant d'être affiché.
  */
 
 import type { LookupTableSpec, ProbabilityParams } from '../../../data/params';
@@ -29,7 +33,7 @@ export function lookupCell(table: LookupTableSpec, distance: number, runeWeight:
 export const lookupTableModel: ProbabilityModel = {
   name: 'lookup_table',
   compute(input, params: ProbabilityParams) {
-    const cell = lookupCell(params.lookupTable, distanceToMax(input.line), input.runeWeight);
+    const cell = lookupCell(params.lookupTable, distanceToMax(input.line) ?? 0, input.runeWeight);
     if (!cell) return { pSC: 1, pSN: 0, pEC: 0 };
     if (input.isHeavyExo) return splitComplement(cell.pSC, params.heavyExoEcShare);
     const pSC = Math.min(1, Math.max(0, cell.pSC));

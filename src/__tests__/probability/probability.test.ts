@@ -165,12 +165,15 @@ describe('lookup_table', () => {
 });
 
 describe('utilitaires', () => {
-  it('distanceToMax: 0 at max or exo, 1 when empty, clamped for over', () => {
+  it('distanceToMax: 0 at max, 1 when empty, clamped for over, null when the notion has no sense', () => {
     expect(distanceToMax({ value: 50, baseMax: 50, isExo: false })).toBe(0);
     expect(distanceToMax({ value: 0, baseMax: 50, isExo: false })).toBe(1);
     expect(distanceToMax({ value: 25, baseMax: 50, isExo: false })).toBe(0.5);
     expect(distanceToMax({ value: 80, baseMax: 50, isExo: false })).toBe(0);
-    expect(distanceToMax({ value: 3, baseMax: 0, isExo: true })).toBe(0);
+    // Correction du 2026-09-10 : un exo n'a pas de jet naturel, la distance vaut null et non 0.
+    // Renvoyer 0 le rendait indiscernable d'un jet parfait, donc du cas le PLUS difficile.
+    expect(distanceToMax({ value: 3, baseMax: 0, isExo: true })).toBeNull();
+    expect(distanceToMax({ value: 3, baseMax: 0, isExo: false })).toBeNull();
   });
 
   it('isHeavyExo follows heavyExoCharacteristics and requires an exo', () => {

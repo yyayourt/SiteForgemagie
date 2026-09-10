@@ -39,7 +39,7 @@ export interface ProbabilityInput {
   runeWeight: number;
   /** Valeur ajoutée par la rune (points) : décide si la tentative est un overmax. */
   runeValue: number;
-  /** Exo lourd (PA/PM/PO) : plancher officiel 1 % au lieu de 15 %. */
+  /** Exo lourd (PA/PM/PO) : garde-fou à 1 % au lieu du modèle. */
   isHeavyExo: boolean;
   /** Reliquat serveur (état propre). Aucun modèle certain ne l'utilise. */
   residualPool: number;
@@ -82,7 +82,7 @@ export interface ProbabilityModel {
  * - normal : ligne naturelle qui reste ≤ son jet max après la rune ;
  * - over : ligne naturelle qui dépasse (ou dépasse déjà) son jet max ;
  * - exo : ligne exotique hors PA/PM/PO ;
- * - heavy_exo : exo PA/PM/PO (plancher officiel 1 %).
+ * - heavy_exo : exo PA/PM/PO (garde-fou officiel à 1 %).
  */
 export type AttemptKind = 'normal' | 'over' | 'exo' | 'heavy_exo';
 
@@ -92,9 +92,20 @@ export function attemptKindOf(line: ProbabilityInput['line'], runeValue: number,
   return line.value + Math.max(0, runeValue) > line.baseMax ? 'over' : 'normal';
 }
 
-/** Distance normalisée au jet maximal : 0 = ligne au jet parfait (ou exo), 1 = ligne vide. */
-export function distanceToMax(line: ProbabilityInput['line']): number {
-  if (line.isExo || line.baseMax <= 0) return 0;
+/**
+ * Distance normalisée au jet maximal : 0 = ligne au jet parfait, 1 = ligne vide.
+ *
+ * Renvoie **`null` quand la notion n'a pas de sens** : ligne exotique (aucun jet naturel) ou
+ * ligne sans fourchette positive. Correction du 2026-09-10 : la fonction renvoyait 0 dans ces
+ * cas, ce qui les rendait indiscernables d'un jet parfait — c'est-à-dire du cas le PLUS
+ * difficile. Pour un exo, cela produisait un pSC de 15 % là où le tutoriel officiel donne 1 %
+ * (voir exoGuard.ts) ; pour un jet fixe, cela appliquait la difficulté maximale alors que le
+ * DevBlog exempte explicitement les jets fixes de ce facteur.
+ *
+ * Un modèle qui reçoit `null` doit décider quoi faire du facteur, jamais le confondre avec 0.
+ */
+export function distanceToMax(line: ProbabilityInput['line']): number | null {
+  if (line.isExo || line.baseMax <= 0) return null;
   return Math.min(1, Math.max(0, (line.baseMax - line.value) / line.baseMax));
 }
 

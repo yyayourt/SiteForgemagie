@@ -3,7 +3,8 @@ import type { AtelierApi } from '../../hooks/useAtelier';
 import type { RuneTier, RuneOutcome } from '../../types';
 import { FM_ORBS, FM_POTIONS } from '../../data/dataset';
 import { getParamEntry } from '../../data/params';
-import { ModelBadge, StatusBadge } from '../shell/Badges';
+import { OutcomeEstimate } from './OutcomeEstimate';
+import { StatusBadge } from '../shell/Badges';
 import { RuneGlyph } from './RuneGlyph';
 import { ExoPicker } from './ExoPicker';
 import { getStatCategory } from '../../data/statCaps';
@@ -22,8 +23,6 @@ const OUTCOMES: { outcome: RuneOutcome; cls: string; title: string }[] = [
   { outcome: 'SN', cls: 'text-sn hover:border-sn', title: 'Forcer un succès neutre : la rune passe, perte = poids de la rune, reliquat consommé d\'abord, ligne visée candidate' },
   { outcome: 'EC', cls: 'text-ec hover:border-ec', title: 'Forcer un échec critique : la rune ne passe pas, perte égale au poids de la rune (observé en jeu)' },
 ];
-
-const pct = (x: number) => `${Math.round(x * 100)} %`;
 
 /** Le panneau « Frapper » : choix de l'action, prévision du modèle, Tenter / Forcer. */
 export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
@@ -86,12 +85,12 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
 
               {estimate && (
                 <div className="well rounded-control p-3 border-dashed">
-                  <ModelBadge model={estimate.model} heavyExo={estimate.isHeavyExo} />
-                  <div className="grid grid-cols-3 gap-1.5 mt-2.5 text-center tnum">
-                    <div><b className="block font-display text-[22px] text-sc">{pct(estimate.pSC)}</b><small className="text-[11px] text-ash-3">succès critique</small></div>
-                    <div><b className="block font-display text-[22px] text-sn">{pct(estimate.pSN)}</b><small className="text-[11px] text-ash-3">succès neutre</small></div>
-                    <div><b className="block font-display text-[22px] text-ec">{pct(estimate.pEC)}</b><small className="text-[11px] text-ash-3">échec critique</small></div>
-                  </div>
+                  <OutcomeEstimate
+                    estimate={estimate.estimate}
+                    model={estimate.model}
+                    isHeavyExo={estimate.isHeavyExo}
+                    characteristicId={selected.characteristicId}
+                  />
                   <p className={`m-0 mt-2 text-[11px] leading-snug tnum ${estimate.overCapUsage > 1 ? 'text-ec' : estimate.overCapUsage >= 0.85 ? 'text-molten-text' : 'text-ash-3'}`}>
                     {estimate.applicableValue <= 0
                       ? `Dépasserait la borne over/exo : le moteur refusera la rune, plus rien ne peut s'appliquer.`
@@ -100,7 +99,7 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
                         : `Borne over/exo après la rune : ${Math.round(estimate.overCapUsage * 100)} %${atelier.probabilityParams.officialFactorsLinear.d !== 0 && atelier.probabilityParams.model === 'official_factors_linear' ? ` (pente d = ${atelier.probabilityParams.officialFactorsLinear.d})` : ''}.`}
                   </p>
                   <p className="m-0 mt-1.5 text-[11px] text-ash-3 leading-snug">
-                    Estimation d'un modèle paramétré, pas la formule du serveur. Seuls le plancher de quinze pour cent en forgemagie normale et celui d'un pour cent en exo PA/PM/PO sont officiels.
+                    Estimation d'un modèle paramétré, pas la formule du serveur. Seuls le plancher de quinze pour cent en forgemagie normale et le taux d'un pour cent en exo PA/PM/PO sont officiels.
                   </p>
                 </div>
               )}

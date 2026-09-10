@@ -261,9 +261,9 @@
           23,
           19
         ],
-        "status": "SOURCE PRIMAIRE",
-        "source": "tutoriel officiel Ankama (dofus.com/fr/mmorpg/tutoriels/420190-forgemagie) : « Le taux de réussite des forgemagies exotiques est en revanche automatiquement très faible et peut descendre jusqu'à 1 % si l'on souhaite ajouter un PA… » ; R Key Findings 5 (PA/PM/PO)",
-        "note": "Caractéristiques dont l'exo relève du plancher 1 % : PA (1), PM (23), Portée (19). Toute extension de cette liste (ex. Invocations 26, ou un seuil de poids comme l'ancien code) est INCONNU : ne pas l'ajouter sans source. Le seuil ≈ 20 de densité évoqué par Huzounet (R PARTIE 7) n'est pas retenu.",
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "MIXTE, a ne pas presenter d'un seul bloc. VERBATIM pour le PA seulement - tutoriel officiel Ankama (dofus.com/fr/mmorpg/tutoriels/420190-forgemagie) : « Le taux de reussite des forgemagies exotiques est en revanche automatiquement tres faible et peut descendre jusqu'a 1 % si l'on souhaite ajouter un PA… ». Seul le PA (caracteristique 1) y est nomme. EXTRAPOLATION COMMUNAUTAIRE CONVERGENTE pour le PM (23) et la Portee (19) : tous les guides les traitent comme le PA, et leurs densites (90 et 51) sont du meme ordre que celle du PA (100), mais AUCUNE source primaire ne les nomme. A noter : la citation se termine par des points de suspension, donc le PM et la PO figurent peut-etre dans la partie elidee - raison de plus pour ne pas trancher sans le texte complet.",
+        "note": "Caracteristiques dont l'exo releve du garde-fou a 1 % (exoGuard.ts). Le CLAMP est identique pour les trois ; c'est l'ETIQUETTE qui differe, et l'interface doit le dire. PA : SOURCE PRIMAIRE. PM et Portee : HYPOTHESE COMMUNAUTAIRE convergente. La liste des caracteristiques VERBATIM est codee en dur (constraints.ts, HEAVY_EXO_VERBATIM) parce que c'est un fait primaire, pas un reglage. Toute extension de cette liste (ex. Invocations 26, ou un seuil de poids comme l'ancien code) est INCONNU : ne pas l'ajouter sans source. Le seuil d'environ 20 de densite evoque par Huzounet (R PARTIE 7) n'est pas retenu. Equivalence utile a savoir : sur le dataset actuel, « densite >= 51 » et « appartenir a {PA, PM, PO} » designent exactement le meme ensemble, la densite suivante etant 30 (Invocations).",
         "bounds": {
           "min": 1,
           "max": 200
@@ -295,6 +295,20 @@
           "max": 1
         },
         "default": 1
+      },
+      "unknownIntervalSampling": {
+        "value": "worst",
+        "status": "INCONNU",
+        "source": "AUCUNE. C'est un CHOIX DE PROJET assume, pas une donnee. Le garde-fou d'exotisme rend un INTERVALLE pour toute creation d'effet non lourde (ancres 4 et 5 du DevBlog 1.27 : 32/50/18 a 1/0/99) parce qu'aucune source ne dit ou une tentative se situe entre les deux. Un tirage d'issue exige pourtant UN point : ce parametre dit lequel.",
+        "note": "Borne de l'intervalle utilisee pour TIRER une issue (et donc par le Monte Carlo). worst (defaut) : la borne basse, 1/0/99 - choix conservateur, ne jamais annoncer mieux que le pire cas documente sur une operation irreversible et couteuse. best : la borne haute, 32/50/18. midpoint : le milieu arithmetique des deux bornes. BIAIS A CONNAITRE : tant que ce parametre vaut worst, TOUT Monte Carlo portant sur une creation d'effet non lourde est PESSIMISTE PAR CONSTRUCTION - il ne mesure pas une incertitude, il mesure la borne basse. Comparer deux strategies d'exo leger par Monte Carlo n'a donc de sens que si les deux subissent le meme biais. L'affichage, lui, montre l'intervalle complet et n'est pas affecte.",
+        "bounds": {
+          "enum": [
+            "worst",
+            "best",
+            "midpoint"
+          ]
+        },
+        "default": "worst"
       },
       "officialFactorsLinear": {
         "$comment": "pSC_brut = a + b x distance - c x (niveau / levelNormalizer) - d x usageBorne - e x qualitéGlobale, distance = (jetMax - valeur) / jetMax dans [0, 1] (0 = ligne au jet parfait ; null, donc sans effet, pour un exo ou un jet fixe), usageBorne = cumul over+exo APRÈS la rune / overCapWeight borné à [0, 1], qualitéGlobale = somme(valeur x densité) / somme(jetMax x densité) sur les lignes naturelles AUTRES que la ligne visée, dans [0, 1]. Puis les garde-fous d'exotisme, puis les bornes officielles. a, b, c, d, e forment le VECTEUR DE PARAMÈTRES AJUSTÉS ; les facteurs structurels du DevBlog sont hors de ce vecteur (params.probability.structuralFactors).",

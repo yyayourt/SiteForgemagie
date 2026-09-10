@@ -15,15 +15,19 @@ import { computeWeightBudget } from '../logic/planning/weightBudget';
 import { applyRune, applyTranscendenceRune, applyRegenerationOrb } from '../logic/engine';
 import { rollItem, computeRollQuality } from '../logic/craft';
 import {
-  computeOutcomeProbabilities,
   drawOutcome,
+  estimateOutcome,
   isHeavyExo,
+  itemQualityExcluding,
   mathRandomRng,
   createSeededRng,
+  naturalLineCount,
   overCapUsageAfter,
-  type ProbabilityOutput,
+  overExoLineCount,
+  structuralFlagsOf,
+  type ProbabilityEstimate,
 } from '../logic/probability';
-import { maxApplicableRuneValue } from '../logic/engine';
+import { maxApplicableRuneValue, withRuneApplied } from '../logic/engine';
 import { simulateRuneAttempts, type MonteCarloResult } from '../logic/probability/monteCarlo';
 import { getAvailableRuneTiers, getCharacteristicName, getTranscendenceRunes, type TranscendenceRuneInfo } from '../data/dataset';
 import { getCraftParams, getDensity, getEngineParams, getProbabilityParams, type ParamOverrides, type ProbabilityModelName } from '../data/params';
@@ -42,8 +46,13 @@ export interface RuneOption {
   nameFr: string;
 }
 
-/** Estimation du MODÈLE probabiliste pour une rune, avec le nom du modèle (à afficher comme tel). */
-export interface RuneEstimate extends ProbabilityOutput {
+/**
+ * Estimation pour une rune. `estimate` porte soit un TRIPLET (`kind: 'point'`), soit un
+ * INTERVALLE (`kind: 'interval'`) quand le garde-fou d'exotisme refuse de donner un chiffre —
+ * l'interface doit alors afficher l'intervalle, jamais un point.
+ */
+export interface RuneEstimate {
+  estimate: ProbabilityEstimate;
   model: ProbabilityModelName;
   isHeavyExo: boolean;
   /** Usage de la borne over/exo si la rune passe (cumul / borne), 1 = à la borne */
@@ -230,22 +239,32 @@ export function useAtelier() {
       const option = runeOptions(characteristicId).find((o) => o.tier === tier);
       if (!target || !option || option.value <= 0) return null;
       const heavy = isHeavyExo(characteristicId, target.isExo, probabilityParams);
-      const overCapUsage = overCapUsageAfter(engineState, { characteristicId, value: option.value }, engineParams);
-      const applicableValue = maxApplicableRuneValue(engineState, { characteristicId, value: option.value }, engineParams);
-      const probs = computeOutcomeProbabilities(
+      const rune = { characteristicId, value: option.value };
+      const overCapUsage = overCapUsageAfter(engineState, rune, engineParams);
+      const applicableValue = maxApplicableRuneValue(engineState, rune, engineParams);
+      // Qualité globale : hors ligne visée (SOURCE PRIMAIRE — v1.27). Décompte des over/exo :
+      // ligne visée COMPRISE, donc mesuré sur l'état APRÈS la rune — deux traitements
+      // différents du même jet, conformément au DevBlog.
+      const after = withRuneApplied(engineState, { characteristicId, value: applicableValue });
+      const probabilityEstimate = estimateOutcome(
         {
           itemLevel: level,
-          line: { value: target.currentValue, baseMax: target.baseMax, isExo: target.isExo },
+          line: { value: target.currentValue, baseMin: target.baseMin, baseMax: target.baseMax, isExo: target.isExo },
           runeWeight: option.weight,
           runeValue: option.value,
           isHeavyExo: heavy,
           residualPool: state.residualPool,
           weightBudget: budget.remainingBudget,
           overCapUsage,
+          itemQuality: itemQualityExcluding(engineState, characteristicId, engineParams),
+          structural: structuralFlagsOf(
+            { value: target.currentValue, baseMin: target.baseMin, baseMax: target.baseMax, isExo: target.isExo },
+            { naturalLineCount: naturalLineCount(engineState, engineParams), overExoCount: overExoLineCount(after) }
+          ),
         },
         probabilityParams
       );
-      return { ...probs, model: probabilityParams.model, isHeavyExo: heavy, overCapUsage, applicableValue };
+      return { estimate: probabilityEstimate, model: probabilityParams.model, isHeavyExo: heavy, overCapUsage, applicableValue };
     },
     [stats, runeOptions, probabilityParams, level, state.residualPool, budget.remainingBudget, engineState, engineParams]
   );
@@ -324,7 +343,8 @@ export function useAtelier() {
     (characteristicId: number, tier: RuneTier) => {
       const est = estimate(characteristicId, tier);
       if (!est) return;
-      return forceRune(characteristicId, tier, drawOutcome(est, appRng), true);
+      // Le tirage utilise `sampling` : pour un intervalle, c'est la borne BASSE (ancre 5).
+      return forceRune(characteristicId, tier, drawOutcome(est.estimate.sampling, appRng), true);
     },
     [estimate, forceRune]
   );

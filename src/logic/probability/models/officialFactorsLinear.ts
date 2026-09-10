@@ -5,7 +5,8 @@
  *              − e × qualitéGlobale
  *              + facteurs structurels (pentes nulles, hors vecteur ajusté)
  *
- *   distance       = (jetMax − valeur) / jetMax ∈ [0, 1].
+ *   distance       = (jetMax − valeur) / jetMax ∈ [0, 1] ; `null` pour un exo ou un jet fixe,
+ *                    auquel cas le facteur est neutralisé (et non lu comme un jet parfait).
  *   usageBorne     = cumul over+exo APRÈS la rune / overCapWeight, borné à [0, 1].
  *   qualitéGlobale = qualité des AUTRES lignes ∈ [0, 1] (itemQuality.ts).
  *
@@ -33,7 +34,8 @@ export const officialFactorsLinearModel: ProbabilityModel = {
   name: 'official_factors_linear',
   compute(input, params: ProbabilityParams) {
     const { a, b, c, d, e, levelNormalizer } = params.officialFactorsLinear;
-    const distance = distanceToMax(input.line);
+    // `null` (exo, jet fixe) neutralise le facteur : il ne vaut PAS « jet parfait ».
+    const distance = distanceToMax(input.line) ?? 0;
     const level = levelNormalizer > 0 ? Math.max(0, input.itemLevel) / levelNormalizer : 0;
     const usage = clamp01(input.overCapUsage ?? 0);
     const quality = clamp01(input.itemQuality ?? 0);

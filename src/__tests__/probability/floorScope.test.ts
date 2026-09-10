@@ -56,12 +56,16 @@ describe('plancher 15 % : portée', () => {
     expect(already.pSC).toBeCloseTo(0.05, 9);
   });
 
-  it('plain exo (e.g. Force) : no floor ; heavy exo (PA/PM/PO) : floor 1 %', () => {
+  it("exo : le modèle ne s'applique plus du tout — le garde-fou le précède (2026-09-10)", () => {
+    // Avant : le modèle sortait a = 0,05 (ici) ou 0,15 (défaut du fichier) pour un exotique,
+    // parce que distanceToMax renvoyait 0. Le plancher de 1 % ne mordait jamais.
+    // Depuis : toute création d'effet passe par exoGuard, quel que soit le modèle et quels
+    // que soient ses paramètres — un réglage ne peut plus produire un exo optimiste.
     const exo = computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true } }), low());
-    expect(exo.pSC).toBeCloseTo(0.05, 9);
+    expect(exo.pSC).toBeCloseTo(MIN_SC_HEAVY_EXO, 9); // borne basse de l'intervalle (ancre 5)
     const p = low();
     const zero = { ...p, officialFactorsLinear: { ...p.officialFactorsLinear, a: 0 } };
-    expect(computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true } }), zero).pSC).toBe(0);
+    expect(computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true } }), zero).pSC).toBeCloseTo(MIN_SC_HEAVY_EXO, 9);
     const heavy = computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true }, isHeavyExo: true }), zero);
     expect(heavy.pSC).toBeCloseTo(MIN_SC_HEAVY_EXO, 9);
   });

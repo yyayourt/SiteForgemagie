@@ -46,7 +46,11 @@ export type LossSelectionStrategyName =
   | 'weighted_by_weight'
   | 'weighted_by_value_times_weight';
 export type NonPositiveLineContribution = 'skip' | 'offset';
-export type UnpayableSnBehaviour = 'ec_no_effect' | 'take_all_remaining';
+/**
+ * SN dont la perte ne peut pas etre payee. no_effect (defaut, SOURCE PRIMAIRE - v1.27) :
+ * rien ne se passe. Les deux autres sont d'anciens choix de projet, conserves en option.
+ */
+export type UnpayableSnBehaviour = 'no_effect' | 'ec_no_effect' | 'take_all_remaining';
 export type TranscendenceRank = 'Ta' | 'Pata' | 'Rata';
 /** { "<characteristicId>": { Ta?: n, Pata?: n, Rata?: n } } */
 export type TranscendenceThresholds = Record<string, Partial<Record<TranscendenceRank, number>>>;
@@ -57,6 +61,11 @@ export type ProbabilityModelName =
   | 'devblog_1_27';
 /** Consommation du reliquat lors d'une perte. Une seule implementation : le comportement actuel. */
 export type PoolConsumptionRuleName = 'absorb_first';
+/**
+ * Borne d'un intervalle INCONNU utilisée pour TIRER une issue. Choix de projet assumé,
+ * jamais une donnée : `worst` par défaut, conservateur.
+ */
+export type UnknownIntervalSampling = 'worst' | 'best' | 'midpoint';
 /** Loi du jet de craft (INCONNU) : voir src/logic/craft/rollDistributions.ts. */
 export type RollDistributionName = 'uniform' | 'triangular';
 
@@ -166,7 +175,7 @@ export interface EngineParams {
   lossSelection: {
     strategy: LossSelectionStrategyName;
     prioritizeOverExo: boolean;
-    /** INCONNU, jamais observé : SN dont la perte ne peut pas être payée. */
+    /** SOURCE PRIMAIRE — v1.27 (« rien ne se passe ») ; jamais observé en Unity. */
     unpayableSn: UnpayableSnBehaviour;
   };
   residualPool: {
@@ -315,12 +324,22 @@ export interface DevblogDifficultyWeights {
 /** Paramètres du MODÈLE probabiliste. Tous INCONNU sauf heavyExoCharacteristics et heavyExoEcShare. */
 export interface ProbabilityParams {
   model: ProbabilityModelName;
-  /** Caractéristiques dont l'exo relève du plancher 1 % (SOURCE PRIMAIRE pour PA/PM/PO). */
+  /**
+   * Caractéristiques dont l'exo relève du garde-fou à 1 %. Étiquetage MIXTE : le PA est
+   * verbatim dans le tutoriel Ankama, le PM et la Portée sont une extrapolation
+   * communautaire convergente (voir `HEAVY_EXO_VERBATIM` dans probability/constraints.ts).
+   */
   heavyExoCharacteristics: readonly number[];
   /** Part du complément (1 − pSC) allant à l'EC en FM normale (INCONNU). */
   ecShare: number;
   /** Part du complément allant à l'EC en exo lourd (HYPOTHÈSE COMMUNAUTAIRE, 1 = pas de SN). */
   heavyExoEcShare: number;
+  /**
+   * Quelle borne d'un intervalle INCONNU sert au tirage d'issue (donc au Monte Carlo).
+   * `worst` par défaut : choix conservateur assumé. Biais connu et documenté — voir
+   * `empirical_params.json → probability.unknownIntervalSampling`.
+   */
+  unknownIntervalSampling: UnknownIntervalSampling;
   /**
    * Vecteur de paramètres AJUSTÉS. d : pente selon l'usage de la borne over/exo après la
    * rune ; e : pente selon la qualité globale de l'objet, hors ligne visée (DevBlog 1.27,
@@ -342,6 +361,7 @@ export function getProbabilityParams(overrides?: ParamOverrides): ProbabilityPar
     heavyExoCharacteristics: [...r<number[]>('heavyExoCharacteristics')],
     ecShare: r<number>('ecShare'),
     heavyExoEcShare: r<number>('heavyExoEcShare'),
+    unknownIntervalSampling: r<UnknownIntervalSampling>('unknownIntervalSampling'),
     officialFactorsLinear: {
       a: r<number>('officialFactorsLinear.a'),
       b: r<number>('officialFactorsLinear.b'),
