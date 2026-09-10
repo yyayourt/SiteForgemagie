@@ -1,0 +1,120 @@
+991:					ActualJet = getActualJet(obj, stats);//Jet actuel de l'item
+992-				}
+993-				int poidBase = Objet.getPoidOfBaseItem(obj.getTemplate().getID());//Poid de base de l'item
+994:				int BaseMaxJet = getBaseMaxJet(obj.getTemplate().getID(), stats);
+995-				int Puis = poidBase-poidActual;
+996-				
+997-				if(poidBase <= 0)
+998-				{
+999-					poidBase = 0;
+1000-				}
+1001-				if(BaseMaxJet <= 0)
+1002-				{
+1003-					BaseMaxJet = 0;
+1004-				}
+1005-				if(ActualJet <= 0)
+1006-				{
+1007-					ActualJet = 0;
+1008-				}
+1009-				if(poidActual <= 0)
+1010-				{
+1011-					poidActual = 0;
+1012-				}
+1013-				if(poid <= 0)
+1014-				{
+1015-					poid = 0;
+1016-				}
+1017-				
+1018-				double Coef = 1;
+1019:				if(ViewBaseStatsItem(obj, stats) == 1 && ViewActualStatsItem(obj, stats) == 1 || ViewBaseStatsItem(obj, stats) == 1 && ViewActualStatsItem(obj, stats) == 0)//Existe sur l'arme de base
+1020-				{
+1021-					Coef = 1;
+1022:				}else if(ViewBaseStatsItem(obj, stats) == 2 && ViewActualStatsItem(obj, stats) == 2)//Existe en négatif de base && négatif sur l'arme
+1023-				{
+1024-					Coef = 0.75;
+1025:				}else if(ViewBaseStatsItem(obj, stats) == 0 && ViewActualStatsItem(obj, stats) == 0 || ViewBaseStatsItem(obj, stats) == 0 && ViewActualStatsItem(obj, stats) == 1)//N'existe pas sur l'arme de base
+1026-				{
+1027-					Coef = 0.25;
+1028-				}
+1029-				
+1030-				//OverMax
+1031-				double JetMax = BaseMaxJet*(2-(obj.getTemplate().getLevel()/100));
+1032-				if(JetMax <=0) JetMax = 1;
+1033-				//int JetMax = (int) (BaseMaxJet+(BaseMaxJet+(100-(poid*BaseMaxJet)) / (2*poid)));
+1034-				Coef = Coef*((JetMax - (double)(ActualJet))/25);
+1035-				if(Coef <= 0) Coef = 0;
+1036-				chan = Formulas.ChanceFM(poidBase, poidActual, BaseMaxJet, ActualJet, poid, Puis, Coef);
+1037-
+1038-				//DEBUG :
+1039-				Console.instance.println("-OverMax : "+JetMax);
+1040-				Console.instance.println("-poidBase : "+poidBase);
+1041-				Console.instance.println("-BaseMaxJet : "+BaseMaxJet);
+1042-				Console.instance.println("-ActualJet : "+ActualJet);
+1043-				Console.instance.println("-poidActual : "+poidActual);
+1044-				Console.instance.println("-poid : "+poid);
+1045-				Console.instance.println("-Puis : "+Puis);
+1046-				Console.instance.println("-Coef : "+Coef);
+1047-				Console.instance.println("-chan : "+chan);
+1048-				if(chan <= 0)chan = 1;
+1049-				if(chan >= 100)chan = 100;
+1050-				Console.instance.println("--chance : "+chan);
+1051-				
+1052-				// 2 cas : Réussite Totale
+1053-				// ou échec total : la FM n'a pas réussi et les bonus de toutes les caractéristiques diminuent proportionnellement à la puissance à la puissance de la rune. Utiliser de grosses runes est donc risqué.
+1054-				//chan = chan-(106-SM.get_lvl());
+1055-			}
+--
+1069:				if(ViewBaseStatsItem(obj, "98") == 1)
+1070-				{
+1071:					if(ViewActualStatsItem(obj, "98") == 0 && ViewActualStatsItem(obj, "7b") == 0)
+1072-					{
+1073-						statsnegatif += ",98#"+Integer.toHexString(1)+"#0#0#0d0+1";	
+1074-					}
+1075-				}
+1076:				if(ViewBaseStatsItem(obj, "9a") == 1)
+1077-				{
+1078:					if(ViewActualStatsItem(obj, "9a") == 0 && ViewActualStatsItem(obj, "77") == 0)
+1079-					{
+1080-						statsnegatif += ",9a#"+Integer.toHexString(1)+"#0#0#0d0+1";	
+1081-					}
+1082-				}
+1083:				if(ViewBaseStatsItem(obj, "9b") == 1)
+1084-				{
+1085:					if(ViewActualStatsItem(obj, "9b") == 0 && ViewActualStatsItem(obj, "7e") == 0)
+1086-					{
+1087-						statsnegatif += ",9b#"+Integer.toHexString(1)+"#0#0#0d0+1";	
+1088-					}
+1089-				}
+1090:				if(ViewBaseStatsItem(obj, "9d") == 1)
+1091-				{
+1092:					if(ViewActualStatsItem(obj, "9d") == 0 && ViewActualStatsItem(obj, "76") == 0)
+1093-					{
+1094-						statsnegatif += ",9d#"+Integer.toHexString(1)+"#0#0#0d0+1";	
+1095-					}
+1096-				}
+1097:				if(ViewBaseStatsItem(obj, "74") == 1)
+1098-				{
+1099:					if(ViewActualStatsItem(obj, "74") == 0 && ViewActualStatsItem(obj, "75") == 0)
+1100-					{
+1101-						statsnegatif += ",74#"+Integer.toHexString(1)+"#0#0#0d0+1";	
+1102-					}
+1103-				}
+1104:				if(ViewBaseStatsItem(obj, "99") == 1)
+1105-				{
+1106:					if(ViewActualStatsItem(obj, "99") == 0 && ViewActualStatsItem(obj, "7d") == 0)
+1107-					{
+1108-						statsnegatif += ",99#"+Integer.toHexString(1)+"#0#0#0d0+1";	
+1109-					}
+1110-				}
+1111-				if(obj.parseStatsString().isEmpty() && !statsnegatif.isEmpty())//Si l'item est vide et que l'on a l'ajout de stats négatifs
+1112-				{
+1113-					obj.setStats(obj.generateNewStatsFromTemplate((statsnegatif.substring(1)), false));	
+1114-				}
+1115-				else if(!obj.parseStatsString().isEmpty())//Si l'item possède déjà des stats
+1116-				{	
+1117-					obj.setStats(obj.generateNewStatsFromTemplate((obj.parseFMEchecStatsString(obj, poid).replace(";","#")+statsnegatif), false));
+1118-				}
+1119-				SocketManager.GAME_SEND_REMOVE_ITEM_PACKET(_P, obj.getGuid());//Supprime l'ancien affichage de l'item
+1120-				SocketManager.GAME_SEND_Ow_PACKET(_P);
+1121-				SocketManager.GAME_SEND_OAKO_PACKET(_P, obj);
+1122-				SocketManager.GAME_SEND_Em_PACKET(_P,"EC+"+obj.getGuid()+"|1|"+tID+"|"+obj.parseStatsString().replace(";","#"));//On replace l'item dans l'inventaire

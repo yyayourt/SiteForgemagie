@@ -1,0 +1,20 @@
+# Journal de tentatives — observation directe DOFUS 3, 10/09/2026
+# Objet : Cape Bouffante | Vitalite jet 36-40 | Initiative jet 151-200
+# Coefficients Dofus 3 confirmes en jeu : vitalite 0.2 | initiative 0.1
+# confiance : haute = lu sans ambiguite sur une image ; moyenne = deduit d'un delta de valeurs
+t_s,rune,poids_rune,vita_avant,ini_avant,gain_stat,gain_val,perte_stat,perte_val,mention_reliquat,reliquat_apres,resultat,confiance
+11.9,Pa Vi,3,60,10,vitalite,15,,,,0,SC,haute
+15.4,Ini,1,75,10,initiative,10,vitalite,5,,,SN,haute
+17.9,Ini,1,70,20,initiative,10,vitalite,6,+ reliquat,0.2,SN,haute
+17.9,Ini,1,64,30,initiative,10,,,,0.2,SC,haute
+19.4,Ini,1,64,40,initiative,10,vitalite,5,,0.2,SN,moyenne
+22.4,Ini,1,59,50,,,vitalite,5,,0.2,EC,moyenne
+24.4,Ini,1,54,50,initiative,10,vitalite,5,,0.2,SN,moyenne
+24.4,Ini,1,49,60,,,vitalite,5,,0.2,EC,moyenne
+28.0,Pa Vi,3,44,60,,,initiative,26,- reliquat,0,EC,moyenne
+30.0,Pa Vi,3,38,44,,,initiative,31,+ reliquat,0.1,EC,haute
+32.0,Pa Vi,3,38,13,vitalite,6,initiative,12,,0.1,SN?,moyenne
+32.0,Pa Vi,3,44,1,,,,,,0.1,Echec,moyenne
+34.5,Pa Vi,3,44,0,vitalite,1,initiative,1,- reliquat,0,SN,moyenne
+36.5,Pa Vi,3,45,0,vitalite,15,,,,0,SC,haute
+38.5,Pa Vi,3,60,0,,,vitalite,15,,0,EC,haute

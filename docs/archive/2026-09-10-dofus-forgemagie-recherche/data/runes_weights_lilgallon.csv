@@ -1,0 +1,93 @@
+rune,categorie,poids
+Rune Age,Runes de type simple,1
+Rune Cha,Runes de type simple,1
+Rune Cri,Runes de type simple,10
+Rune de chasse,Runes de type simple,-1
+Rune Do,Runes de type simple,20
+Rune Do Air,Runes de type simple,5
+Rune Do Cri,Runes de type simple,5
+Rune Do Eau,Runes de type simple,5
+Rune Do Feu,Runes de type simple,5
+Rune Do Neutre,Runes de type simple,5
+Rune Do Per Ar,Runes de type simple,15
+Rune Do Per Di,Runes de type simple,15
+Rune Do Per Mé,Runes de type simple,15
+Rune Do Per So,Runes de type simple,15
+Rune Do Pou,Runes de type simple,5
+Rune Do Ren,Runes de type simple,10
+Rune Do Terre,Runes de type simple,5
+Rune Fo,Runes de type simple,1
+Rune Fui,Runes de type simple,4
+Rune Ga Pa,Runes de type simple,100
+Rune Ga Pme,Runes de type simple,90
+Rune Ine,Runes de type simple,1
+Rune Ini,Runes de type simple,1
+Rune Invo,Runes de type simple,30
+Rune Pa Age,Runes de type Pa,3
+Rune Pa Cha,Runes de type Pa,3
+Rune Pa Do Air,Runes de type Pa,15
+Rune Pa Do Cri,Runes de type Pa,15
+Rune Pa Do Eau,Runes de type Pa,15
+Rune Pa Do Feu,Runes de type Pa,15
+Rune Pa Do Neutre,Runes de type Pa,15
+Rune Pa Do Pou,Runes de type Pa,15
+Rune Pa Do Terre,Runes de type Pa,15
+Rune Pa Fo,Runes de type Pa,3
+Rune Pa Fui,Runes de type Pa,12
+Rune Pa Ine,Runes de type Pa,3
+Rune Pa Ini,Runes de type Pa,3
+Rune Pa Pi,Runes de type Pa,15
+Rune Pa Pi Per,Runes de type Pa,6
+Rune Pa Prospe,Runes de type Pa,9
+Rune Pa Pui,Runes de type Pa,6
+Rune Pa Ret Pa,Runes de type Pa,21
+Rune Pa Ret Pme,Runes de type Pa,21
+Rune Pa Ré Air,Runes de type Pa,6
+Rune Pa Ré Cri,Runes de type Pa,6
+Rune Pa Ré Eau,Runes de type Pa,6
+Rune Pa Ré Feu,Runes de type Pa,6
+Rune Pa Ré Neutre,Runes de type Pa,6
+Rune Pa Ré Pa,Runes de type Pa,21
+Rune Pa Ré Pme,Runes de type Pa,21
+Rune Pa Ré Pou,Runes de type Pa,6
+Rune Pa Ré Terre,Runes de type Pa,6
+Rune Pa Sa,Runes de type Pa,9
+Rune Pa So,Runes de type Pa,30
+Rune Pa Tac,Runes de type Pa,12
+Rune Pa Vi,Runes de type Pa,3
+Rune Pi,Runes de type simple,5
+Rune Pi Per,Runes de type simple,2
+Rune Po,Runes de type simple,51
+Rune Prospe,Runes de type simple,3
+Rune Pui,Runes de type simple,2
+Rune Ra Age,Runes de type Ra,10
+Rune Ra Cha,Runes de type Ra,10
+Rune Ra Fo,Runes de type Ra,10
+Rune Ra Ine,Runes de type Ra,10
+Rune Ra Ini,Runes de type Ra,10
+Rune Ra Pi Per,Runes de type Ra,20
+Rune Ra Pui,Runes de type Ra,20
+Rune Ra Sa,Runes de type Ra,30
+Rune Ra Vi,Runes de type Ra,10
+Rune Ret Pa,Runes de type simple,7
+Rune Ret Pme,Runes de type simple,7
+Rune Ré Air,Runes de type simple,2
+Rune Ré Cri,Runes de type simple,2
+Rune Ré Eau,Runes de type simple,2
+Rune Ré Feu,Runes de type simple,2
+Rune Ré Neutre,Runes de type simple,2
+Rune Ré Pa,Runes de type simple,7
+Rune Ré Per Air,Runes de type simple,6
+Rune Ré Per Di,Runes de type simple,15
+Rune Ré Per Eau,Runes de type simple,6
+Rune Ré Per Feu,Runes de type simple,6
+Rune Ré Per Mé,Runes de type simple,15
+Rune Ré Per Neutre,Runes de type simple,6
+Rune Ré Per Terre,Runes de type simple,6
+Rune Ré Pme,Runes de type simple,7
+Rune Ré Pou,Runes de type simple,2
+Rune Ré Terre,Runes de type simple,2
+Rune Sa,Runes de type simple,3
+Rune So,Runes de type simple,10
+Rune Tac,Runes de type simple,4
+Rune Vi,Runes de type simple,1
