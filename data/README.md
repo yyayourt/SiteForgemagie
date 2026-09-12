@@ -29,7 +29,7 @@ Données **figées** générées par `scripts/extract-dataset.ts` (`npm run extr
 | `characteristics[]` | `GET /characteristics` | `id`, `keyword`, `name.fr` | filtré sur `id > 0` |
 | `itemSuperTypes[]` | `GET /item-super-types` | `id`, `name.fr` | aucune |
 | `itemTypes[]` | `GET /item-types` | `id`, `superTypeId`, `name.fr` | aucune |
-| `runes[]` | `GET /items?typeId=78` | `id`, `name.fr`, `level`, `realWeight`, `effects[]` | `effects[].value` = `from` (DofusDB code une valeur fixe par `from = v, to = 0`) |
+| `runes[]` | `GET /items?typeId=78` | `id`, `name.fr`, `level`, `realWeight`, `img`, `effects[]` | `effects[].value` = `from` (DofusDB code une valeur fixe par `from = v, to = 0`) ; `img` = icône de la rune, même mécanisme que `items.json.img` (URL `api.dofusdb.fr/img/items/{iconId}.png`) |
 | `transcendenceRunes[]` | `GET /items?typeId=211` | idem | idem ; les effets `2825/2826/2827` (characteristic 0) sont des marqueurs de règle, conservés bruts |
 | `potions[]` | `GET /items?typeId=26` | `id`, `name.fr`, `level`, `description.fr`, `effects[]` | effets bruts (`effectId`, `from`, `to`) |
 | `orbs[]` | `GET /items?typeId=189` | idem | idem |
@@ -51,6 +51,8 @@ Champs volontairement **ignorés** : `realWeight` (poids d'inventaire/économie,
 Dérivé de `dataset.json → runes` : pour chaque `characteristicId`, les runes disponibles par palier. Le palier est **déduit du nom** (`Rune X` → `normal`, `Rune Pa X` → `pa`, `Rune Ra X` → `ra`) : l'API ne fournit pas d'information de palier. `unclassified[]` liste les runes exclues et pourquoi (Rune de Signature : aucun effet ; Rune de chasse : characteristic 0).
 
 Ce fichier remplace les valeurs `runeNormal / runePa / runeRa` autrefois écrites à la main : un palier absent ici n'existe pas en jeu (ex. pas de Ra pour Soins, Tacle, Fuite, Retrait, % résistances).
+
+Chaque palier porte aussi `img` (icône de la rune, cf. `runes[].img` ci-dessus), utilisée par l'interface (panneau « Frapper », lignes de l'enclume) à la place du glyphe SVG générique quand elle est disponible — même principe que `items.json.img` pour les objets. Sur ce dépôt, les valeurs `img` de `dataset.json` et `rune-tiers.json` ont été renseignées le 2026-09-10 par des requêtes ponctuelles à l'API DofusDB (`GET /items?typeId=78`), `api.dofusdb.fr` n'étant pas joignable en direct depuis l'environnement d'exécution ce jour-là ; la prochaine régénération via `npm run extract-dataset` les recalculera normalement puisque `scripts/extract-dataset.ts` capture désormais ce champ.
 
 ## Observations en jeu (`observations/`)
 

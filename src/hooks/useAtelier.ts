@@ -44,6 +44,8 @@ export interface RuneOption {
   /** Identifiant de la rune dans le dataset (clé du carnet de prix) */
   runeId: number;
   nameFr: string;
+  /** Icône de la rune (dataset, api.dofusdb.fr) */
+  img: string;
 }
 
 /**
@@ -228,6 +230,7 @@ export function useAtelier() {
         weight: info.value * density,
         runeId: info.runeId,
         nameFr: info.nameFr,
+        img: info.img,
       }));
     },
     [overrides]

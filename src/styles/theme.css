@@ -11,7 +11,10 @@
  *  - ACTION = vert franc et chaud (--color-cta), réservé aux boutons d'action principaux ;
  *  - OVER = vert-menthe désaturé (--color-over), jamais sur un bouton ; EXO = bleu-vert froid ;
  *    ligne éteinte = gris. Cohérent avec le code couleur du client depuis la 2.58 ;
- *  - aucune ressource Ankama : glyphes, ornements et icônes sont des SVG originaux.
+ *  - ornements et glyphes de secours sont des SVG originaux ; les icônes d'objets et de
+ *    runes sont les icônes DofusDB (api.dofusdb.fr/img/items/*.png), données tierces
+ *    publiques déjà utilisées pour les objets — même principe que items.json.img ;
+ *  - couleurs d'élément/de famille de caractéristique : voir src/data/statColors.ts.
  */
 
 @theme {
@@ -64,6 +67,25 @@
   --color-st-hypothesis: #c9bca6;
   --color-st-contradiction: #ffb454;
   --color-st-unknown: #ff6b5e;
+
+  /* ─── Éléments (identique dans les deux modes) ───
+   * Association élément → teinte reprise de la convention DOFUS habituelle (icônes de
+   * sort/résistance en jeu, DofusDB, wiki) : Feu rouge, Eau bleu, Air vert, Terre brun/
+   * orangé, Neutre blanc/gris. Les valeurs hexadécimales sont un choix de présentation
+   * pour ce site, pas une teinte extraite du client — voir src/data/statColors.ts. */
+  --color-elem-neutral: #c3bdac;
+  --color-elem-earth: #9a7a3f;
+  --color-elem-fire: #e2492f;
+  --color-elem-water: #4f9fe0;
+  --color-elem-air: #6bc95a;
+
+  /* ─── Familles non élémentaires (choix de présentation, DOFUS ne les colore pas en jeu) ─── */
+  --color-cat-special: #8a7fd1;
+  --color-cat-primary: #c98aa0;
+  --color-cat-damage: #c96a3a;
+  --color-cat-percent-dmg: #c9863a;
+  --color-cat-resistance: #6f93a8;
+  --color-cat-utility: #a68a63;
 
   /* ─── Typographie ─── */
   --font-display: 'Fraunces', Georgia, serif;

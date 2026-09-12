@@ -5,9 +5,8 @@ import { FM_ORBS, FM_POTIONS } from '../../data/dataset';
 import { getParamEntry } from '../../data/params';
 import { OutcomeEstimate } from './OutcomeEstimate';
 import { StatusBadge } from '../shell/Badges';
-import { RuneGlyph } from './RuneGlyph';
+import { RuneIcon } from './RuneIcon';
 import { ExoPicker } from './ExoPicker';
-import { getStatCategory } from '../../data/statCaps';
 
 type Tab = 'rune' | 'transcendence' | 'orb' | 'potion';
 
@@ -70,7 +69,7 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
                     className="btn-well grid justify-items-center gap-1 px-2 py-3 text-center"
                     title={`Rune ${o.label || 'simple'} : +${o.value} ${selected.statName}, poids ${o.weight.toFixed(1)}`}
                   >
-                    <span className="text-molten-text"><RuneGlyph category={getStatCategory(selected.characteristicId)} size={20} /></span>
+                    <RuneIcon characteristicId={selected.characteristicId} img={o.img} title={o.nameFr} size={34} />
                     <b className="font-display text-lg tnum">+{o.value}</b>
                     <small className="text-[11px] text-ash-3 tnum">{o.label ? `${o.label} · ` : ''}{o.weight.toFixed(1)} poids</small>
                   </button>

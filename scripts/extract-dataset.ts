@@ -124,6 +124,7 @@ interface RuneRef {
   nameFr: string;
   level: number;
   realWeight: number | null;
+  img: string;
   effects: RuneEffect[];
 }
 
@@ -131,6 +132,7 @@ interface RuneTier {
   runeId: number;
   nameFr: string;
   value: number;
+  img: string;
 }
 
 // ─── Utilitaires ──────────────────────────────────────────────────────────────
@@ -251,6 +253,7 @@ async function main(): Promise<void> {
     nameFr: r.name?.fr ?? '',
     level: r.level,
     realWeight: r.realWeight ?? null,
+    img: r.img ?? '',
     effects: (r.effects ?? []).map((e) => ({
       effectId: e.effectId,
       characteristicId: e.characteristic,
@@ -333,7 +336,7 @@ async function main(): Promise<void> {
       unclassified.push({ runeId: rune.id, nameFr: rune.nameFr, reason: `palier ${tier} déjà occupé` });
       continue;
     }
-    tiers[key][tier] = { runeId: rune.id, nameFr: rune.nameFr, value: eff.value };
+    tiers[key][tier] = { runeId: rune.id, nameFr: rune.nameFr, value: eff.value, img: rune.img };
   }
 
   const meta = {

@@ -1,6 +1,8 @@
 /**
- * Glyphes de runes ORIGINAUX (SVG dessinés ici, aucune ressource Ankama).
- * Un glyphe par famille de caractéristique, gravé en tête de ligne d'objet.
+ * Glyphes de runes ORIGINAUX (SVG dessinés ici, aucune ressource Ankama), un par famille
+ * de caractéristique. Depuis l'ajout des icônes DofusDB (RuneIcon.tsx), ce glyphe n'est
+ * plus le rendu principal : il sert de secours quand aucune icône n'est disponible pour
+ * la caractéristique visée (dataset incomplet, caractéristique sans rune).
  */
 
 import type { StatCapCategory } from '../../data/statCaps';

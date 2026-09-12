@@ -25,6 +25,8 @@ export interface RuneTierInfo {
   nameFr: string;
   /** Valeur ajoutée par la rune (ex. Rune Pa Vi → 15) */
   value: number;
+  /** Icône de la rune (api.dofusdb.fr/img/items/*.png), même origine que Item.imgUrl */
+  img: string;
 }
 
 export interface RuneTiersEntry {
@@ -106,6 +108,17 @@ export function getAvailableRuneTiers(
     const info = entry[tier];
     return info ? [{ tier, info }] : [];
   });
+}
+
+/**
+ * Icône représentative d'une caractéristique, pour un affichage qui n'est pas lié à un
+ * palier précis (ex. glyphe de ligne sur la dalle) : palier normal en priorité, sinon Pa,
+ * sinon Ra. Chaîne vide si aucune rune n'existe pour cette caractéristique.
+ */
+export function getRepresentativeRuneImg(characteristicId: number): string {
+  const entry = getRuneTiers(characteristicId);
+  if (!entry) return '';
+  return entry.normal?.img ?? entry.pa?.img ?? entry.ra?.img ?? '';
 }
 
 // ─── Runes de transcendance, potions, orbes (dataset, données tierces) ───────

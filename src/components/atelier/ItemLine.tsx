@@ -1,6 +1,6 @@
 import type { SimulatedStat, AtelierMode, ForgeEvent } from '../../types';
-import { getStatCategory } from '../../data/statCaps';
-import { RuneGlyph } from './RuneGlyph';
+import { getRepresentativeRuneImg } from '../../data/dataset';
+import { RuneIcon } from './RuneIcon';
 
 interface Props {
   stat: SimulatedStat;
@@ -97,10 +97,8 @@ export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, o
         </span>
       )}
 
-      {/* Glyphe */}
-      <span className={`grid place-items-center ${tone === 'natural' ? 'text-ash-3' : text} opacity-80`} aria-hidden="true">
-        <RuneGlyph category={getStatCategory(stat.characteristicId)} size={22} />
-      </span>
+      {/* Icône de la rune */}
+      <RuneIcon characteristicId={stat.characteristicId} img={getRepresentativeRuneImg(stat.characteristicId)} size={28} className="opacity-90" />
 
       {/* Nom, badge, base */}
       <div className="min-w-0">

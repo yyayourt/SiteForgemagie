@@ -1,0 +1,2420 @@
+From 4e64906f844b198c77fd1af2921b0a931ead9909 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 10 Sep 2026 18:52:57 +0000
+Subject: [PATCH] =?UTF-8?q?Ic=C3=B4nes=20de=20runes=20DofusDB=20+=20code?=
+ =?UTF-8?q?=20couleur=20par=20famille=20de=20caract=C3=A9ristique?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Les runes affichent maintenant leur icône DofusDB réelle (même mécanisme
+que items.json.img), au lieu du seul glyphe SVG générique : panneau
+« Frapper » (choix du palier) et glyphe de ligne sur la dalle. RuneGlyph
+reste le secours si une icône manque.
+
+- data/rune-tiers.json, data/dataset.json : champ `img` par rune (103
+  runes de forgemagie, données via l'API DofusDB /items?typeId=78,
+  api.dofusdb.fr non joignable en direct depuis cet environnement —
+  voir la note ajoutée dans data/README.md).
+- scripts/extract-dataset.ts : capture `img` pour que la prochaine
+  régénération (`npm run extract-dataset`) le fasse nativement.
+- src/data/statColors.ts (nouveau) : teinte par caractéristique — couleur
+  d'élément (Terre/Feu/Eau/Air/Neutre, convention DOFUS habituelle) pour
+  les lignes élémentaires, couleur de famille (choix de présentation du
+  site, DOFUS ne colore pas ces stats en jeu) pour le reste. Classes
+  Tailwind écrites en toutes lettres pour rester détectables par le
+  scanner (v4, pas de gabarit `text-${token}`).
+- src/components/atelier/RuneIcon.tsx (nouveau) : médaillon icône + teinte,
+  utilisé par ItemLine et ActionPanel.
+- theme.css, App.tsx : tokens --color-elem-*/--color-cat-*, mention à jour
+  de la provenance des icônes dans l'en-tête du thème et le pied de page.
+
+Vérifié : tsc -b, eslint, vitest (196 tests) et build vite au vert ;
+capture d'écran locale pour confirmer le rendu et la distinction des
+teintes par famille (images cassées dans ce sandbox : api.dofusdb.fr est
+bloqué par la politique réseau de l'environnement, pas par le code —
+même comportement que les icônes d'objets existantes ici).
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01B9jra7vcLo5nzzf6CphSDM
+---
+ data/README.md                         |   4 +-
+ data/dataset.json                      | 315 ++++++++++++++++---------
+ data/rune-tiers.json                   | 312 ++++++++++++++++--------
+ scripts/extract-dataset.ts             |   5 +-
+ src/App.tsx                            |   2 +-
+ src/components/atelier/ActionPanel.tsx |   5 +-
+ src/components/atelier/ItemLine.tsx    |  10 +-
+ src/components/atelier/RuneGlyph.tsx   |   6 +-
+ src/components/atelier/RuneIcon.tsx    |  44 ++++
+ src/data/dataset.ts                    |  13 +
+ src/data/statColors.ts                 | 132 +++++++++++
+ src/hooks/useAtelier.ts                |   3 +
+ src/styles/theme.css                   |  24 +-
+ 13 files changed, 651 insertions(+), 224 deletions(-)
+ create mode 100644 src/components/atelier/RuneIcon.tsx
+ create mode 100644 src/data/statColors.ts
+
+diff --git a/data/README.md b/data/README.md
+index e542809..5aa06e0 100644
+--- a/data/README.md
++++ b/data/README.md
+@@ -29,7 +29,7 @@ Données **figées** générées par `scripts/extract-dataset.ts` (`npm run extr
+ | `characteristics[]` | `GET /characteristics` | `id`, `keyword`, `name.fr` | filtré sur `id > 0` |
+ | `itemSuperTypes[]` | `GET /item-super-types` | `id`, `name.fr` | aucune |
+ | `itemTypes[]` | `GET /item-types` | `id`, `superTypeId`, `name.fr` | aucune |
+-| `runes[]` | `GET /items?typeId=78` | `id`, `name.fr`, `level`, `realWeight`, `effects[]` | `effects[].value` = `from` (DofusDB code une valeur fixe par `from = v, to = 0`) |
++| `runes[]` | `GET /items?typeId=78` | `id`, `name.fr`, `level`, `realWeight`, `img`, `effects[]` | `effects[].value` = `from` (DofusDB code une valeur fixe par `from = v, to = 0`) ; `img` = icône de la rune, même mécanisme que `items.json.img` (URL `api.dofusdb.fr/img/items/{iconId}.png`) |
+ | `transcendenceRunes[]` | `GET /items?typeId=211` | idem | idem ; les effets `2825/2826/2827` (characteristic 0) sont des marqueurs de règle, conservés bruts |
+ | `potions[]` | `GET /items?typeId=26` | `id`, `name.fr`, `level`, `description.fr`, `effects[]` | effets bruts (`effectId`, `from`, `to`) |
+ | `orbs[]` | `GET /items?typeId=189` | idem | idem |
+@@ -52,6 +52,8 @@ Dérivé de `dataset.json → runes` : pour chaque `characteristicId`, les runes
+ 
+ Ce fichier remplace les valeurs `runeNormal / runePa / runeRa` autrefois écrites à la main : un palier absent ici n'existe pas en jeu (ex. pas de Ra pour Soins, Tacle, Fuite, Retrait, % résistances).
+ 
++Chaque palier porte aussi `img` (icône de la rune, cf. `runes[].img` ci-dessus), utilisée par l'interface (panneau « Frapper », lignes de l'enclume) à la place du glyphe SVG générique quand elle est disponible — même principe que `items.json.img` pour les objets. Sur ce dépôt, les valeurs `img` de `dataset.json` et `rune-tiers.json` ont été renseignées le 2026-09-10 par des requêtes ponctuelles à l'API DofusDB (`GET /items?typeId=78`), `api.dofusdb.fr` n'étant pas joignable en direct depuis l'environnement d'exécution ce jour-là ; la prochaine régénération via `npm run extract-dataset` les recalculera normalement puisque `scripts/extract-dataset.ts` capture désormais ce champ.
++
+ ## Observations en jeu (`observations/`)
+ 
+ Trois formats, chacun avec son schéma JSON et son validateur dans `src/logic/observations/` :
+diff --git a/data/dataset.json b/data/dataset.json
+index 06c4cd5..7729087 100644
+--- a/data/dataset.json
++++ b/data/dataset.json
+@@ -2722,7 +2722,8 @@
+      "characteristicId": 10,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78043.png"
+   },
+   {
+    "id": 1521,
+@@ -2735,7 +2736,8 @@
+      "characteristicId": 12,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78049.png"
+   },
+   {
+    "id": 1522,
+@@ -2748,7 +2750,8 @@
+      "characteristicId": 15,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78037.png"
+   },
+   {
+    "id": 1523,
+@@ -2761,7 +2764,8 @@
+      "characteristicId": 11,
+      "value": 5
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78052.png"
+   },
+   {
+    "id": 1524,
+@@ -2774,7 +2778,8 @@
+      "characteristicId": 14,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78046.png"
+   },
+   {
+    "id": 1525,
+@@ -2787,7 +2792,8 @@
+      "characteristicId": 13,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78040.png"
+   },
+   {
+    "id": 1545,
+@@ -2800,7 +2806,8 @@
+      "characteristicId": 10,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78044.png"
+   },
+   {
+    "id": 1546,
+@@ -2813,7 +2820,8 @@
+      "characteristicId": 12,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78050.png"
+   },
+   {
+    "id": 1547,
+@@ -2826,7 +2834,8 @@
+      "characteristicId": 15,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78038.png"
+   },
+   {
+    "id": 1548,
+@@ -2839,7 +2848,8 @@
+      "characteristicId": 11,
+      "value": 15
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78053.png"
+   },
+   {
+    "id": 1549,
+@@ -2852,7 +2862,8 @@
+      "characteristicId": 14,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78047.png"
+   },
+   {
+    "id": 1550,
+@@ -2865,7 +2876,8 @@
+      "characteristicId": 13,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78041.png"
+   },
+   {
+    "id": 1551,
+@@ -2878,7 +2890,8 @@
+      "characteristicId": 10,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78045.png"
+   },
+   {
+    "id": 1552,
+@@ -2891,7 +2904,8 @@
+      "characteristicId": 12,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78051.png"
+   },
+   {
+    "id": 1553,
+@@ -2904,7 +2918,8 @@
+      "characteristicId": 15,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78039.png"
+   },
+   {
+    "id": 1554,
+@@ -2917,7 +2932,8 @@
+      "characteristicId": 11,
+      "value": 50
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78054.png"
+   },
+   {
+    "id": 1555,
+@@ -2930,7 +2946,8 @@
+      "characteristicId": 14,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78048.png"
+   },
+   {
+    "id": 1556,
+@@ -2943,7 +2960,8 @@
+      "characteristicId": 13,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78042.png"
+   },
+   {
+    "id": 1557,
+@@ -2956,7 +2974,8 @@
+      "characteristicId": 1,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78055.png"
+   },
+   {
+    "id": 1558,
+@@ -2969,7 +2988,8 @@
+      "characteristicId": 23,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78056.png"
+   },
+   {
+    "id": 7433,
+@@ -2982,7 +3002,8 @@
+      "characteristicId": 18,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78014.png"
+   },
+   {
+    "id": 7434,
+@@ -2995,7 +3016,8 @@
+      "characteristicId": 49,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78013.png"
+   },
+   {
+    "id": 7435,
+@@ -3008,7 +3030,8 @@
+      "characteristicId": 16,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78015.png"
+   },
+   {
+    "id": 7436,
+@@ -3021,7 +3044,8 @@
+      "characteristicId": 25,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78016.png"
+   },
+   {
+    "id": 7437,
+@@ -3034,7 +3058,8 @@
+      "characteristicId": 50,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78017.png"
+   },
+   {
+    "id": 7438,
+@@ -3047,7 +3072,8 @@
+      "characteristicId": 19,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78018.png"
+   },
+   {
+    "id": 7442,
+@@ -3060,7 +3086,8 @@
+      "characteristicId": 26,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78019.png"
+   },
+   {
+    "id": 7443,
+@@ -3073,7 +3100,8 @@
+      "characteristicId": 40,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78020.png"
+   },
+   {
+    "id": 7444,
+@@ -3086,7 +3114,8 @@
+      "characteristicId": 40,
+      "value": 30
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78021.png"
+   },
+   {
+    "id": 7445,
+@@ -3099,7 +3128,8 @@
+      "characteristicId": 40,
+      "value": 100
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78022.png"
+   },
+   {
+    "id": 7446,
+@@ -3112,7 +3142,8 @@
+      "characteristicId": 70,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78268.png"
+   },
+   {
+    "id": 7447,
+@@ -3125,7 +3156,8 @@
+      "characteristicId": 69,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78024.png"
+   },
+   {
+    "id": 7448,
+@@ -3138,7 +3170,8 @@
+      "characteristicId": 44,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78025.png"
+   },
+   {
+    "id": 7449,
+@@ -3151,7 +3184,8 @@
+      "characteristicId": 44,
+      "value": 30
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78026.png"
+   },
+   {
+    "id": 7450,
+@@ -3164,7 +3198,8 @@
+      "characteristicId": 44,
+      "value": 100
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78027.png"
+   },
+   {
+    "id": 7451,
+@@ -3177,7 +3212,8 @@
+      "characteristicId": 48,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78036.png"
+   },
+   {
+    "id": 7452,
+@@ -3190,7 +3226,8 @@
+      "characteristicId": 55,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78028.png"
+   },
+   {
+    "id": 7453,
+@@ -3203,7 +3240,8 @@
+      "characteristicId": 57,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78032.png"
+   },
+   {
+    "id": 7454,
+@@ -3216,7 +3254,8 @@
+      "characteristicId": 56,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78030.png"
+   },
+   {
+    "id": 7455,
+@@ -3229,7 +3268,8 @@
+      "characteristicId": 54,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78034.png"
+   },
+   {
+    "id": 7456,
+@@ -3242,7 +3282,8 @@
+      "characteristicId": 58,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78057.png"
+   },
+   {
+    "id": 7457,
+@@ -3255,7 +3296,8 @@
+      "characteristicId": 34,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78029.png"
+   },
+   {
+    "id": 7458,
+@@ -3268,7 +3310,8 @@
+      "characteristicId": 36,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78033.png"
+   },
+   {
+    "id": 7459,
+@@ -3281,7 +3324,8 @@
+      "characteristicId": 33,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78035.png"
+   },
+   {
+    "id": 7460,
+@@ -3294,14 +3338,16 @@
+      "characteristicId": 37,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78058.png"
+   },
+   {
+    "id": 7508,
+    "nameFr": "Rune de Signature",
+    "level": 100,
+    "realWeight": 5,
+-   "effects": []
++   "effects": [],
++   "img": "https://api.dofusdb.fr/img/items/50037.png"
+   },
+   {
+    "id": 7560,
+@@ -3314,7 +3360,8 @@
+      "characteristicId": 35,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78031.png"
+   },
+   {
+    "id": 10057,
+@@ -3327,7 +3374,8 @@
+      "characteristicId": 0,
+      "value": 0
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78059.png"
+   },
+   {
+    "id": 10613,
+@@ -3340,7 +3388,8 @@
+      "characteristicId": 70,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78023.png"
+   },
+   {
+    "id": 10615,
+@@ -3353,7 +3402,8 @@
+      "characteristicId": 69,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78266.png"
+   },
+   {
+    "id": 10616,
+@@ -3366,7 +3416,8 @@
+      "characteristicId": 69,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78267.png"
+   },
+   {
+    "id": 10618,
+@@ -3379,7 +3430,8 @@
+      "characteristicId": 25,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78269.png"
+   },
+   {
+    "id": 10619,
+@@ -3392,7 +3444,8 @@
+      "characteristicId": 25,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78270.png"
+   },
+   {
+    "id": 10662,
+@@ -3405,7 +3458,8 @@
+      "characteristicId": 48,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78271.png"
+   },
+   {
+    "id": 11637,
+@@ -3418,7 +3472,8 @@
+      "characteristicId": 78,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78076.png"
+   },
+   {
+    "id": 11638,
+@@ -3431,7 +3486,8 @@
+      "characteristicId": 78,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78075.png"
+   },
+   {
+    "id": 11639,
+@@ -3444,7 +3500,8 @@
+      "characteristicId": 79,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78077.png"
+   },
+   {
+    "id": 11640,
+@@ -3457,7 +3514,8 @@
+      "characteristicId": 79,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78078.png"
+   },
+   {
+    "id": 11641,
+@@ -3470,7 +3528,8 @@
+      "characteristicId": 27,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78083.png"
+   },
+   {
+    "id": 11642,
+@@ -3483,7 +3542,8 @@
+      "characteristicId": 27,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78084.png"
+   },
+   {
+    "id": 11643,
+@@ -3496,7 +3556,8 @@
+      "characteristicId": 28,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78085.png"
+   },
+   {
+    "id": 11644,
+@@ -3509,7 +3570,8 @@
+      "characteristicId": 28,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78086.png"
+   },
+   {
+    "id": 11645,
+@@ -3522,7 +3584,8 @@
+      "characteristicId": 82,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78087.png"
+   },
+   {
+    "id": 11646,
+@@ -3535,7 +3598,8 @@
+      "characteristicId": 82,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78088.png"
+   },
+   {
+    "id": 11647,
+@@ -3548,7 +3612,8 @@
+      "characteristicId": 83,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78089.png"
+   },
+   {
+    "id": 11648,
+@@ -3561,7 +3626,8 @@
+      "characteristicId": 83,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78090.png"
+   },
+   {
+    "id": 11649,
+@@ -3574,7 +3640,8 @@
+      "characteristicId": 84,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78081.png"
+   },
+   {
+    "id": 11650,
+@@ -3587,7 +3654,8 @@
+      "characteristicId": 84,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78082.png"
+   },
+   {
+    "id": 11651,
+@@ -3600,7 +3668,8 @@
+      "characteristicId": 85,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78079.png"
+   },
+   {
+    "id": 11652,
+@@ -3613,7 +3682,8 @@
+      "characteristicId": 85,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78080.png"
+   },
+   {
+    "id": 11653,
+@@ -3626,7 +3696,8 @@
+      "characteristicId": 86,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78073.png"
+   },
+   {
+    "id": 11654,
+@@ -3639,7 +3710,8 @@
+      "characteristicId": 86,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78074.png"
+   },
+   {
+    "id": 11655,
+@@ -3652,7 +3724,8 @@
+      "characteristicId": 87,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78071.png"
+   },
+   {
+    "id": 11656,
+@@ -3665,7 +3738,8 @@
+      "characteristicId": 87,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78072.png"
+   },
+   {
+    "id": 11657,
+@@ -3678,7 +3752,8 @@
+      "characteristicId": 88,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78065.png"
+   },
+   {
+    "id": 11658,
+@@ -3691,7 +3766,8 @@
+      "characteristicId": 88,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78066.png"
+   },
+   {
+    "id": 11659,
+@@ -3704,7 +3780,8 @@
+      "characteristicId": 89,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78063.png"
+   },
+   {
+    "id": 11660,
+@@ -3717,7 +3794,8 @@
+      "characteristicId": 89,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78064.png"
+   },
+   {
+    "id": 11661,
+@@ -3730,7 +3808,8 @@
+      "characteristicId": 90,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78061.png"
+   },
+   {
+    "id": 11662,
+@@ -3743,7 +3822,8 @@
+      "characteristicId": 90,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78062.png"
+   },
+   {
+    "id": 11663,
+@@ -3756,7 +3836,8 @@
+      "characteristicId": 91,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78067.png"
+   },
+   {
+    "id": 11664,
+@@ -3769,7 +3850,8 @@
+      "characteristicId": 91,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78068.png"
+   },
+   {
+    "id": 11665,
+@@ -3782,7 +3864,8 @@
+      "characteristicId": 92,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78069.png"
+   },
+   {
+    "id": 11666,
+@@ -3795,7 +3878,8 @@
+      "characteristicId": 92,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78070.png"
+   },
+   {
+    "id": 18719,
+@@ -3808,7 +3892,8 @@
+      "characteristicId": 125,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78092.png"
+   },
+   {
+    "id": 18720,
+@@ -3821,7 +3906,8 @@
+      "characteristicId": 120,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78091.png"
+   },
+   {
+    "id": 18721,
+@@ -3834,7 +3920,8 @@
+      "characteristicId": 122,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78093.png"
+   },
+   {
+    "id": 18722,
+@@ -3847,7 +3934,8 @@
+      "characteristicId": 123,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78094.png"
+   },
+   {
+    "id": 18723,
+@@ -3860,7 +3948,8 @@
+      "characteristicId": 124,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78095.png"
+   },
+   {
+    "id": 18724,
+@@ -3873,7 +3962,8 @@
+      "characteristicId": 121,
+      "value": 1
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78096.png"
+   },
+   {
+    "id": 19337,
+@@ -3886,7 +3976,8 @@
+      "characteristicId": 49,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78099.png"
+   },
+   {
+    "id": 19338,
+@@ -3899,7 +3990,8 @@
+      "characteristicId": 57,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78100.png"
+   },
+   {
+    "id": 19339,
+@@ -3912,7 +4004,8 @@
+      "characteristicId": 56,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78101.png"
+   },
+   {
+    "id": 19340,
+@@ -3925,7 +4018,8 @@
+      "characteristicId": 55,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78102.png"
+   },
+   {
+    "id": 19341,
+@@ -3938,7 +4032,8 @@
+      "characteristicId": 58,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78103.png"
+   },
+   {
+    "id": 19342,
+@@ -3951,7 +4046,8 @@
+      "characteristicId": 54,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78104.png"
+   },
+   {
+    "id": 29683,
+@@ -3964,7 +4060,8 @@
+      "characteristicId": 85,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78272.png"
+   },
+   {
+    "id": 29684,
+@@ -3977,7 +4074,8 @@
+      "characteristicId": 84,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78273.png"
+   },
+   {
+    "id": 30695,
+@@ -3990,7 +4088,8 @@
+      "characteristicId": 54,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78294.png"
+   },
+   {
+    "id": 30696,
+@@ -4003,7 +4102,8 @@
+      "characteristicId": 58,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78293.png"
+   },
+   {
+    "id": 30697,
+@@ -4016,7 +4116,8 @@
+      "characteristicId": 55,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78295.png"
+   },
+   {
+    "id": 30698,
+@@ -4029,7 +4130,8 @@
+      "characteristicId": 56,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78296.png"
+   },
+   {
+    "id": 30699,
+@@ -4042,7 +4144,8 @@
+      "characteristicId": 87,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78292.png"
+   },
+   {
+    "id": 30700,
+@@ -4055,7 +4158,8 @@
+      "characteristicId": 57,
+      "value": 10
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78297.png"
+   },
+   {
+    "id": 30942,
+@@ -4068,7 +4172,8 @@
+      "characteristicId": 50,
+      "value": 3
+     }
+-   ]
++   ],
++   "img": "https://api.dofusdb.fr/img/items/78017.png"
+   }
+  ],
+  "transcendenceRunes": [
+diff --git a/data/rune-tiers.json b/data/rune-tiers.json
+index 88d0e48..f4ed96f 100644
+--- a/data/rune-tiers.json
++++ b/data/rune-tiers.json
+@@ -2,7 +2,8 @@
+  "meta": {
+   "gameVersion": "3.6.10.11",
+   "extractedAt": "2026-09-05T10:51:48.477Z",
+-  "derivedFrom": "dataset.json → runes (typeId 78), palier déduit du nom"
++  "derivedFrom": "dataset.json → runes (typeId 78), palier déduit du nom",
++  "note_img": "Champ `img` ajouté a posteriori (2026-09-10) par appels ponctuels à l'API DofusDB (GET /items?typeId=78), non via extract-dataset.ts (accès réseau à api.dofusdb.fr indisponible depuis cet environnement) — a réextraire au prochain `npm run extract-dataset` une fois scripts/extract-dataset.ts mis à jour pour inclure ce champ."
+  },
+  "tiers": {
+   "1": {
+@@ -10,7 +11,8 @@
+    "normal": {
+     "runeId": 1557,
+     "nameFr": "Rune Ga Pa",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78055.png"
+    }
+   },
+   "10": {
+@@ -18,17 +20,20 @@
+    "normal": {
+     "runeId": 1519,
+     "nameFr": "Rune Fo",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78043.png"
+    },
+    "pa": {
+     "runeId": 1545,
+     "nameFr": "Rune Pa Fo",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78044.png"
+    },
+    "ra": {
+     "runeId": 1551,
+     "nameFr": "Rune Ra Fo",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78045.png"
+    }
+   },
+   "11": {
+@@ -36,17 +41,20 @@
+    "normal": {
+     "runeId": 1523,
+     "nameFr": "Rune Vi",
+-    "value": 5
++    "value": 5,
++    "img": "https://api.dofusdb.fr/img/items/78052.png"
+    },
+    "pa": {
+     "runeId": 1548,
+     "nameFr": "Rune Pa Vi",
+-    "value": 15
++    "value": 15,
++    "img": "https://api.dofusdb.fr/img/items/78053.png"
+    },
+    "ra": {
+     "runeId": 1554,
+     "nameFr": "Rune Ra Vi",
+-    "value": 50
++    "value": 50,
++    "img": "https://api.dofusdb.fr/img/items/78054.png"
+    }
+   },
+   "12": {
+@@ -54,17 +62,20 @@
+    "normal": {
+     "runeId": 1521,
+     "nameFr": "Rune Sa",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78049.png"
+    },
+    "pa": {
+     "runeId": 1546,
+     "nameFr": "Rune Pa Sa",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78050.png"
+    },
+    "ra": {
+     "runeId": 1552,
+     "nameFr": "Rune Ra Sa",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78051.png"
+    }
+   },
+   "13": {
+@@ -72,17 +83,20 @@
+    "normal": {
+     "runeId": 1525,
+     "nameFr": "Rune Cha",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78040.png"
+    },
+    "pa": {
+     "runeId": 1550,
+     "nameFr": "Rune Pa Cha",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78041.png"
+    },
+    "ra": {
+     "runeId": 1556,
+     "nameFr": "Rune Ra Cha",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78042.png"
+    }
+   },
+   "14": {
+@@ -90,17 +104,20 @@
+    "normal": {
+     "runeId": 1524,
+     "nameFr": "Rune Age",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78046.png"
+    },
+    "pa": {
+     "runeId": 1549,
+     "nameFr": "Rune Pa Age",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78047.png"
+    },
+    "ra": {
+     "runeId": 1555,
+     "nameFr": "Rune Ra Age",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78048.png"
+    }
+   },
+   "15": {
+@@ -108,17 +125,20 @@
+    "normal": {
+     "runeId": 1522,
+     "nameFr": "Rune Ine",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78037.png"
+    },
+    "pa": {
+     "runeId": 1547,
+     "nameFr": "Rune Pa Ine",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78038.png"
+    },
+    "ra": {
+     "runeId": 1553,
+     "nameFr": "Rune Ra Ine",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78039.png"
+    }
+   },
+   "16": {
+@@ -126,7 +146,8 @@
+    "normal": {
+     "runeId": 7435,
+     "nameFr": "Rune Do",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78015.png"
+    }
+   },
+   "18": {
+@@ -134,7 +155,8 @@
+    "normal": {
+     "runeId": 7433,
+     "nameFr": "Rune Cri",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78014.png"
+    }
+   },
+   "19": {
+@@ -142,7 +164,8 @@
+    "normal": {
+     "runeId": 7438,
+     "nameFr": "Rune Po",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78018.png"
+    }
+   },
+   "23": {
+@@ -150,7 +173,8 @@
+    "normal": {
+     "runeId": 1558,
+     "nameFr": "Rune Ga Pme",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78056.png"
+    }
+   },
+   "25": {
+@@ -158,17 +182,20 @@
+    "normal": {
+     "runeId": 7436,
+     "nameFr": "Rune Pui",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78016.png"
+    },
+    "pa": {
+     "runeId": 10618,
+     "nameFr": "Rune Pa Pui",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78269.png"
+    },
+    "ra": {
+     "runeId": 10619,
+     "nameFr": "Rune Ra Pui",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78270.png"
+    }
+   },
+   "26": {
+@@ -176,7 +203,8 @@
+    "normal": {
+     "runeId": 7442,
+     "nameFr": "Rune Invo",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78019.png"
+    }
+   },
+   "27": {
+@@ -184,12 +212,14 @@
+    "normal": {
+     "runeId": 11641,
+     "nameFr": "Rune Ré Pa",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78083.png"
+    },
+    "pa": {
+     "runeId": 11642,
+     "nameFr": "Rune Pa Ré Pa",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78084.png"
+    }
+   },
+   "28": {
+@@ -197,12 +227,14 @@
+    "normal": {
+     "runeId": 11643,
+     "nameFr": "Rune Ré Pme",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78085.png"
+    },
+    "pa": {
+     "runeId": 11644,
+     "nameFr": "Rune Pa Ré Pme",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78086.png"
+    }
+   },
+   "33": {
+@@ -210,7 +242,8 @@
+    "normal": {
+     "runeId": 7459,
+     "nameFr": "Rune Ré Per Terre",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78035.png"
+    }
+   },
+   "34": {
+@@ -218,7 +251,8 @@
+    "normal": {
+     "runeId": 7457,
+     "nameFr": "Rune Ré Per Feu",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78029.png"
+    }
+   },
+   "35": {
+@@ -226,7 +260,8 @@
+    "normal": {
+     "runeId": 7560,
+     "nameFr": "Rune Ré Per Eau",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78031.png"
+    }
+   },
+   "36": {
+@@ -234,7 +269,8 @@
+    "normal": {
+     "runeId": 7458,
+     "nameFr": "Rune Ré Per Air",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78033.png"
+    }
+   },
+   "37": {
+@@ -242,7 +278,8 @@
+    "normal": {
+     "runeId": 7460,
+     "nameFr": "Rune Ré Per Neutre",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78058.png"
+    }
+   },
+   "40": {
+@@ -250,17 +287,20 @@
+    "normal": {
+     "runeId": 7443,
+     "nameFr": "Rune Pod",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78020.png"
+    },
+    "pa": {
+     "runeId": 7444,
+     "nameFr": "Rune Pa Pod",
+-    "value": 30
++    "value": 30,
++    "img": "https://api.dofusdb.fr/img/items/78021.png"
+    },
+    "ra": {
+     "runeId": 7445,
+     "nameFr": "Rune Ra Pod",
+-    "value": 100
++    "value": 100,
++    "img": "https://api.dofusdb.fr/img/items/78022.png"
+    }
+   },
+   "44": {
+@@ -268,17 +308,20 @@
+    "normal": {
+     "runeId": 7448,
+     "nameFr": "Rune Ini",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78025.png"
+    },
+    "pa": {
+     "runeId": 7449,
+     "nameFr": "Rune Pa Ini",
+-    "value": 30
++    "value": 30,
++    "img": "https://api.dofusdb.fr/img/items/78026.png"
+    },
+    "ra": {
+     "runeId": 7450,
+     "nameFr": "Rune Ra Ini",
+-    "value": 100
++    "value": 100,
++    "img": "https://api.dofusdb.fr/img/items/78027.png"
+    }
+   },
+   "48": {
+@@ -286,12 +329,14 @@
+    "normal": {
+     "runeId": 7451,
+     "nameFr": "Rune Prospe",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78036.png"
+    },
+    "pa": {
+     "runeId": 10662,
+     "nameFr": "Rune Pa Prospe",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78271.png"
+    }
+   },
+   "49": {
+@@ -299,12 +344,14 @@
+    "normal": {
+     "runeId": 7434,
+     "nameFr": "Rune So",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78013.png"
+    },
+    "pa": {
+     "runeId": 19337,
+     "nameFr": "Rune Pa So",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78099.png"
+    }
+   },
+   "50": {
+@@ -312,12 +359,14 @@
+    "normal": {
+     "runeId": 7437,
+     "nameFr": "Rune Do Ren",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78017.png"
+    },
+    "pa": {
+     "runeId": 30942,
+     "nameFr": "Rune Pa Do Ren",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78017.png"
+    }
+   },
+   "54": {
+@@ -325,17 +374,20 @@
+    "normal": {
+     "runeId": 7455,
+     "nameFr": "Rune Ré Terre",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78034.png"
+    },
+    "pa": {
+     "runeId": 19342,
+     "nameFr": "Rune Pa Ré Terre",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78104.png"
+    },
+    "ra": {
+     "runeId": 30695,
+     "nameFr": "Rune Ra Ré Terre",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78294.png"
+    }
+   },
+   "55": {
+@@ -343,17 +395,20 @@
+    "normal": {
+     "runeId": 7452,
+     "nameFr": "Rune Ré Feu",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78028.png"
+    },
+    "pa": {
+     "runeId": 19340,
+     "nameFr": "Rune Pa Ré Feu",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78102.png"
+    },
+    "ra": {
+     "runeId": 30697,
+     "nameFr": "Rune Ra Ré Feu",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78295.png"
+    }
+   },
+   "56": {
+@@ -361,17 +416,20 @@
+    "normal": {
+     "runeId": 7454,
+     "nameFr": "Rune Ré Eau",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78030.png"
+    },
+    "pa": {
+     "runeId": 19339,
+     "nameFr": "Rune Pa Ré Eau",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78101.png"
+    },
+    "ra": {
+     "runeId": 30698,
+     "nameFr": "Rune Ra Ré Eau",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78296.png"
+    }
+   },
+   "57": {
+@@ -379,17 +437,20 @@
+    "normal": {
+     "runeId": 7453,
+     "nameFr": "Rune Ré Air",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78032.png"
+    },
+    "pa": {
+     "runeId": 19338,
+     "nameFr": "Rune Pa Ré Air",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78100.png"
+    },
+    "ra": {
+     "runeId": 30700,
+     "nameFr": "Rune Ra Ré Air",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78297.png"
+    }
+   },
+   "58": {
+@@ -397,17 +458,20 @@
+    "normal": {
+     "runeId": 7456,
+     "nameFr": "Rune Ré Neutre",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78057.png"
+    },
+    "pa": {
+     "runeId": 19341,
+     "nameFr": "Rune Pa Ré Neutre",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78103.png"
+    },
+    "ra": {
+     "runeId": 30696,
+     "nameFr": "Rune Ra Ré Neutre",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78293.png"
+    }
+   },
+   "69": {
+@@ -415,17 +479,20 @@
+    "normal": {
+     "runeId": 7447,
+     "nameFr": "Rune Per Pi",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78024.png"
+    },
+    "pa": {
+     "runeId": 10615,
+     "nameFr": "Rune Pa Per Pi",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78266.png"
+    },
+    "ra": {
+     "runeId": 10616,
+     "nameFr": "Rune Ra Per Pi",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78267.png"
+    }
+   },
+   "70": {
+@@ -433,12 +500,14 @@
+    "normal": {
+     "runeId": 7446,
+     "nameFr": "Rune Do Pi",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78268.png"
+    },
+    "pa": {
+     "runeId": 10613,
+     "nameFr": "Rune Pa Do Pi",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78023.png"
+    }
+   },
+   "78": {
+@@ -446,12 +515,14 @@
+    "normal": {
+     "runeId": 11637,
+     "nameFr": "Rune Fui",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78076.png"
+    },
+    "pa": {
+     "runeId": 11638,
+     "nameFr": "Rune Pa Fui",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78075.png"
+    }
+   },
+   "79": {
+@@ -459,12 +530,14 @@
+    "normal": {
+     "runeId": 11639,
+     "nameFr": "Rune Tac",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78077.png"
+    },
+    "pa": {
+     "runeId": 11640,
+     "nameFr": "Rune Pa Tac",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78078.png"
+    }
+   },
+   "82": {
+@@ -472,12 +545,14 @@
+    "normal": {
+     "runeId": 11645,
+     "nameFr": "Rune Ret Pa",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78087.png"
+    },
+    "pa": {
+     "runeId": 11646,
+     "nameFr": "Rune Pa Ret Pa",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78088.png"
+    }
+   },
+   "83": {
+@@ -485,12 +560,14 @@
+    "normal": {
+     "runeId": 11647,
+     "nameFr": "Rune Ret Pme",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78089.png"
+    },
+    "pa": {
+     "runeId": 11648,
+     "nameFr": "Rune Pa Ret Pme",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78090.png"
+    }
+   },
+   "84": {
+@@ -498,17 +575,20 @@
+    "normal": {
+     "runeId": 11649,
+     "nameFr": "Rune Do Pou",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78081.png"
+    },
+    "pa": {
+     "runeId": 11650,
+     "nameFr": "Rune Pa Do Pou",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78082.png"
+    },
+    "ra": {
+     "runeId": 29684,
+     "nameFr": "Rune Ra Do Pou",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78273.png"
+    }
+   },
+   "85": {
+@@ -516,17 +596,20 @@
+    "normal": {
+     "runeId": 11651,
+     "nameFr": "Rune Ré Pou",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78079.png"
+    },
+    "pa": {
+     "runeId": 11652,
+     "nameFr": "Rune Pa Ré Pou",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78080.png"
+    },
+    "ra": {
+     "runeId": 29683,
+     "nameFr": "Rune Ra Ré Pou",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78272.png"
+    }
+   },
+   "86": {
+@@ -534,12 +617,14 @@
+    "normal": {
+     "runeId": 11653,
+     "nameFr": "Rune Do Cri",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78073.png"
+    },
+    "pa": {
+     "runeId": 11654,
+     "nameFr": "Rune Pa Do Cri",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78074.png"
+    }
+   },
+   "87": {
+@@ -547,17 +632,20 @@
+    "normal": {
+     "runeId": 11655,
+     "nameFr": "Rune Ré Cri",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78071.png"
+    },
+    "pa": {
+     "runeId": 11656,
+     "nameFr": "Rune Pa Ré Cri",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78072.png"
+    },
+    "ra": {
+     "runeId": 30699,
+     "nameFr": "Rune Ra Ré Cri",
+-    "value": 10
++    "value": 10,
++    "img": "https://api.dofusdb.fr/img/items/78292.png"
+    }
+   },
+   "88": {
+@@ -565,12 +653,14 @@
+    "normal": {
+     "runeId": 11657,
+     "nameFr": "Rune Do Terre",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78065.png"
+    },
+    "pa": {
+     "runeId": 11658,
+     "nameFr": "Rune Pa Do Terre",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78066.png"
+    }
+   },
+   "89": {
+@@ -578,12 +668,14 @@
+    "normal": {
+     "runeId": 11659,
+     "nameFr": "Rune Do Feu",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78063.png"
+    },
+    "pa": {
+     "runeId": 11660,
+     "nameFr": "Rune Pa Do Feu",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78064.png"
+    }
+   },
+   "90": {
+@@ -591,12 +683,14 @@
+    "normal": {
+     "runeId": 11661,
+     "nameFr": "Rune Do Eau",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78061.png"
+    },
+    "pa": {
+     "runeId": 11662,
+     "nameFr": "Rune Pa Do Eau",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78062.png"
+    }
+   },
+   "91": {
+@@ -604,12 +698,14 @@
+    "normal": {
+     "runeId": 11663,
+     "nameFr": "Rune Do Air",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78067.png"
+    },
+    "pa": {
+     "runeId": 11664,
+     "nameFr": "Rune Pa Do Air",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78068.png"
+    }
+   },
+   "92": {
+@@ -617,12 +713,14 @@
+    "normal": {
+     "runeId": 11665,
+     "nameFr": "Rune Do Neutre",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78069.png"
+    },
+    "pa": {
+     "runeId": 11666,
+     "nameFr": "Rune Pa Do Neutre",
+-    "value": 3
++    "value": 3,
++    "img": "https://api.dofusdb.fr/img/items/78070.png"
+    }
+   },
+   "120": {
+@@ -630,7 +728,8 @@
+    "normal": {
+     "runeId": 18720,
+     "nameFr": "Rune Do Per Di",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78091.png"
+    }
+   },
+   "121": {
+@@ -638,7 +737,8 @@
+    "normal": {
+     "runeId": 18724,
+     "nameFr": "Rune Ré Per Di",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78096.png"
+    }
+   },
+   "122": {
+@@ -646,7 +746,8 @@
+    "normal": {
+     "runeId": 18721,
+     "nameFr": "Rune Do Per Ar",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78093.png"
+    }
+   },
+   "123": {
+@@ -654,7 +755,8 @@
+    "normal": {
+     "runeId": 18722,
+     "nameFr": "Rune Do Per So",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78094.png"
+    }
+   },
+   "124": {
+@@ -662,7 +764,8 @@
+    "normal": {
+     "runeId": 18723,
+     "nameFr": "Rune Ré Per Mé",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78095.png"
+    }
+   },
+   "125": {
+@@ -670,7 +773,8 @@
+    "normal": {
+     "runeId": 18719,
+     "nameFr": "Rune Do Per Mé",
+-    "value": 1
++    "value": 1,
++    "img": "https://api.dofusdb.fr/img/items/78092.png"
+    }
+   }
+  },
+diff --git a/scripts/extract-dataset.ts b/scripts/extract-dataset.ts
+index bb25b35..6f0029b 100644
+--- a/scripts/extract-dataset.ts
++++ b/scripts/extract-dataset.ts
+@@ -124,6 +124,7 @@ interface RuneRef {
+   nameFr: string;
+   level: number;
+   realWeight: number | null;
++  img: string;
+   effects: RuneEffect[];
+ }
+ 
+@@ -131,6 +132,7 @@ interface RuneTier {
+   runeId: number;
+   nameFr: string;
+   value: number;
++  img: string;
+ }
+ 
+ // ─── Utilitaires ──────────────────────────────────────────────────────────────
+@@ -251,6 +253,7 @@ async function main(): Promise<void> {
+     nameFr: r.name?.fr ?? '',
+     level: r.level,
+     realWeight: r.realWeight ?? null,
++    img: r.img ?? '',
+     effects: (r.effects ?? []).map((e) => ({
+       effectId: e.effectId,
+       characteristicId: e.characteristic,
+@@ -333,7 +336,7 @@ async function main(): Promise<void> {
+       unclassified.push({ runeId: rune.id, nameFr: rune.nameFr, reason: `palier ${tier} déjà occupé` });
+       continue;
+     }
+-    tiers[key][tier] = { runeId: rune.id, nameFr: rune.nameFr, value: eff.value };
++    tiers[key][tier] = { runeId: rune.id, nameFr: rune.nameFr, value: eff.value, img: rune.img };
+   }
+ 
+   const meta = {
+diff --git a/src/App.tsx b/src/App.tsx
+index a828bf3..1253789 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -89,7 +89,7 @@ function App() {
+ 
+       <footer className="px-4 sm:px-7 py-4 text-xs text-ash-3 border-t border-iron-edge/60 flex flex-wrap gap-x-4 gap-y-1">
+         <span>La Forge — reconstruction traçable de la forgemagie DOFUS 3. La formule du serveur est secrète : toute probabilité affichée est un modèle.</span>
+-        <span className="ml-auto">Données d'objets DofusDB (dataset local). Icônes d'objets : assets Ankama, usage communautaire.</span>
++        <span className="ml-auto">Données d'objets et de runes DofusDB (dataset local). Icônes d'objets et de runes : assets Ankama, usage communautaire.</span>
+       </footer>
+ 
+       <ParamsDrawer open={paramsOpen} onClose={() => setParamsOpen(false)} />
+diff --git a/src/components/atelier/ActionPanel.tsx b/src/components/atelier/ActionPanel.tsx
+index 17aee19..3097923 100644
+--- a/src/components/atelier/ActionPanel.tsx
++++ b/src/components/atelier/ActionPanel.tsx
+@@ -4,9 +4,8 @@ import type { RuneTier, RuneOutcome } from '../../types';
+ import { FM_ORBS, FM_POTIONS } from '../../data/dataset';
+ import { getParamEntry } from '../../data/params';
+ import { ModelBadge, StatusBadge } from '../shell/Badges';
+-import { RuneGlyph } from './RuneGlyph';
++import { RuneIcon } from './RuneIcon';
+ import { ExoPicker } from './ExoPicker';
+-import { getStatCategory } from '../../data/statCaps';
+ 
+ type Tab = 'rune' | 'transcendence' | 'orb' | 'potion';
+ 
+@@ -71,7 +70,7 @@ export function ActionPanel({ atelier }: { atelier: AtelierApi }) {
+                     className="btn-well grid justify-items-center gap-1 px-2 py-3 text-center"
+                     title={`Rune ${o.label || 'simple'} : +${o.value} ${selected.statName}, poids ${o.weight.toFixed(1)}`}
+                   >
+-                    <span className="text-molten-text"><RuneGlyph category={getStatCategory(selected.characteristicId)} size={20} /></span>
++                    <RuneIcon characteristicId={selected.characteristicId} img={o.img} title={o.nameFr} size={34} />
+                     <b className="font-display text-lg tnum">+{o.value}</b>
+                     <small className="text-[11px] text-ash-3 tnum">{o.label ? `${o.label} · ` : ''}{o.weight.toFixed(1)} poids</small>
+                   </button>
+diff --git a/src/components/atelier/ItemLine.tsx b/src/components/atelier/ItemLine.tsx
+index 0cd9502..a514e06 100644
+--- a/src/components/atelier/ItemLine.tsx
++++ b/src/components/atelier/ItemLine.tsx
+@@ -1,6 +1,6 @@
+ import type { SimulatedStat, AtelierMode, ForgeEvent } from '../../types';
+-import { getStatCategory } from '../../data/statCaps';
+-import { RuneGlyph } from './RuneGlyph';
++import { getRepresentativeRuneImg } from '../../data/dataset';
++import { RuneIcon } from './RuneIcon';
+ 
+ interface Props {
+   stat: SimulatedStat;
+@@ -97,10 +97,8 @@ export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, o
+         </span>
+       )}
+ 
+-      {/* Glyphe */}
+-      <span className={`grid place-items-center ${tone === 'natural' ? 'text-ash-3' : text} opacity-80`} aria-hidden="true">
+-        <RuneGlyph category={getStatCategory(stat.characteristicId)} size={22} />
+-      </span>
++      {/* Icône de la rune */}
++      <RuneIcon characteristicId={stat.characteristicId} img={getRepresentativeRuneImg(stat.characteristicId)} size={28} className="opacity-90" />
+ 
+       {/* Nom, badge, base */}
+       <div className="min-w-0">
+diff --git a/src/components/atelier/RuneGlyph.tsx b/src/components/atelier/RuneGlyph.tsx
+index cd3479e..a491c3a 100644
+--- a/src/components/atelier/RuneGlyph.tsx
++++ b/src/components/atelier/RuneGlyph.tsx
+@@ -1,6 +1,8 @@
+ /**
+- * Glyphes de runes ORIGINAUX (SVG dessinés ici, aucune ressource Ankama).
+- * Un glyphe par famille de caractéristique, gravé en tête de ligne d'objet.
++ * Glyphes de runes ORIGINAUX (SVG dessinés ici, aucune ressource Ankama), un par famille
++ * de caractéristique. Depuis l'ajout des icônes DofusDB (RuneIcon.tsx), ce glyphe n'est
++ * plus le rendu principal : il sert de secours quand aucune icône n'est disponible pour
++ * la caractéristique visée (dataset incomplet, caractéristique sans rune).
+  */
+ 
+ import type { StatCapCategory } from '../../data/statCaps';
+diff --git a/src/components/atelier/RuneIcon.tsx b/src/components/atelier/RuneIcon.tsx
+new file mode 100644
+index 0000000..8556f12
+--- /dev/null
++++ b/src/components/atelier/RuneIcon.tsx
+@@ -0,0 +1,44 @@
++import { getStatCategory } from '../../data/statCaps';
++import { getStatColorClasses } from '../../data/statColors';
++import { RuneGlyph } from './RuneGlyph';
++
++interface Props {
++  characteristicId: number;
++  /** Icône DofusDB de la rune (RuneOption.img / RuneTierInfo.img) */
++  img?: string;
++  size?: number;
++  title?: string;
++  className?: string;
++}
++
++/**
++ * Icône d'une rune : image DofusDB (api.dofusdb.fr, mêmes données tierces que les icônes
++ * d'objets) dans un médaillon teinté par famille de caractéristique — voir statColors.ts
++ * pour le statut de cette teinte. Si l'icône est absente du dataset, retombe sur le glyphe
++ * SVG original de secours (RuneGlyph) plutôt que de laisser un vide.
++ */
++export function RuneIcon({ characteristicId, img, size = 30, title, className = '' }: Props) {
++  const { border, bgSoft } = getStatColorClasses(characteristicId);
++  return (
++    <span
++      className={`relative inline-grid place-items-center rounded-[9px] border overflow-hidden shrink-0 ${border} ${bgSoft} ${className}`}
++      style={{ width: size, height: size }}
++      title={title}
++      role={title ? 'img' : undefined}
++      aria-label={title}
++    >
++      {img ? (
++        <img
++          src={img}
++          alt=""
++          width={size}
++          height={size}
++          className="w-full h-full object-contain p-[3px]"
++          loading="lazy"
++        />
++      ) : (
++        <RuneGlyph category={getStatCategory(characteristicId)} size={Math.round(size * 0.62)} />
++      )}
++    </span>
++  );
++}
+diff --git a/src/data/dataset.ts b/src/data/dataset.ts
+index 7c8140f..e32db27 100644
+--- a/src/data/dataset.ts
++++ b/src/data/dataset.ts
+@@ -25,6 +25,8 @@ export interface RuneTierInfo {
+   nameFr: string;
+   /** Valeur ajoutée par la rune (ex. Rune Pa Vi → 15) */
+   value: number;
++  /** Icône de la rune (api.dofusdb.fr/img/items/*.png), même origine que Item.imgUrl */
++  img: string;
+ }
+ 
+ export interface RuneTiersEntry {
+@@ -108,6 +110,17 @@ export function getAvailableRuneTiers(
+   });
+ }
+ 
++/**
++ * Icône représentative d'une caractéristique, pour un affichage qui n'est pas lié à un
++ * palier précis (ex. glyphe de ligne sur la dalle) : palier normal en priorité, sinon Pa,
++ * sinon Ra. Chaîne vide si aucune rune n'existe pour cette caractéristique.
++ */
++export function getRepresentativeRuneImg(characteristicId: number): string {
++  const entry = getRuneTiers(characteristicId);
++  if (!entry) return '';
++  return entry.normal?.img ?? entry.pa?.img ?? entry.ra?.img ?? '';
++}
++
+ // ─── Runes de transcendance, potions, orbes (dataset, données tierces) ───────
+ 
+ export type TranscendenceRankName = 'Ta' | 'Pata' | 'Rata';
+diff --git a/src/data/statColors.ts b/src/data/statColors.ts
+new file mode 100644
+index 0000000..85db16e
+--- /dev/null
++++ b/src/data/statColors.ts
+@@ -0,0 +1,132 @@
++/**
++ * Couleur d'affichage par caractéristique : teinte l'icône de rune et le liseré de ligne.
++ *
++ * Statut : DEUX niveaux bien distincts, à ne pas confondre entre eux ni avec les données
++ * de simulation (poids, bornes, probabilités) qui, elles, suivent les statuts épistémiques
++ * de CLAUDE.md.
++ *
++ *  - Éléments (Neutre/Terre/Feu/Eau/Air, `characteristicId` ci-dessous) : la correspondance
++ *    élément → teinte (Feu rouge, Eau bleu, Air vert, Terre brun/orangé, Neutre blanc/gris)
++ *    reprend la convention DOFUS habituelle, visible sur les icônes de sort/résistance en
++ *    jeu et reprise par DofusDB et la communauté. Les identifiants de caractéristique
++ *    viennent de data/dataset.json (33-37 = % résistances, 54-58 = résistances fixes,
++ *    88-92 = dommages, dans l'ordre Terre/Feu/Eau/Air/Neutre selon l'API).
++ *  - Autres familles (PA/PM/PO, caractéristiques primaires, dommages et résistances
++ *    génériques, utilitaires) : DOFUS ne leur attribue PAS de couleur distincte en jeu
++ *    (texte neutre, différencié par icône seulement). La teinte utilisée ici est un choix
++ *    de présentation propre à ce site pour rendre les familles lisibles d'un coup d'œil ;
++ *    ce n'est pas une reconstitution d'un code couleur officiel.
++ *
++ * Les valeurs hexadécimales vivent dans src/styles/theme.css (--color-elem-*, --color-cat-*) ;
++ * ce module ne fait que la jointure characteristicId → classe utilitaire Tailwind.
++ */
++
++import { getStatCategory, type StatCapCategory } from './statCaps';
++
++export type ElementName = 'neutral' | 'earth' | 'fire' | 'water' | 'air';
++
++export const ELEMENT_LABELS: Record<ElementName, string> = {
++  neutral: 'Neutre',
++  earth: 'Terre',
++  fire: 'Feu',
++  water: 'Eau',
++  air: 'Air',
++};
++
++/** characteristicId → élément, pour les seules caractéristiques élémentaires (dataset.json). */
++const ELEMENT_BY_CHARACTERISTIC: Record<number, ElementName> = {
++  // % résistances (33 Terre, 34 Feu, 35 Eau, 36 Air, 37 Neutre)
++  33: 'earth',
++  34: 'fire',
++  35: 'water',
++  36: 'air',
++  37: 'neutral',
++  // résistances fixes (54 Terre, 55 Feu, 56 Eau, 57 Air, 58 Neutre)
++  54: 'earth',
++  55: 'fire',
++  56: 'water',
++  57: 'air',
++  58: 'neutral',
++  // dommages (88 Terre, 89 Feu, 90 Eau, 91 Air, 92 Neutre)
++  88: 'earth',
++  89: 'fire',
++  90: 'water',
++  91: 'air',
++  92: 'neutral',
++};
++
++/** Élément d'une caractéristique, ou null si elle n'en a pas (la plupart des stats). */
++export function getStatElement(characteristicId: number): ElementName | null {
++  return ELEMENT_BY_CHARACTERISTIC[characteristicId] ?? null;
++}
++
++/**
++ * Classes Tailwind littérales par token couleur (text/border/bg), une entrée par
++ * `--color-elem-*` / `--color-cat-*` de theme.css. Écrites en toutes lettres — pas de
++ * gabarit `text-${token}` — pour que le scanner de classes de Tailwind (v4, sans config
++ * de contenu explicite) les détecte : une classe construite par interpolation de chaîne
++ * n'apparaît dans aucun fichier sous sa forme finale et ne serait jamais générée.
++ */
++interface ColorClasses {
++  text: string;
++  border: string;
++  bg: string;
++  /** Fond faible opacité, pour un liseré d'icône discret derrière l'image de rune */
++  bgSoft: string;
++}
++
++const TOKEN_CLASSES = {
++  'elem-neutral': { text: 'text-elem-neutral', border: 'border-elem-neutral', bg: 'bg-elem-neutral', bgSoft: 'bg-elem-neutral/15' },
++  'elem-earth': { text: 'text-elem-earth', border: 'border-elem-earth', bg: 'bg-elem-earth', bgSoft: 'bg-elem-earth/15' },
++  'elem-fire': { text: 'text-elem-fire', border: 'border-elem-fire', bg: 'bg-elem-fire', bgSoft: 'bg-elem-fire/15' },
++  'elem-water': { text: 'text-elem-water', border: 'border-elem-water', bg: 'bg-elem-water', bgSoft: 'bg-elem-water/15' },
++  'elem-air': { text: 'text-elem-air', border: 'border-elem-air', bg: 'bg-elem-air', bgSoft: 'bg-elem-air/15' },
++  'cat-special': { text: 'text-cat-special', border: 'border-cat-special', bg: 'bg-cat-special', bgSoft: 'bg-cat-special/15' },
++  'cat-primary': { text: 'text-cat-primary', border: 'border-cat-primary', bg: 'bg-cat-primary', bgSoft: 'bg-cat-primary/15' },
++  'cat-damage': { text: 'text-cat-damage', border: 'border-cat-damage', bg: 'bg-cat-damage', bgSoft: 'bg-cat-damage/15' },
++  'cat-percent-dmg': { text: 'text-cat-percent-dmg', border: 'border-cat-percent-dmg', bg: 'bg-cat-percent-dmg', bgSoft: 'bg-cat-percent-dmg/15' },
++  'cat-resistance': { text: 'text-cat-resistance', border: 'border-cat-resistance', bg: 'bg-cat-resistance', bgSoft: 'bg-cat-resistance/15' },
++  'cat-utility': { text: 'text-cat-utility', border: 'border-cat-utility', bg: 'bg-cat-utility', bgSoft: 'bg-cat-utility/15' },
++} as const satisfies Record<string, ColorClasses>;
++
++type ColorToken = keyof typeof TOKEN_CLASSES;
++
++const CATEGORY_TOKEN: Record<StatCapCategory, ColorToken> = {
++  special: 'cat-special',
++  primary: 'cat-primary',
++  damage: 'cat-damage',
++  percent_dmg: 'cat-percent-dmg',
++  resistance: 'cat-resistance',
++  utility: 'cat-utility',
++};
++
++const ELEMENT_TOKEN: Record<ElementName, ColorToken> = {
++  neutral: 'elem-neutral',
++  earth: 'elem-earth',
++  fire: 'elem-fire',
++  water: 'elem-water',
++  air: 'elem-air',
++};
++
++/** Token couleur pour une caractéristique : élément si élémentaire, sinon famille. */
++export function getStatColorToken(characteristicId: number): ColorToken {
++  const element = getStatElement(characteristicId);
++  if (element) return ELEMENT_TOKEN[element];
++  return CATEGORY_TOKEN[getStatCategory(characteristicId)];
++}
++
++export function getStatColorClasses(characteristicId: number): ColorClasses {
++  return TOKEN_CLASSES[getStatColorToken(characteristicId)];
++}
++
++export function getStatTextClass(characteristicId: number): string {
++  return TOKEN_CLASSES[getStatColorToken(characteristicId)].text;
++}
++
++export function getStatBorderClass(characteristicId: number): string {
++  return TOKEN_CLASSES[getStatColorToken(characteristicId)].border;
++}
++
++export function getStatBgClass(characteristicId: number): string {
++  return TOKEN_CLASSES[getStatColorToken(characteristicId)].bg;
++}
+diff --git a/src/hooks/useAtelier.ts b/src/hooks/useAtelier.ts
+index b4a90b2..91a8ee5 100644
+--- a/src/hooks/useAtelier.ts
++++ b/src/hooks/useAtelier.ts
+@@ -40,6 +40,8 @@ export interface RuneOption {
+   /** Identifiant de la rune dans le dataset (clé du carnet de prix) */
+   runeId: number;
+   nameFr: string;
++  /** Icône de la rune (dataset, api.dofusdb.fr) */
++  img: string;
+ }
+ 
+ /** Estimation du MODÈLE probabiliste pour une rune, avec le nom du modèle (à afficher comme tel). */
+@@ -219,6 +221,7 @@ export function useAtelier() {
+         weight: info.value * density,
+         runeId: info.runeId,
+         nameFr: info.nameFr,
++        img: info.img,
+       }));
+     },
+     [overrides]
+diff --git a/src/styles/theme.css b/src/styles/theme.css
+index 202c192..c1424eb 100644
+--- a/src/styles/theme.css
++++ b/src/styles/theme.css
+@@ -11,7 +11,10 @@
+  *  - ACTION = vert franc et chaud (--color-cta), réservé aux boutons d'action principaux ;
+  *  - OVER = vert-menthe désaturé (--color-over), jamais sur un bouton ; EXO = bleu-vert froid ;
+  *    ligne éteinte = gris. Cohérent avec le code couleur du client depuis la 2.58 ;
+- *  - aucune ressource Ankama : glyphes, ornements et icônes sont des SVG originaux.
++ *  - ornements et glyphes de secours sont des SVG originaux ; les icônes d'objets et de
++ *    runes sont les icônes DofusDB (api.dofusdb.fr/img/items/*.png), données tierces
++ *    publiques déjà utilisées pour les objets — même principe que items.json.img ;
++ *  - couleurs d'élément/de famille de caractéristique : voir src/data/statColors.ts.
+  */
+ 
+ @theme {
+@@ -65,6 +68,25 @@
+   --color-st-contradiction: #ffb454;
+   --color-st-unknown: #ff6b5e;
+ 
++  /* ─── Éléments (identique dans les deux modes) ───
++   * Association élément → teinte reprise de la convention DOFUS habituelle (icônes de
++   * sort/résistance en jeu, DofusDB, wiki) : Feu rouge, Eau bleu, Air vert, Terre brun/
++   * orangé, Neutre blanc/gris. Les valeurs hexadécimales sont un choix de présentation
++   * pour ce site, pas une teinte extraite du client — voir src/data/statColors.ts. */
++  --color-elem-neutral: #c3bdac;
++  --color-elem-earth: #9a7a3f;
++  --color-elem-fire: #e2492f;
++  --color-elem-water: #4f9fe0;
++  --color-elem-air: #6bc95a;
++
++  /* ─── Familles non élémentaires (choix de présentation, DOFUS ne les colore pas en jeu) ─── */
++  --color-cat-special: #8a7fd1;
++  --color-cat-primary: #c98aa0;
++  --color-cat-damage: #c96a3a;
++  --color-cat-percent-dmg: #c9863a;
++  --color-cat-resistance: #6f93a8;
++  --color-cat-utility: #a68a63;
++
+   /* ─── Typographie ─── */
+   --font-display: 'Fraunces', Georgia, serif;
+   --font-text: 'Instrument Sans', system-ui, sans-serif;
+-- 
+2.43.0
+

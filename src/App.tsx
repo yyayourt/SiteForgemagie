@@ -89,7 +89,7 @@ function App() {
 
       <footer className="px-4 sm:px-7 py-4 text-xs text-ash-3 border-t border-iron-edge/60 flex flex-wrap gap-x-4 gap-y-1">
         <span>La Forge — reconstruction traçable de la forgemagie DOFUS 3. La formule du serveur est secrète : toute probabilité affichée est un modèle.</span>
-        <span className="ml-auto">Données d'objets DofusDB (dataset local). Icônes d'objets : assets Ankama, usage communautaire.</span>
+        <span className="ml-auto">Données d'objets et de runes DofusDB (dataset local). Icônes d'objets et de runes : assets Ankama, usage communautaire.</span>
       </footer>
 
       <ParamsDrawer open={paramsOpen} onClose={() => setParamsOpen(false)} />
