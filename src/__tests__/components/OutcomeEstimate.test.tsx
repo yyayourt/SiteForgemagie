@@ -29,14 +29,16 @@ afterEach(cleanup);
 
 const CHAR_PA = 1;
 const CHAR_PM = 23;
-const CHAR_INVOCATIONS = 26;
+const CHAR_PO = 19;
+const CHAR_DO_DISTANCE = 120; // exo léger de référence (Invocations est lourd depuis 2026-09-16)
 
-const show = (estimate: ProbabilityEstimate, characteristicId = CHAR_INVOCATIONS, isHeavyExo = false) =>
+const show = (estimate: ProbabilityEstimate, characteristicId = CHAR_DO_DISTANCE, isHeavyExo = false, heavyByWeight = false) =>
   render(
     <OutcomeEstimate
       estimate={estimate}
       model="official_factors_linear"
       isHeavyExo={isHeavyExo}
+      heavyByWeight={heavyByWeight}
       characteristicId={characteristicId}
     />
   );
@@ -96,23 +98,23 @@ describe('forme « intervalle » — une création d’effet non lourde', () => 
     show(estimate());
     const note = screen.getByTestId('interval-note').textContent ?? '';
     expect(note).toContain('inconnu');
-    expect(note).toContain('la borne basse');
+    expect(note).toContain('la borne haute'); // best, défaut depuis 2026-09-16
     expect(note).toContain('Monte Carlo');
   });
 
-  it('suit le paramètre de tirage quand il change', () => {
-    const params = { ...getProbabilityParams(), unknownIntervalSampling: 'best' as const };
+  it('suit le paramètre de tirage quand il change (worst reste disponible)', () => {
+    const params = { ...getProbabilityParams(), unknownIntervalSampling: 'worst' as const };
     const e = estimateOutcome(input({ line: { value: 0, baseMin: 0, baseMax: 0, isExo: true } }), params);
     show(e);
-    expect(screen.getByTestId('interval-note').textContent).toContain('la borne haute');
-    if (e.kind !== 'interval') throw new Error('intervalle attendu');
-    expect(e.sampling).toEqual(ANCHOR_BEST_CREATION);
-  });
-
-  it('le tirage par défaut reste la borne basse', () => {
-    const e = estimateOutcome(input({ line: { value: 0, baseMin: 0, baseMax: 0, isExo: true } }), getProbabilityParams());
+    expect(screen.getByTestId('interval-note').textContent).toContain('la borne basse');
     if (e.kind !== 'interval') throw new Error('intervalle attendu');
     expect(e.sampling).toEqual(ANCHOR_WORST_CREATION);
+  });
+
+  it("le tirage par défaut est la borne haute (ancre 4, création d'effet facile) — décision du 2026-09-16", () => {
+    const e = estimateOutcome(input({ line: { value: 0, baseMin: 0, baseMax: 0, isExo: true } }), getProbabilityParams());
+    if (e.kind !== 'interval') throw new Error('intervalle attendu');
+    expect(e.sampling).toEqual(ANCHOR_BEST_CREATION);
   });
 });
 
@@ -139,8 +141,22 @@ describe('forme « point » POLITIQUE — un exo lourd', () => {
     expect(note).toContain('trente-deux pour cent');
   });
 
-  it('PM : même clamp, un niveau de preuve en moins — Ankama ne le nomme même pas', () => {
+  it('PM : nommé par le tutoriel avec le PA (verbatim recoupé le 2026-09-14) — même note que le PA', () => {
     show(estimate(), CHAR_PM, true);
+    const note = screen.getByTestId('heavy-exo-note').textContent ?? '';
+    expect(note).toContain('PA ou PM');
+    expect(note).toContain('plancher attesté, pas la valeur du cas');
+  });
+
+  it('régime atteint par le poids cumulé (2ᵉ point de % Do) : la note donne cette raison, pas la liste', () => {
+    show(estimate(), 120, true, true);
+    const note = screen.getByTestId('heavy-exo-note').textContent ?? '';
+    expect(note).toContain('trente de poids ou plus');
+    expect(note).not.toContain('seuls les guides la rangent');
+  });
+
+  it('Portée : même clamp, un niveau de preuve en moins — Ankama ne la nomme pas', () => {
+    show(estimate(), CHAR_PO, true);
     const note = screen.getByTestId('heavy-exo-note').textContent ?? '';
     expect(note).toContain('hypothèse');
     expect(note).toContain('ne cite le');

@@ -14,6 +14,7 @@ doit citer ce document.**
 | [S1](S1-devblog-ankama-1.27.md) | DevBlog Ankama « La nouvelle forgemagie » | **1.27 (2010)** | **R3** |
 | [S3](S3-reconstruction-unity-2026.md) | Rapport de reconstruction (17 sections) | compilation 1.29 → 3.1 | **R4/R5** (compilateur) |
 | [S4](S4-reverse-engineering-technical-mapping.md) | Rapport de rétro-ingénierie technique | protocole 2.x + outillage Unity | **R4** (technique), **R6** sur le reliquat |
+| [S5](S5-rapport-exo-leger-2026-09-12.md) | Rapport de recherche « exo léger (poids < 30) », 2026-09-12 | hétérogène : Unity 3.6.10.x, 2.x, Touch | **compilateur** (R2 → R6 selon l'affirmation ; vidéos sans rang) |
 | [Généalogie](genealogie.md) | Arbre de dérivation des sources communautaires | 2010 → 2026 | — |
 
 ## Avertissement de classement (2026-09-10)

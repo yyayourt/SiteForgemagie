@@ -13,45 +13,51 @@
  * optimiste. C'est un défaut plus grave qu'une imprécision : un joueur brûle des runes.
  *
  * ─── Ce que le garde-fou fait ───────────────────────────────────────────────────────────
- * 1. EXO LOURD (PA, PM, PO) : pSC est **épinglé à 1 %**. Attention à ce que cela veut dire :
- *    le tutoriel Ankama écrit « peut **descendre jusqu'à** 1 % », donc 1 % est un
- *    **plancher attesté**, pas la valeur du cas. Retenir ce plancher COMME valeur, c'est
- *    appliquer au PA/PM/PO exactement la politique `unknownIntervalSampling = worst` que le
- *    point 2 applique aux autres créations d'effet : un exo lourd est une création d'effet
- *    comme une autre, son intervalle théorique va lui aussi de l'ancre 5 (1 %) à l'ancre 4
- *    (32 %), et **rien ne documente où il tombe entre les deux**.
+ * 1. RÉGIME 1 % (« exo lourd » : liste PA/PM/PO/Invocations, OU ligne dont le poids non
+ *    naturel après la rune atteint 30 — heavyRegime.ts) : pSC est **épinglé à 1 %**.
+ *    Attention à ce que cela veut dire : le tutoriel Ankama écrit « peut **descendre
+ *    jusqu'à** 1 % », donc 1 % est un **plancher attesté**, pas la valeur du cas. Retenir ce
+ *    plancher COMME valeur est une politique de projet (borne basse d'un intervalle qui va
+ *    théoriquement, comme pour toute création d'effet, de l'ancre 5 (1 %) à l'ancre 4
+ *    (32 %) — **rien ne documente où il tombe entre les deux**). Ce que cette politique a
+ *    pour elle : le consensus des guides, et le poids (≥ 30) qui place l'opération à
+ *    l'extrémité difficile.
  *    Le partage du complément reste `heavyExoEcShare` (HYPOTHÈSE COMMUNAUTAIRE, 1 par
  *    défaut → 1/0/99, l'ancre 5).
- * 2. AUTRE CRÉATION D'EFFET : aucune estimation ponctuelle n'est renvoyée. Le résultat est
- *    un INTERVALLE explicite marqué `INCONNU`, borné par les ancres 4 et 5 du DevBlog
- *    (32/50/18 → 1/0/99). Mieux vaut une incertitude affichée qu'un chiffre faux.
+ * 2. AUTRE CRÉATION D'EFFET (exo léger) : aucune estimation ponctuelle n'est renvoyée. Le
+ *    résultat est un INTERVALLE explicite marqué `INCONNU`, borné par les ancres 4 et 5 du
+ *    DevBlog (32/50/18 → 1/0/99). Mieux vaut une incertitude affichée qu'un chiffre faux.
  * 3. Le reste (normal, overmax) n'est pas touché : le modèle s'applique tel quel.
  *
  * ─── Statuts, sans mélange ──────────────────────────────────────────────────────────────
  * - **1 % est ATTEIGNABLE en exo PA** : `SOURCE PRIMAIRE — Unity` (tutoriel « La
  *   forgemagie », dofus.com/fr/mmorpg/tutoriels/420190 : « Le taux de réussite des
  *   forgemagies exotiques est en revanche automatiquement très faible et peut descendre
- *   jusqu'à 1 % si l'on souhaite ajouter un PA… »). C'est tout ce que la source garantit :
- *   une borne basse, pour une caractéristique nommée.
+ *   jusqu'à 1 % si l'on souhaite ajouter un PA ou un PM exotique, par exemple »). C'est tout
+ *   ce que la source garantit : une borne basse, pour deux caractéristiques nommées.
  * - **1 % EST le taux du PA** : `HYPOTHÈSE COMMUNAUTAIRE` forte, pas un fait. Ce qui la
  *   soutient : le consensus des guides depuis quinze ans, et la densité de 100 — la plus
  *   lourde du jeu — qui place l'opération à l'extrémité difficile de l'intervalle. Ce qui
  *   manque : toute mesure, et toute indication d'Ankama sur la position du PA entre l'ancre
  *   5 (1 %) et l'ancre 4 (32 %).
- * - **PM et Portée** : même clamp, un niveau de preuve en moins — Ankama ne les nomme même
- *   pas. `HEAVY_EXO_VERBATIM` (constraints.ts) porte cette distinction jusqu'à l'interface.
- * - L'USAGE du plancher COMME valeur : décision de projet, identique à
- *   `unknownIntervalSampling = worst`. Ne jamais annoncer mieux que le bas de l'intervalle
- *   sur une opération irréversible et coûteuse, tant qu'aucune mesure Unity n'existe. Choix
- *   délibérément pessimiste, écrit ici pour qu'on puisse le contester.
+ * - **PM** : nommé lui aussi par le tutoriel (« un PA ou un PM exotique », verbatim recoupé
+ *   le 2026-09-14) — même niveau de preuve que le PA.
+ * - **Portée et Invocations** : même clamp, un niveau de preuve en moins — Ankama ne les
+ *   nomme pas ; seule la convergence des guides les range avec le PA et le PM.
+ *   `HEAVY_EXO_VERBATIM` (constraints.ts) porte cette distinction jusqu'à l'interface.
+ * - L'USAGE du plancher COMME valeur (régime 1 %) : décision de projet, pessimiste,
+ *   écrite ici pour qu'on puisse la contester. Elle tient parce que le bas de l'intervalle
+ *   est attesté (PA, PM) ou soutenu par consensus (PO, Invocations, poids ≥ 30).
  * - Les BORNES de l'intervalle : `SOURCE PRIMAIRE — v1.27`, transposition `HYPOTHÈSE`.
- * - Le triplet servant à TIRER une issue en simulation (`sampling`) : **décision de modèle,
- *   pas détail d'affichage**, sortie en paramètre `probability.unknownIntervalSampling`
- *   (`worst` par défaut, `best` et `midpoint` disponibles). Un tirage exige un point ;
- *   prendre le haut de l'intervalle réintroduirait l'optimisme que ce module supprime.
- *   ⚠️ BIAIS ASSUMÉ : tant que ce paramètre vaut `worst`, tout Monte Carlo portant sur une
- *   création d'effet non lourde est **pessimiste par construction** — il ne mesure pas une
- *   incertitude, il mesure la borne basse. L'affichage, lui, montre l'intervalle entier.
+ * - Le triplet servant à TIRER une issue en simulation (`sampling`) pour un exo LÉGER :
+ *   **décision de modèle, pas détail d'affichage**, sortie en paramètre
+ *   `probability.unknownIntervalSampling`. `best` par défaut depuis le 2026-09-16 (ancre 4,
+ *   32/50/18 — le chiffre d'Ankama pour la création d'effet FACILE, ce que les sources et le
+ *   témoignage décrivent pour un exo léger ; décision de Yanis contre la politique du pire).
+ *   `worst` (défaut du 2026-09-10 au 2026-09-16) et `midpoint` restent disponibles.
+ *   ⚠️ BIAIS ASSUMÉ : quel que soit le réglage, tout Monte Carlo portant sur une création
+ *   d'effet non lourde mesure la borne choisie, pas une incertitude. L'affichage, lui,
+ *   montre l'intervalle entier.
  *
  * ─── Ce que le garde-fou n'est PAS ──────────────────────────────────────────────────────
  * Il ne construit AUCUN continuum de difficulté entre 32 % et 1 %. Le DevBlog décrit ce
@@ -98,7 +104,7 @@ export type ProbabilityEstimate =
 
 /**
  * Triplet d'un exo lourd : SC épinglé au plancher attesté (1 %), complément partagé par
- * `heavyExoEcShare`. Le plancher est primaire ; en faire la valeur est la politique `worst`.
+ * `heavyExoEcShare`. Le plancher est primaire ; en faire la valeur est une politique de projet.
  */
 export function heavyExoProbabilities(params: ProbabilityParams): ProbabilityOutput {
   return splitComplement(MIN_SC_HEAVY_EXO, params.heavyExoEcShare);
@@ -114,7 +120,7 @@ export function guardExoticEstimate(
 ): ProbabilityEstimate | null {
   if (attemptKind === 'heavy_exo') {
     // `POLITIQUE` et non `SOURCE PRIMAIRE` : la source garantit que 1 % est atteignable,
-    // pas que ce soit le taux. Retenir ce plancher comme valeur est la politique `worst`.
+    // pas que ce soit le taux. Retenir ce plancher comme valeur est une politique de projet.
     const probabilities = heavyExoProbabilities(params);
     return { kind: 'point', probabilities, sampling: probabilities, status: 'POLITIQUE', attemptKind };
   }

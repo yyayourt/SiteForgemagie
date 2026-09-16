@@ -39,7 +39,7 @@ export interface ProbabilityInput {
   runeWeight: number;
   /** Valeur ajoutée par la rune (points) : décide si la tentative est un overmax. */
   runeValue: number;
-  /** Exo lourd (PA/PM/PO) : garde-fou à 1 % au lieu du modèle. */
+  /** Régime 1 % (liste PA/PM/PO/Invocations, ou poids cumulé ≥ seuil : heavyRegime.ts) : garde-fou au lieu du modèle. */
   isHeavyExo: boolean;
   /** Reliquat serveur (état propre). Aucun modèle certain ne l'utilise. */
   residualPool: number;
@@ -81,8 +81,10 @@ export interface ProbabilityModel {
  * tentative d'overmax ou de forgemagie exotique ».
  * - normal : ligne naturelle qui reste ≤ son jet max après la rune ;
  * - over : ligne naturelle qui dépasse (ou dépasse déjà) son jet max ;
- * - exo : ligne exotique hors PA/PM/PO ;
- * - heavy_exo : exo PA/PM/PO (garde-fou officiel à 1 %).
+ * - exo : ligne exotique hors régime 1 % (exo léger) ;
+ * - heavy_exo : régime 1 % — liste PA/PM/PO/Invocations, ou poids non naturel de la ligne
+ *   ≥ seuil après la rune (heavyRegime.ts). Avec `heavyExoIncludeOvermax`, une ligne
+ *   naturelle peut y entrer : le nom est historique, la nature est « SC seulement ».
  */
 export type AttemptKind = 'normal' | 'over' | 'exo' | 'heavy_exo';
 

@@ -180,8 +180,9 @@ describe('utilitaires', () => {
     const p = params();
     expect(isHeavyExo(1, true, p)).toBe(true);
     expect(isHeavyExo(1, false, p)).toBe(false);
-    expect(isHeavyExo(26, true, p)).toBe(false); // Invocations : pas dans la liste
-    expect(isHeavyExo(26, true, params({ heavyExoCharacteristics: [1, 23, 19, 26] }))).toBe(true);
+    expect(isHeavyExo(26, true, p)).toBe(true); // Invocations : ajoutées le 2026-09-16 (HYPOTHÈSE COMMUNAUTAIRE)
+    expect(isHeavyExo(26, true, params({ heavyExoCharacteristics: [1, 23, 19] }))).toBe(false); // la liste décide, pas le poids
+    expect(isHeavyExo(16, true, p)).toBe(false); // Dommages (densité 20) : jamais lourd
   });
 
   it('drawOutcome is deterministic with an injected RNG', () => {

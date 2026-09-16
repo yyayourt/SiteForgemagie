@@ -28,11 +28,16 @@ export interface OutcomeEstimateProps {
   estimate: ProbabilityEstimate;
   model: ProbabilityModelName;
   isHeavyExo: boolean;
-  /** Caractéristique visée : décide si le taux de 1 % est verbatim (PA) ou extrapolé (PM, PO). */
+  /**
+   * Régime 1 % atteint par le poids cumulé de la ligne (heavyRegime.ts, règle
+   * cumulative_weight) et non par la liste : la note doit le dire. Optionnel : absent = liste.
+   */
+  heavyByWeight?: boolean;
+  /** Caractéristique visée : décide si le plancher de 1 % est verbatim (PA, PM) ou extrapolé (PO, Invocations). */
   characteristicId: number;
 }
 
-export function OutcomeEstimate({ estimate, model, isHeavyExo, characteristicId }: OutcomeEstimateProps) {
+export function OutcomeEstimate({ estimate, model, isHeavyExo, heavyByWeight = false, characteristicId }: OutcomeEstimateProps) {
   return (
     <>
       {estimate.kind === 'point' && estimate.status === 'MODÈLE' && (
@@ -69,21 +74,28 @@ export function OutcomeEstimate({ estimate, model, isHeavyExo, characteristicId 
       {estimate.kind === 'point' && estimate.status === 'POLITIQUE' && (
         <p className="m-0 mt-2 text-[11px] text-molten-text leading-snug" data-testid="heavy-exo-note">
           <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" />{' '}
-          {isHeavyExoRateVerbatim(characteristicId) ? (
+          {heavyByWeight ? (
             <>
-              Exotique PA. Ankama écrit que le taux « peut descendre jusqu'à un pour cent » : c'est
-              un plancher attesté, pas la valeur du cas.
+              Ligne à trente de poids ou plus au-delà du jet : d'après les guides, elle ne passe
+              plus qu'en succès critique, comme un exo PA — c'est ce qui rend le deuxième point
+              d'un pourcentage de dommages si dur. Aucune source Ankama.
+            </>
+          ) : isHeavyExoRateVerbatim(characteristicId) ? (
+            <>
+              Exotique PA ou PM. Ankama écrit que le taux « peut descendre jusqu'à un pour cent si
+              l'on souhaite ajouter un PA ou un PM exotique » : c'est un plancher attesté, pas la
+              valeur du cas.
             </>
           ) : (
             <>
               Exotique lourd. Ankama ne cite le « peut descendre jusqu'à un pour cent » que pour le
-              PA : pour cette caractéristique-ci, même le plancher n'est pas attesté, seuls les
-              guides la rangent avec le PA.
+              PA et le PM : pour cette caractéristique-ci, même le plancher n'est pas attesté, seuls
+              les guides la rangent avec eux.
             </>
           )}{' '}
-          Le simulateur retient ce plancher comme valeur, par la même politique conservatrice que
-          pour les autres créations d'effet, dont l'intervalle monte jusqu'à trente-deux pour cent.
-          Où tombe cette rune entre les deux n'est documenté nulle part.
+          Le simulateur retient ce plancher comme valeur. En théorie l'intervalle d'une création
+          d'effet monte jusqu'à trente-deux pour cent ; où tombe cette rune entre les deux n'est
+          documenté nulle part.
         </p>
       )}
     </>

@@ -18,6 +18,8 @@ import {
   drawOutcome,
   estimateOutcome,
   isHeavyExo,
+  isHeavyRegime,
+  nonNaturalLineWeightAfter,
   itemQualityExcluding,
   mathRandomRng,
   createSeededRng,
@@ -57,6 +59,11 @@ export interface RuneEstimate {
   estimate: ProbabilityEstimate;
   model: ProbabilityModelName;
   isHeavyExo: boolean;
+  /**
+   * Régime 1 % atteint par le POIDS cumulé de la ligne (règle cumulative_weight), et non par
+   * la liste PA/PM/PO/Invocations : l'interface doit donner la bonne raison.
+   */
+  heavyByWeight: boolean;
   /** Usage de la borne over/exo si la rune passe (cumul / borne), 1 = à la borne */
   overCapUsage: number;
   /** Valeur qui s'appliquerait réellement (troncature à la borne) ; 0 = la rune serait refusée */
@@ -241,10 +248,22 @@ export function useAtelier() {
       const target = stats.find((s) => s.characteristicId === characteristicId);
       const option = runeOptions(characteristicId).find((o) => o.tier === tier);
       if (!target || !option || option.value <= 0) return null;
-      const heavy = isHeavyExo(characteristicId, target.isExo, probabilityParams);
       const rune = { characteristicId, value: option.value };
       const overCapUsage = overCapUsageAfter(engineState, rune, engineParams);
       const applicableValue = maxApplicableRuneValue(engineState, rune, engineParams);
+      // Régime 1 % : liste OU poids non naturel de la ligne APRÈS la rune (heavyRegime.ts).
+      const heavy = isHeavyRegime(
+        {
+          characteristicId,
+          isExo: target.isExo,
+          nonNaturalWeightAfter: nonNaturalLineWeightAfter(
+            { value: target.currentValue, baseMax: target.baseMax, isExo: target.isExo },
+            applicableValue,
+            target.weightPerPoint
+          ),
+        },
+        probabilityParams
+      );
       // Qualité globale : hors ligne visée (SOURCE PRIMAIRE — v1.27). Décompte des over/exo :
       // ligne visée COMPRISE, donc mesuré sur l'état APRÈS la rune — deux traitements
       // différents du même jet, conformément au DevBlog.
@@ -267,7 +286,8 @@ export function useAtelier() {
         },
         probabilityParams
       );
-      return { estimate: probabilityEstimate, model: probabilityParams.model, isHeavyExo: heavy, overCapUsage, applicableValue };
+      const heavyByWeight = heavy && !isHeavyExo(characteristicId, target.isExo, probabilityParams);
+      return { estimate: probabilityEstimate, model: probabilityParams.model, isHeavyExo: heavy, heavyByWeight, overCapUsage, applicableValue };
     },
     [stats, runeOptions, probabilityParams, level, state.residualPool, budget.remainingBudget, engineState, engineParams]
   );

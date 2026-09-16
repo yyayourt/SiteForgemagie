@@ -7,7 +7,8 @@
  * Trois étapes, dans cet ordre et jamais un autre :
  *   1. le MODÈLE propose un triplet (INCONNU, paramétré) ;
  *   2. le GARDE-FOU D'EXOTISME (exoGuard.ts) le remplace pour toute création d'effet — par
- *      1 % pour un exo lourd, par un INTERVALLE explicite sinon ;
+ *      1 % en régime lourd (liste ou poids cumulé ≥ 30, heavyRegime.ts), par un INTERVALLE
+ *      explicite sinon ;
  *   3. les BORNES OFFICIELLES (constraints.ts) relèvent pSC au plancher primaire s'il y en a un.
  *
  * La formule serveur est secrète : la sortie est une estimation paramétrée, à afficher comme
@@ -95,10 +96,7 @@ export function getProbabilityModel(name: ProbabilityModelName): ProbabilityMode
 
 export const PROBABILITY_MODEL_NAMES = Object.keys(MODELS) as ProbabilityModelName[];
 
-/** Exo lourd = ligne exotique dont la caractéristique figure dans heavyExoCharacteristics. */
-export function isHeavyExo(characteristicId: number, isExo: boolean, params: ProbabilityParams): boolean {
-  return isExo && params.heavyExoCharacteristics.includes(characteristicId);
-}
+export { isHeavyExo, isHeavyRegime, nonNaturalLineWeightAfter, type HeavyRegimeQuery } from './heavyRegime';
 
 /**
  * Estimation complète : triplet OU intervalle, avec son statut et la nature de la tentative.
@@ -123,9 +121,9 @@ export function estimateOutcome(
 
 /**
  * Triplet utilisé pour TIRER une issue. Pour une création d'effet non lourde, c'est la borne
- * choisie par `probability.unknownIntervalSampling` (`worst` par défaut : ancre 5). Un tirage
- * exige un point, et prendre le haut de l'intervalle réintroduirait l'optimisme que le
- * garde-fou supprime.
+ * choisie par `probability.unknownIntervalSampling` (`best` par défaut depuis le 2026-09-16 :
+ * ancre 4, 32/50/18). Un tirage exige un point ; lequel est un choix de projet, documenté
+ * dans empirical_params.json.
  *
  * ⚠️ Le Monte Carlo passe par ici : sur une création d'effet non lourde, il hérite du biais
  * de ce paramètre et n'explore PAS l'intervalle. Voir exoGuard.ts.

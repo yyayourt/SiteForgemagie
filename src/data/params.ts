@@ -63,9 +63,16 @@ export type ProbabilityModelName =
 export type PoolConsumptionRuleName = 'absorb_first';
 /**
  * Borne d'un intervalle INCONNU utilisée pour TIRER une issue. Choix de projet assumé,
- * jamais une donnée : `worst` par défaut, conservateur.
+ * jamais une donnée : `best` par défaut depuis le 2026-09-16 (décision de Yanis, voir
+ * empirical_params.json), `worst` auparavant.
  */
 export type UnknownIntervalSampling = 'worst' | 'best' | 'midpoint';
+/**
+ * Ce qui déclenche le régime « 1 % / SC seulement » : la seule liste de caractéristiques, ou
+ * la liste PLUS un seuil de poids non naturel de la ligne après la rune (HYPOTHÈSE
+ * COMMUNAUTAIRE, Fashionista + témoignage 2026-09-16). Voir probability/heavyRegime.ts.
+ */
+export type HeavyExoRuleName = 'characteristic_list' | 'cumulative_weight';
 /** Loi du jet de craft (INCONNU) : voir src/logic/craft/rollDistributions.ts. */
 export type RollDistributionName = 'uniform' | 'triangular';
 
@@ -325,18 +332,25 @@ export interface DevblogDifficultyWeights {
 export interface ProbabilityParams {
   model: ProbabilityModelName;
   /**
-   * Caractéristiques dont l'exo relève du garde-fou à 1 %. Étiquetage MIXTE : le PA est
-   * verbatim dans le tutoriel Ankama, le PM et la Portée sont une extrapolation
+   * Caractéristiques dont l'exo relève du garde-fou à 1 %. Étiquetage MIXTE : le PA et le PM
+   * sont verbatim dans le tutoriel Ankama, la Portée et les Invocations sont une extrapolation
    * communautaire convergente (voir `HEAVY_EXO_VERBATIM` dans probability/constraints.ts).
    */
   heavyExoCharacteristics: readonly number[];
+  /** Règle de déclenchement du régime 1 % (HYPOTHÈSE COMMUNAUTAIRE) : voir heavyRegime.ts. */
+  heavyExoRule: HeavyExoRuleName;
+  /** Seuil de poids non naturel de la ligne après la rune, règle cumulative_weight (30, HYPOTHÈSE COMMUNAUTAIRE). */
+  heavyExoWeightThreshold: number;
+  /** Étendre la règle cumulative_weight à l'overmax d'une ligne naturelle (INCONNU, faux par défaut). */
+  heavyExoIncludeOvermax: boolean;
   /** Part du complément (1 − pSC) allant à l'EC en FM normale (INCONNU). */
   ecShare: number;
   /** Part du complément allant à l'EC en exo lourd (HYPOTHÈSE COMMUNAUTAIRE, 1 = pas de SN). */
   heavyExoEcShare: number;
   /**
    * Quelle borne d'un intervalle INCONNU sert au tirage d'issue (donc au Monte Carlo).
-   * `worst` par défaut : choix conservateur assumé. Biais connu et documenté — voir
+   * `best` par défaut (2026-09-16) : l'exo léger est traité comme la création d'effet facile
+   * du DevBlog (ancre 4). Biais connu et documenté — voir
    * `empirical_params.json → probability.unknownIntervalSampling`.
    */
   unknownIntervalSampling: UnknownIntervalSampling;
@@ -359,6 +373,9 @@ export function getProbabilityParams(overrides?: ParamOverrides): ProbabilityPar
   return {
     model: r<ProbabilityModelName>('model'),
     heavyExoCharacteristics: [...r<number[]>('heavyExoCharacteristics')],
+    heavyExoRule: r<HeavyExoRuleName>('heavyExoRule'),
+    heavyExoWeightThreshold: r<number>('heavyExoWeightThreshold'),
+    heavyExoIncludeOvermax: r<boolean>('heavyExoIncludeOvermax'),
     ecShare: r<number>('ecShare'),
     heavyExoEcShare: r<number>('heavyExoEcShare'),
     unknownIntervalSampling: r<UnknownIntervalSampling>('unknownIntervalSampling'),

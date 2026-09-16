@@ -17,6 +17,9 @@ import {
   ANCHOR_BEST_CREATION,
   ANCHOR_WORST_CREATION,
   PROBABILITY_MODEL_NAMES,
+  HEAVY_EXO_VERBATIM,
+  isHeavyExo,
+  isHeavyExoRateVerbatim,
   type ProbabilityInput,
 } from '../../logic/probability';
 import { getProbabilityParams, type ProbabilityParams } from '../../data/params';
@@ -106,14 +109,68 @@ describe('exo non lourd : un INTERVALLE, jamais un point', () => {
     }
   });
 
-  it('le tirage utilise la borne BASSE : un intervalle ne doit pas réintroduire un optimisme', () => {
-    expect(computeOutcomeProbabilities(lightExo(), params())).toEqual(ANCHOR_WORST_CREATION);
+  it("le tirage par défaut est la borne HAUTE (ancre 4, 32/50/18) : l'exo léger est la création d'effet facile du DevBlog — décision du 2026-09-16", () => {
+    expect(computeOutcomeProbabilities(lightExo(), params())).toEqual(ANCHOR_BEST_CREATION);
+  });
+
+  it('worst et midpoint restent sélectionnables', () => {
+    expect(computeOutcomeProbabilities(lightExo(), params({ unknownIntervalSampling: 'worst' }))).toEqual(ANCHOR_WORST_CREATION);
+    const mid = computeOutcomeProbabilities(lightExo(), params({ unknownIntervalSampling: 'midpoint' }));
+    expect(mid.pSC).toBeCloseTo((ANCHOR_BEST_CREATION.pSC + ANCHOR_WORST_CREATION.pSC) / 2, 12);
   });
 
   it("le SN existe en création d'effet : la borne haute n'est pas à 0 (ancre 4 inédite)", () => {
     const e = estimateOutcome(lightExo(), params());
     if (e.kind !== 'interval') throw new Error('unreachable');
     expect(e.best.pSN).toBeCloseTo(0.5, 12);
+  });
+
+  /**
+   * Garde contre une prémisse périmée (rapport externe du 2026-09-12, docs/knowledge/
+   * 2026-09-14-exo-leger.md) : « un exo léger retombe sur la formule générique et sort à
+   * ~50 % de SC ». C'était vrai avant P2 ; ce test l'empêche de redevenir vrai. Le cas est
+   * concret : % Dommages distance (120), densité 15, ni PA/PM/PO, sur un objet propre.
+   */
+  it("un exo % Dommages distance (poids 15) n'est PAS lourd et reste un intervalle, jamais un point du modèle", () => {
+    const p = params();
+    expect(isHeavyExo(120, true, p)).toBe(false);
+    for (const name of PROBABILITY_MODEL_NAMES) {
+      const e = estimateOutcome(input({ isHeavyExo: false, runeWeight: 15 }), adversarial(), name);
+      expect(e.kind).toBe('interval');
+      expect(e.status).toBe('INCONNU');
+      // aucun modèle, même adverse, ne peut faire sortir un point (et donc pas un « 50 % ») :
+      // le tirage est une borne de l'intervalle (best par défaut), jamais la sortie du modèle
+      expect(computeOutcomeProbabilities(input({ isHeavyExo: false, runeWeight: 15 }), adversarial(), name)).toEqual(
+        ANCHOR_BEST_CREATION
+      );
+    }
+  });
+});
+
+describe('verbatim du tutoriel : quelles caractéristiques Ankama nomme en citant le 1 %', () => {
+  it('le PA (1) et le PM (23) — phrase intégrale recoupée le 2026-09-14 ; la Portée (19) ne l’est pas', () => {
+    expect([...HEAVY_EXO_VERBATIM]).toEqual([1, 23]);
+    expect(isHeavyExoRateVerbatim(1)).toBe(true);
+    expect(isHeavyExoRateVerbatim(23)).toBe(true);
+    expect(isHeavyExoRateVerbatim(19)).toBe(false);
+  });
+
+  it("un exo Invocations (26) est épinglé à 1 / 0 / 99 — HYPOTHÈSE COMMUNAUTAIRE (Papycha, Fashionista), pas verbatim", () => {
+    const p = params();
+    expect(p.heavyExoCharacteristics).toContain(26);
+    expect(isHeavyExoRateVerbatim(26)).toBe(false);
+    const e = estimateOutcome(input({ runeWeight: 30 }), p);
+    expect(e.kind).toBe('point');
+    expect(e.status).toBe('POLITIQUE');
+    expect(computeOutcomeProbabilities(input({ runeWeight: 30 }), p)).toEqual(ANCHOR_WORST_CREATION);
+  });
+
+  it('le verbatim ne change pas le clamp : PA, PM, Portée et Invocations sortent tous à 1 %', () => {
+    const p = params();
+    for (const id of p.heavyExoCharacteristics) {
+      expect(isHeavyExo(id, true, p)).toBe(true);
+    }
+    expect(computeOutcomeProbabilities(input(), p).pSC).toBeCloseTo(MIN_SC_HEAVY_EXO, 12);
   });
 });
 

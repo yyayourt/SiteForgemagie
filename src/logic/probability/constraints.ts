@@ -30,9 +30,11 @@ export const MIN_SC_NORMAL = 0.15;
  *
  * Le tutoriel écrit « peut **descendre jusqu'à** 1 % » : c'est un **plancher**, pas une
  * valeur. Le moteur, lui, en fait aussi un **plafond** — et cela n'est pas primaire.
- * C'est l'application au cas de l'exo lourd de la même politique conservatrice que
- * `probability.unknownIntervalSampling` applique aux autres créations d'effet : retenir la
- * **borne basse** d'un intervalle dont on ne sait pas où l'on tombe.
+ * C'est une politique de projet : retenir la **borne basse** d'un intervalle dont on ne
+ * sait pas où l'on tombe, parce que pour ce cas précis cette borne est attestée (PA, PM)
+ * ou portée par le consensus. (Pour un exo LÉGER, `probability.unknownIntervalSampling`
+ * retient au contraire la borne HAUTE depuis le 2026-09-16 : les sources le placent du côté
+ * facile.)
  *
  * L'intervalle est le même que pour toute création d'effet : ancre 5 (1 %) à ancre 4
  * (32 %), v1.27. **Rien ne documente où le PA tombe entre les deux.** Le consensus
@@ -47,21 +49,26 @@ export const MIN_SC_HEAVY_EXO = 0.01;
 
 /**
  * Caractéristiques pour lesquelles Ankama **nomme** l'exotique en citant le 1 % : le **PA**
- * (caractéristique 1), et lui seul — « peut descendre jusqu'à 1 % si l'on souhaite ajouter
- * un PA… ».
+ * (caractéristique 1) et le **PM** (23) — « peut descendre jusqu'à 1 % si l'on souhaite
+ * ajouter un PA ou un PM exotique, par exemple ».
  *
- * ⚠️ Ce qui est verbatim, c'est **l'ATTEIGNABILITÉ du 1 % pour le PA**, pas le fait que ce
- * soit le taux du PA en toutes circonstances (voir `MIN_SC_HEAVY_EXO`). La distinction que
- * cette constante porte est donc : pour le PA, on sait que la borne basse existe ; pour le
- * PM (23) et la Portée (19), on ne sait même pas cela — aucune source primaire ne les nomme,
- * seule la convergence des guides les range avec le PA.
+ * Historique du verbatim : jusqu'au 2026-09-14 la citation retenue s'arrêtait à « …un PA… »
+ * et le PM était rangé avec la Portée (« peut-être dans la partie élidée »). La phrase
+ * intégrale a été recoupée le 2026-09-14 par deux relais citant le tutoriel mot pour mot
+ * (fil forum officiel « Tutoriel de Forgemagie [Mis à Jour] », blog Calinette) : le PM y est.
+ * Recoupement par relais, pas lecture directe de dofus.com (qui bloque le fetch) — noté pour
+ * être contesté si la page dit autre chose. Voir docs/knowledge/2026-09-14-exo-leger.md.
  *
- * Le clamp est identique pour les trois ; deux niveaux de preuve différents le justifient.
+ * ⚠️ Ce qui est verbatim, c'est **l'ATTEIGNABILITÉ du 1 % pour le PA et le PM**, pas le fait
+ * que ce soit leur taux en toutes circonstances (voir `MIN_SC_HEAVY_EXO`). La distinction que
+ * cette constante porte est donc : pour le PA et le PM, on sait que la borne basse existe ;
+ * pour la Portée (19) et les Invocations (26), on ne sait même pas cela — aucune source
+ * primaire ne les nomme, seule la convergence des guides les range avec le PA et le PM.
  *
- * Réserve : la citation se termine par des points de suspension. Le PM et la PO figurent
- * peut-être dans la partie élidée ; on ne le sait pas, donc on ne l'affirme pas.
+ * Le clamp est identique pour toutes les caractéristiques lourdes ; deux niveaux de preuve
+ * différents le justifient.
  */
-export const HEAVY_EXO_VERBATIM: readonly number[] = [1];
+export const HEAVY_EXO_VERBATIM: readonly number[] = [1, 23];
 
 /** Ankama nomme-t-il cette caractéristique en citant le 1 %, ou est-elle rangée là par convergence ? */
 export function isHeavyExoRateVerbatim(characteristicId: number): boolean {

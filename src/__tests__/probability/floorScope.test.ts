@@ -4,7 +4,8 @@
  * naturelle qui reste ≤ son jet max. Over et exo non lourd : aucun plancher (INCONNU).
  */
 import { describe, it, expect } from 'vitest';
-import { computeOutcomeProbabilities, attemptKindOf, officialFloorFor, MIN_SC_NORMAL, MIN_SC_HEAVY_EXO, type ProbabilityInput } from '../../logic/probability';
+import { computeOutcomeProbabilities, attemptKindOf, officialFloorFor, MIN_SC_NORMAL, MIN_SC_HEAVY_EXO,
+  ANCHOR_BEST_CREATION, type ProbabilityInput } from '../../logic/probability';
 import { getProbabilityParams, type ProbabilityParams } from '../../data/params';
 
 /** Modèle linéaire volontairement bas : a = 0,05, aucune pente → pSC brut 0,05 partout. */
@@ -61,11 +62,15 @@ describe('plancher 15 % : portée', () => {
     // parce que distanceToMax renvoyait 0. Le plancher de 1 % ne mordait jamais.
     // Depuis : toute création d'effet passe par exoGuard, quel que soit le modèle et quels
     // que soient ses paramètres — un réglage ne peut plus produire un exo optimiste.
+    // Le tirage d'un exo léger est la borne choisie par unknownIntervalSampling (best = ancre 4,
+    // 32 %, défaut depuis 2026-09-16) — jamais le a du modèle, quel qu'il soit.
     const exo = computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true } }), low());
-    expect(exo.pSC).toBeCloseTo(MIN_SC_HEAVY_EXO, 9); // borne basse de l'intervalle (ancre 5)
+    expect(exo.pSC).toBeCloseTo(ANCHOR_BEST_CREATION.pSC, 9);
     const p = low();
     const zero = { ...p, officialFactorsLinear: { ...p.officialFactorsLinear, a: 0 } };
-    expect(computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true } }), zero).pSC).toBeCloseTo(MIN_SC_HEAVY_EXO, 9);
+    expect(computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true } }), zero).pSC).toBeCloseTo(ANCHOR_BEST_CREATION.pSC, 9);
+    const worst = { ...zero, unknownIntervalSampling: 'worst' as const };
+    expect(computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true } }), worst).pSC).toBeCloseTo(MIN_SC_HEAVY_EXO, 9);
     const heavy = computeOutcomeProbabilities(input({ line: { value: 0, baseMax: 0, isExo: true }, isHeavyExo: true }), zero);
     expect(heavy.pSC).toBeCloseTo(MIN_SC_HEAVY_EXO, 9);
   });
