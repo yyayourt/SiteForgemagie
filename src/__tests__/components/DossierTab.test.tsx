@@ -7,7 +7,12 @@ import { DossierTab } from '../../components/knowledge/DossierTab';
 import { unknownParams } from '../../components/knowledge/dossierModel';
 import { PARAM_REGISTRY } from '../../data/paramRegistry';
 
-afterEach(cleanup);
+const originalScrollIntoView = Element.prototype.scrollIntoView;
+
+afterEach(() => {
+  cleanup();
+  Element.prototype.scrollIntoView = originalScrollIntoView;
+});
 const show = (focusSection?: string | null) => render(<ParamsProvider><DossierTab focusSection={focusSection} /></ParamsProvider>);
 
 describe('DossierTab', () => {
@@ -22,7 +27,7 @@ describe('DossierTab', () => {
   });
   it('une ligne se déplie pour montrer source et chemin', () => {
     show();
-    const btn = screen.getAllByRole('button', { name: /détails/ })[0];
+    const btn = screen.getAllByRole('button', { name: /détails/i })[0];
     expect(btn.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(btn);
     expect(btn.getAttribute('aria-expanded')).toBe('true');
@@ -31,7 +36,9 @@ describe('DossierTab', () => {
     const scrollIntoView = vi.fn();
     Element.prototype.scrollIntoView = scrollIntoView;
     show('densities');
-    expect(scrollIntoView).toHaveBeenCalled();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    const target = scrollIntoView.mock.contexts[0] as HTMLElement;
+    expect(target.id.startsWith('dossier-densities-')).toBe(true);
   });
   it('focusSection venu du hash ne doit jamais faire planter un sélecteur CSS (guillemet)', () => {
     Element.prototype.scrollIntoView = vi.fn();

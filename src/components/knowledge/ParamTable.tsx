@@ -32,6 +32,7 @@ function ParamRow({ d }: { d: ParamDescriptor }) {
           <button
             type="button"
             aria-expanded={open}
+            aria-label={`Détails : ${d.label}`}
             onClick={() => setOpen((o) => !o)}
             className="text-xs text-ash-3 underline hover:text-ash"
           >
@@ -41,14 +42,16 @@ function ParamRow({ d }: { d: ParamDescriptor }) {
       </tr>
       {open && (
         <tr className="border-t border-iron-edge/60 bg-well">
-          <td colSpan={4} className="px-3 py-3 text-xs text-ash-2 grid gap-1.5 break-words">
-            {d.entry.note && (
-              <p className="m-0 break-words"><span className="text-ash-3">Note : </span>{d.entry.note}</p>
-            )}
-            <p className="m-0 break-words"><span className="text-ash-3">Source : </span>{d.entry.source}</p>
-            <p className="m-0 break-words"><span className="text-ash-3">Bornes : </span>{fmt(d.entry.bounds)}</p>
-            <p className="m-0 break-words"><span className="text-ash-3">Défaut : </span>{fmt(d.entry.default)}</p>
-            <p className="m-0 font-mono text-[11px] break-words">{d.path}</p>
+          <td colSpan={4} className="px-3 py-3 bg-well">
+            <div className="grid gap-1.5 text-xs text-ash-2 break-words">
+              {d.entry.note && (
+                <p className="m-0 break-words"><span className="text-ash-3">Note : </span>{d.entry.note}</p>
+              )}
+              <p className="m-0 break-words"><span className="text-ash-3">Source : </span>{d.entry.source}</p>
+              <p className="m-0 break-words"><span className="text-ash-3">Bornes : </span>{fmt(d.entry.bounds)}</p>
+              <p className="m-0 break-words"><span className="text-ash-3">Défaut : </span>{fmt(d.entry.default)}</p>
+              <p className="m-0 font-mono text-[11px] break-words">{d.path}</p>
+            </div>
           </td>
         </tr>
       )}
