@@ -74,4 +74,10 @@ describe('RunePalette', () => {
     expect((screen.getByRole('button', { name: getCharacteristicName(PA) }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: /Orbe/ }) as HTMLButtonElement).disabled).toBe(true);
   });
+
+  it('marqueur exo lourd : présent sur la tuile PA (absente, heavy), absent sur Vitalité (sur objet)', () => {
+    setup();
+    expect(screen.getByRole('button', { name: getCharacteristicName(PA) }).textContent).toContain('✦');
+    expect(screen.getByRole('button', { name: getCharacteristicName(VITA) }).textContent).not.toContain('✦');
+  });
 });

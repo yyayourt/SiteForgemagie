@@ -115,7 +115,7 @@ export function RunePalette(props: RunePaletteProps) {
               {fmTile('Potion', false, true, undefined, <StatusBadge status="CONTRADICTION" />)}
             </div>
           </div>
-          <p className="text-[11px] text-ash-3"><span className="text-exo">violet</span> : exo · <span className="text-exo">✦</span> exo lourd (régime 1 %)</p>
+          <p className="text-[11px] text-ash-3"><span className="text-exo">turquoise</span> : exo · <span className="text-exo">✦</span> exo lourd (régime 1 %)</p>
         </div>
       </div>
     </section>
