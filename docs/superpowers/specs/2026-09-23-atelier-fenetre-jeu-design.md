@@ -64,7 +64,7 @@ Onglets `Historique · Budget · Coût`.
   (`special` en premier, marqué ✦ quand `isHeavyExo(cid, true, probabilityParams)` (logic/probability/heavyRegime.ts) est vrai) ; enfin
   *Objets FM* : Orbe, Transcendance (active seulement si la ligne visée en a une), Potion
   (désactivée, badge `CONTRADICTION`).
-- Tuile d'une caractéristique absente : liseré violet `exo`.
+- Tuile d'une caractéristique absente : liseré turquoise `exo` (--color-exo).
 - Objet transcendé ou mode Ajuster : les tuiles de runes sont désactivées avec la même
   raison qu'aujourd'hui (message dans le slot). En mode Ajuster, cliquer une tuile absente
   ajoute l'exo à 0 (comportement actuel de l'`ExoPicker` d'`ItemSlab`).
