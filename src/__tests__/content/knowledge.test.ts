@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { UNDERSTAND_SECTIONS, RUNE_PATH, MEASUREMENTS } from '../../content/knowledge';
 import { GLOSSARY } from '../../content/glossary';
 import { PARAM_BY_PATH, PARAM_REGISTRY } from '../../data/paramRegistry';
+import { buildDossierGroups } from '../../components/knowledge/dossierModel';
 
 const STATUSES = ['SOURCE PRIMAIRE', 'MODÈLE EMPIRIQUE', 'HYPOTHÈSE COMMUNAUTAIRE', 'CONTRADICTION', 'INCONNU'];
 const REGISTRY_SECTIONS = new Set(PARAM_REGISTRY.map((d) => d.section));
@@ -35,6 +36,18 @@ describe('contenu Comprendre', () => {
     }
   });
 
+  // M5 : « Voir le dossier » ouvre onOpenDossier(s.dossierSections[0]) ; DossierTab.tsx cherche
+  // ensuite un id `dossier-<focusSection>` exact ou un préfixe `dossier-<focusSection>-` (densités
+  // éclatées par famille). Chaque dossierSections[0] doit donc résoudre vers un vrai groupe.
+  it('dossierSections[0] de chaque section résout vers un groupe du Dossier (exact ou préfixe)', () => {
+    const groups = buildDossierGroups(PARAM_REGISTRY, '');
+    for (const s of UNDERSTAND_SECTIONS) {
+      const focusSection = s.dossierSections[0];
+      const resolves = groups.some((g) => g.id === focusSection || g.id.startsWith(`${focusSection}-`));
+      expect(resolves, `${s.id} → dossierSections[0]="${focusSection}" ne résout vers aucun groupe`).toBe(true);
+    }
+  });
+
   it('parcours d’une rune : 5 à 6 étapes pointant vers des sections existantes', () => {
     expect(RUNE_PATH.length).toBeGreaterThanOrEqual(5);
     expect(RUNE_PATH.length).toBeLessThanOrEqual(6);
@@ -47,6 +60,20 @@ describe('contenu Comprendre', () => {
       const d = PARAM_BY_PATH.get(path);
       expect(d, path).toBeDefined();
       expect(['INCONNU', 'CONTRADICTION']).toContain(d!.entry.status);
+    }
+  });
+
+  // F2 : un item qui cite un paramètre affiche désormais le statut RÉEL du paramètre (badge sur
+  // LiveValue), à côté de son propre statut. Les deux doivent rester en accord, sauf désaccord
+  // documenté explicitement dans le texte (allow-list ci-dessous).
+  const STATUS_DISAGREEMENT_ALLOWED = ['params.overCapScope'];
+  it('un item qui cite un paramètre porte le même statut que ce paramètre (sauf désaccord documenté)', () => {
+    const items = UNDERSTAND_SECTIONS.flatMap((s) => [...s.brief, ...s.steps, ...s.certain, ...s.uncertain]);
+    for (const it of items) {
+      if (!it.param) continue;
+      if (STATUS_DISAGREEMENT_ALLOWED.includes(it.param)) continue;
+      const d = PARAM_BY_PATH.get(it.param)!;
+      expect(it.status, `${it.param} : item=${it.status} vs registre=${d.entry.status} — "${it.text}"`).toBe(d.entry.status);
     }
   });
 });

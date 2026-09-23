@@ -3,24 +3,18 @@
  * thème (UNDERSTAND_SECTIONS, squelette fixe En bref / Comment ça marche / Exemple / Sûr / Pas
  * sûr / Voir le dossier), puis le glossaire (GLOSSARY).
  */
-import { useParams } from '../../app/ParamsProvider';
-import { readParam } from '../../data/params';
-import { PARAM_BY_PATH } from '../../data/paramRegistry';
 import { UNDERSTAND_SECTIONS, type KnowledgeExample, type KnowledgeItem } from '../../content/knowledge';
 import { GLOSSARY } from '../../content/glossary';
 import { StatusBadge } from '../shell/Badges';
 import { KnowledgeItemList } from './KnowledgeItemList';
 import { RunePathDiagram } from './RunePathDiagram';
-import { formatLiveValue } from './liveValue';
+import { LiveValue } from './liveValue';
 
-/** Valeur live d'un paramètre cité dans un exemple, affichée « libellé : valeur ». */
+/** Valeur live d'un paramètre cité dans un exemple : « libellé : valeur », avec son propre statut (F2). */
 function ExampleParamValue({ path }: { path: string }) {
-  const { overrides } = useParams();
-  const value = readParam<unknown>(path, overrides);
-  const label = PARAM_BY_PATH.get(path)?.label ?? path;
   return (
     <span className="text-[11px] text-ash-3">
-      {label} : {formatLiveValue(value)}
+      <LiveValue path={path} withLabel withBadge />
     </span>
   );
 }
@@ -76,7 +70,7 @@ export function UnderstandTab({
 }) {
   return (
     <div className="grid gap-10">
-      <section id="parcours" aria-labelledby="parcours-title" className="grid gap-3">
+      <section id="parcours" tabIndex={-1} aria-labelledby="parcours-title" className="grid gap-3">
         <h2 id="parcours-title" className="text-[20px] text-molten-text soft m-0">
           Le parcours d’une rune
         </h2>
@@ -84,7 +78,7 @@ export function UnderstandTab({
       </section>
 
       {UNDERSTAND_SECTIONS.map((s) => (
-        <section key={s.id} id={s.id} aria-labelledby={`${s.id}-title`} className="grid gap-4">
+        <section key={s.id} id={s.id} tabIndex={-1} aria-labelledby={`${s.id}-title`} className="grid gap-4">
           <h2 id={`${s.id}-title`} className="text-[20px] text-molten-text soft m-0">
             {s.title}
           </h2>
@@ -109,7 +103,7 @@ export function UnderstandTab({
               title="Sûr"
               dotClassName="bg-st-primary"
               items={s.certain}
-              emptyText="Rien d’établi par une source primaire pour l’instant."
+              emptyText="Rien d’établi pour l’instant."
             />
             <CertaintyColumn
               title="Pas sûr"
@@ -129,7 +123,7 @@ export function UnderstandTab({
         </section>
       ))}
 
-      <section id="glossaire" aria-labelledby="glossaire-title" className="grid gap-3">
+      <section id="glossaire" tabIndex={-1} aria-labelledby="glossaire-title" className="grid gap-3">
         <h2 id="glossaire-title" className="text-[20px] text-molten-text soft m-0">
           Glossaire
         </h2>

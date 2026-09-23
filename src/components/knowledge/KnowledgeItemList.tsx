@@ -7,28 +7,25 @@
  * valeur), elle reste collée en ligne ; sinon (phrase complète, « . » ou « ? ») elle passe sur
  * sa propre ligne avec le libellé du paramètre, pour ne pas produire « …(2012). capped_50 ».
  */
-import { useParams } from '../../app/ParamsProvider';
-import { readParam } from '../../data/params';
-import { PARAM_BY_PATH } from '../../data/paramRegistry';
 import type { KnowledgeItem } from '../../content/knowledge';
 import { StatusBadge } from '../shell/Badges';
-import { formatLiveValue } from './liveValue';
+import { LiveValue } from './liveValue';
 
 /** Valeur live collée en fin de phrase introductive (« Valeur retenue : » → « … : capped_50 »). */
 function InlineValue({ path }: { path: string }) {
-  const { overrides } = useParams();
-  const value = readParam<unknown>(path, overrides);
-  return <span className="tnum text-ash"> {formatLiveValue(value)}</span>;
+  return (
+    <span className="tnum text-ash">
+      {' '}
+      <LiveValue path={path} />
+    </span>
+  );
 }
 
 /** Valeur live sur sa propre ligne, avec le libellé du paramètre, quand le texte est une phrase complète. */
 function BlockValue({ path }: { path: string }) {
-  const { overrides } = useParams();
-  const value = readParam<unknown>(path, overrides);
-  const label = PARAM_BY_PATH.get(path)?.label ?? path;
   return (
     <span className="block text-[12px] text-ash-2">
-      Valeur actuelle — {label} : {formatLiveValue(value)}
+      Valeur actuelle — <LiveValue path={path} withLabel />
     </span>
   );
 }
