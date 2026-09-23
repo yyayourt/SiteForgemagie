@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, useId, type ReactNode } from 'react';
 import type { AtelierApi } from '../../hooks/useAtelier';
 import type { RuneOutcome, RuneTier } from '../../types';
 import { FM_ORBS, FM_POTIONS } from '../../data/dataset';
@@ -34,6 +34,7 @@ const SHORTCUTS: [string, string][] = [
 
 /** Le slot de fusion, sous les lignes : rune posée, prévision, Fusionner, Forcer. */
 export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleHelp }: Props) {
+  const headingId = useId();
   const { selected, item, itemLocked, mode } = atelier;
   const lockNote = getParamEntry<boolean>('params.transcendence.refuseIfOver');
   const rollLaw = getParamEntry<string>('params.craft.rollDistribution');
@@ -84,11 +85,17 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
       </div>
     );
   } else if (slotKind === 'potion') {
+    const potionStatus = getParamEntry<unknown>('params.potions.damageKeptPercentByLevel')?.status ?? 'CONTRADICTION';
     body = (
-      <p className="m-0 text-[13px] text-ash-2">
-        Potions non modélisées : la part de dégâts conservée est une <StatusBadge status="CONTRADICTION" /> entre les sources.{' '}
-        {FM_POTIONS.length} potions au dataset.
-      </p>
+      <div className="grid gap-2">
+        <p className="m-0 text-[13px] text-ash-2 leading-snug">
+          Les potions changent l'élément des dommages neutres d'une arme en conservant une part des dégâts. Cette part est une <StatusBadge status={potionStatus} /> non tranchée entre les sources, et l'API ne la fournit pas : le module n'est pas modélisé tant qu'elle n'est pas établie.
+        </p>
+        <ul className="m-0 p-0 list-none text-xs text-ash-3 grid grid-cols-2 gap-x-3 gap-y-0.5">
+          {FM_POTIONS.map((p) => <li key={p.id}>{p.nameFr} · niv. {p.level}</li>)}
+        </ul>
+        <button type="button" className="btn-cta w-full py-3 text-[18px]" disabled title="Non modélisé : taux de conservation en CONTRADICTION">Appliquer une potion</button>
+      </div>
     );
   } else if (!selected) {
     body = <p className="text-sm text-ash-3">Cliquez une ligne ou une rune de la palette pour la viser.</p>;
@@ -139,7 +146,8 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-slab-edge/60" aria-label="Fusion">
+    <section className="mt-3 pt-3 border-t border-slab-edge/60" aria-labelledby={headingId}>
+      <h2 id={headingId} className="sr-only">Fusion</h2>
       {body}
       <div className="mt-2 flex justify-end">
         <button type="button" onClick={onToggleHelp} aria-expanded={showHelp} className="text-[11px] text-ash-3 hover:text-ash">⌨ raccourcis (?)</button>
@@ -149,6 +157,6 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
           {SHORTCUTS.map(([k, v]) => (<Fragment key={k}><dt><kbd className="font-mono text-ash">{k}</kbd></dt><dd className="m-0">{v}</dd></Fragment>))}
         </dl>
       )}
-    </div>
+    </section>
   );
 }

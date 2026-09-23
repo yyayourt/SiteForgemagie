@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode, type Ref } from 'react';
 import type { AtelierMode, SimulatedStat } from '../../types';
 import { CHARACTERISTICS_WITH_RUNES, getCharacteristicName, getRepresentativeRuneImg } from '../../data/dataset';
+import { getParamEntry } from '../../data/params';
 import { StatusBadge } from '../shell/Badges';
 import { RuneIcon } from './RuneIcon';
 import { buildPaletteGroups, type PaletteTile } from './paletteModel';
@@ -17,20 +18,22 @@ export interface RunePaletteProps {
   disabled: boolean;
   canTranscend: boolean;
   onPickCharacteristic: (characteristicId: number, onItem: boolean) => void;
-  onPickSlot: (kind: 'orb' | 'transcendence') => void;
+  onPickSlot: (kind: 'orb' | 'transcendence' | 'potion') => void;
   searchRef?: Ref<HTMLInputElement>;
 }
 
 /**
  * La palette : l'inventaire de runes de l'atelier. Une tuile par caractéristique ; poser la
  * rune d'une caractéristique absente crée l'exo, comme en jeu. Orbe, transcendance et potion
- * sont des tuiles « Objets FM ». La potion reste désactivée : taux de conservation en
- * CONTRADICTION, module non modélisé.
+ * sont des tuiles « Objets FM ». La potion est sélectionnable en mode « Forger » : le slot de
+ * fusion affiche alors l'avertissement (taux de conservation en CONTRADICTION, module non
+ * modélisé) et un bouton « Appliquer » désactivé.
  */
 export function RunePalette(props: RunePaletteProps) {
   const { stats, densityOf, heavyIds, selectedId, slotKind, mode, disabled, canTranscend, onPickCharacteristic, onPickSlot, searchRef } = props;
   const [query, setQuery] = useState('');
   const [collapsed, setCollapsed] = useState(false);
+  const potionStatus = getParamEntry<unknown>('params.potions.damageKeptPercentByLevel')?.status ?? 'CONTRADICTION';
 
   const groups = useMemo(() => {
     const presentIds = new Set(stats.map((s) => s.characteristicId));
@@ -112,10 +115,10 @@ export function RunePalette(props: RunePaletteProps) {
             <div className="grid gap-1.5">
               {fmTile('Orbe régénérant', slotKind === 'orb', disabled || mode !== 'forge', () => onPickSlot('orb'))}
               {fmTile('Transcendance', slotKind === 'transcendence', disabled || mode !== 'forge' || !canTranscend, () => onPickSlot('transcendence'))}
-              {fmTile('Potion', false, true, undefined, <StatusBadge status="CONTRADICTION" />)}
+              {fmTile('Potion', slotKind === 'potion', disabled || mode !== 'forge', () => onPickSlot('potion'), <StatusBadge status={potionStatus} />)}
             </div>
           </div>
-          <p className="text-[11px] text-ash-3"><span className="text-exo">turquoise</span> : exo · <span className="text-exo">✦</span> exo lourd (régime 1 %)</p>
+          <p className="text-[11px] text-ash-3"><span className="text-exo">turquoise</span> : exo · <span className="text-exo">✦</span> exo lourd (liste du moteur, régime 1 %)</p>
         </div>
       </div>
     </section>

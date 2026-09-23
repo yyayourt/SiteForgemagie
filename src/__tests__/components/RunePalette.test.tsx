@@ -55,12 +55,13 @@ describe('RunePalette', () => {
     expect(screen.queryByRole('button', { name: getCharacteristicName(PA) })).toBeNull();
   });
 
-  it('potion toujours désactivée ; transcendance selon canTranscend ; orbe → onPickSlot', () => {
+  it("potion → onPickSlot('potion') en mode forge ; transcendance selon canTranscend ; orbe → onPickSlot (F6)", () => {
     const p = setup();
-    expect((screen.getByRole('button', { name: /Potion/ }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: /Transcendance/ }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: /Orbe/ }));
     expect(p.onPickSlot).toHaveBeenCalledWith('orb');
+    fireEvent.click(screen.getByRole('button', { name: /Potion/ }));
+    expect(p.onPickSlot).toHaveBeenCalledWith('potion');
   });
 
   it('mode Ajuster : tuile présente désactivée, tuile absente active', () => {
@@ -69,10 +70,11 @@ describe('RunePalette', () => {
     expect((screen.getByRole('button', { name: getCharacteristicName(PA) }) as HTMLButtonElement).disabled).toBe(false);
   });
 
-  it('désactivée : tout est grisé', () => {
+  it('désactivée : tout est grisé, y compris la potion', () => {
     setup({ disabled: true });
     expect((screen.getByRole('button', { name: getCharacteristicName(PA) }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: /Orbe/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /Potion/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('marqueur exo lourd : présent sur la tuile PA (absente, heavy), absent sur Vitalité (sur objet)', () => {
