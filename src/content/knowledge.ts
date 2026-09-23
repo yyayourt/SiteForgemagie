@@ -84,7 +84,7 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
     ],
     steps: [
       {
-        text: 'Le poids d’une ligne = valeur × densité de la caractéristique (15 × 0,2 = 3 ; 10 × 0,1 = 1).',
+        text: 'Le poids d’une ligne = valeur × densité de la caractéristique (calcul détaillé dans l’exemple ci-dessous).',
         status: SP,
         source: 'infobulles lues en jeu, 2026-09-10',
       },
@@ -142,7 +142,7 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
         param: 'densities.124',
       },
       {
-        text: '% Critique (30 est la valeur Rétro, écart de version). Réserve : la lecture en jeu reste à consigner dans les observations.',
+        text: '% Critique, par point (30 est la valeur Rétro, écart de version ; réserve : la lecture en jeu reste à consigner dans les observations) :',
         status: SP,
         source: 'lecture en jeu Unity, errata',
         param: 'densities.18',
@@ -213,7 +213,7 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
         source: 'tutoriel Ankama ; DevBlog 2010 (v1.27)',
       },
       {
-        text: 'La formule du serveur n’est pas publiée (ça, c’est sûr) : le simulateur utilise des modèles réglables, pas la vraie formule, et le modèle lui-même est inconnu.',
+        text: 'La formule du serveur n’est pas publiée : le simulateur utilise des modèles réglables, pas la vraie formule, et le modèle lui-même est inconnu.',
         status: IN,
         source: 'paramètre params.probability.model',
       },
@@ -236,7 +236,7 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
         param: 'params.probability.model',
       },
       {
-        text: 'Le reste (1 − SC) va d’abord au SN, jusqu’à 50 % ; l’EC prend le reste. Modèle dérivé de cinq triplets du DevBlog 2010.',
+        text: 'Le reste (1 − SC) va d’abord au SN, jusqu’à 50 % ; l’EC prend le reste. Modèle dérivé de quatre triplets du DevBlog 2010 et d’un relevé d’Alterya (2012).',
         status: ME,
         source: 'paramètre params.probability.snSplit ; DevBlog 2010 (v1.27)',
         param: 'params.probability.snSplit',
@@ -292,7 +292,7 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
         source: 'relevés Dasech et Fek, errata',
       },
       {
-        text: '2ᵉ point de % Dommages Per So en exo : aucun SN, SC mesuré sur 10 000 à 15 000 runes (bêta 3.6) :',
+        text: '2ᵉ point de % Dommages aux sorts (rune Do Per So) en exo : aucun SN, SC mesuré sur 10 000 à 15 000 runes (bêta 3.6) :',
         status: ME,
         source: 'paramètre params.probability.cumulativeRegimeSc',
         param: 'params.probability.cumulativeRegimeSc',
@@ -554,12 +554,13 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
     ],
     steps: [
       {
-        text: 'Sur une ligne, le simulateur borne la valeur totale × densité (505 vita, 101 agilité), pas seulement la part over.',
+        text: 'Sur une ligne, le simulateur borne la valeur totale × densité, pas seulement la part over (avec la borne actuelle, par exemple 505 vita ou 101 agilité). Borne par ligne :',
         status: HC,
-        source: 'paramètre params.overCapLineBasis',
+        source: 'paramètres params.overCapLineBasis et params.overCapWeight',
+        param: 'params.overCapWeight',
       },
       {
-        text: 'Sur l’objet, il additionne les parts over (valeur − max) et les exos, face au plafond objet. Cette portée est supposée, la valeur du plafond inconnue. Plafond objet retenu :',
+        text: 'Sur l’objet, il additionne les parts over (valeur − max) et les exos, face au plafond objet. Cette portée est supposée (les sources se contredisent, voir « Pas sûr ») et la valeur du plafond est inconnue. Plafond objet retenu :',
         status: IN,
         source: 'paramètres params.overCapScope et params.objectNonNaturalCap',
         param: 'params.objectNonNaturalCap',
@@ -615,7 +616,7 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
         source: 'recherche en HDV 2026-09-09, errata (hypothèse écartée)',
       },
       {
-        text: '2ᵉ point de % Dommages Per So en exo : aucun SN, SC mesuré :',
+        text: '2ᵉ point de % Dommages aux sorts (rune Do Per So) en exo : aucun SN, SC mesuré :',
         status: ME,
         source: 'paramètre params.probability.cumulativeRegimeSc',
         param: 'params.probability.cumulativeRegimeSc',
@@ -912,7 +913,7 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
     certain: [],
     uncertain: [
       {
-        text: 'Facteur de niveau (= 3/200), soutenu par deux dépôts, le forum officiel et « Enpreur » :',
+        text: 'Facteur de niveau, soutenu par deux dépôts, le forum officiel et « Enpreur » :',
         status: HC,
         source: 'paramètre params.brisage.levelFactor ; analyse simulateur 2026-09-23',
         param: 'params.brisage.levelFactor',
@@ -1056,7 +1057,7 @@ export const RUNE_PATH: RunePathStep[] = [
   {
     label: 'Peser la rune et vérifier les limites',
     detail:
-      'Il calcule le poids de la rune, refuse si l’objet est transcendé, et arrête la rune à la borne d’over/exo si besoin.',
+      'Il calcule le poids de la rune, refuse si l’objet est transcendé, et (hypothèse du simulateur) arrête la rune à la borne d’over/exo si besoin.',
     sectionId: 'over-exo',
   },
   {
@@ -1072,7 +1073,7 @@ export const RUNE_PATH: RunePathStep[] = [
   },
   {
     label: 'Choisir les pertes',
-    detail: 'Le reliquat paie d’abord, puis une loi choisit les lignes qui perdent et combien de points.',
+    detail: 'Dans le simulateur, le reliquat paie d’abord (ordre réel inconnu), puis une loi choisit les lignes qui perdent et combien de points.',
     sectionId: 'pertes',
   },
   {

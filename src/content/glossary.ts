@@ -108,7 +108,7 @@ export const GLOSSARY: GlossaryEntry[] = [
     id: 'sn',
     term: 'SN (succès neutre)',
     definition:
-      'La rune passe, et l’objet perd le poids de la rune, ligne visée comprise. Au plus 50 % de chances selon le DevBlog 2010.',
+      'La rune passe, et l’objet perd le poids de la rune, ligne visée comprise. Au plus 50 % de chances selon le DevBlog 2010 (règle de 2010, transposition à Unity non vérifiée).',
     status: 'SOURCE PRIMAIRE',
   },
   {

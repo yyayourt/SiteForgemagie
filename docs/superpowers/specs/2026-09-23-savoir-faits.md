@@ -73,7 +73,7 @@ Section `densities` (toutes les entrées `densities.N`). Chemins clés : `densit
 1. Le modèle choisi calcule une chance de SC à partir de la distance au jet max (et d'autres facteurs, à pente nulle pour l'instant). [INCONNU — source: EP params.probability.model, params.probability.officialFactorsLinear.$comment (l.440)]
 2. Le reste (1 − SC) va d'abord au SN, jusqu'à 50 % ; l'EC prend le reste. [MODÈLE EMPIRIQUE (dérivé des ancres v1.27, 5 triplets) — source: EP params.probability.snSplit (l.390-401) ; ANA:29-38]
 3. Si la tentative crée ou étend un exo lourd, le SC est épinglé à 1 %, sans SN. [HYPOTHÈSE COMMUNAUTAIRE (valeur) / POLITIQUE (usage du plancher comme valeur) — source: EP params.probability.heavyExoCharacteristics (l.321-330), params.probability.heavyExoEcShare (l.403-412)]
-4. Un exo léger n'a pas de chiffre : le jeu affiche un intervalle entre 1/0/99 et 32/50/18 ; le tirage utilise la borne haute. [INCONNU (choix de projet) — source: EP params.probability.unknownIntervalSampling (l.425-437)]
+4. Un exo léger n'a pas de chiffre : le simulateur affiche un intervalle entre 1/0/99 et 32/50/18 ; le tirage utilise la borne haute. [INCONNU (choix de projet) — source: EP params.probability.unknownIntervalSampling (l.425-437)]
 5. Enfin, les bornes officielles (15 % ; 1 %) sont appliquées par-dessus tout modèle. [SOURCE PRIMAIRE — source: constraints.ts:83-93]
 
 ### Exemple
