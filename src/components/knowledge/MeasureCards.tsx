@@ -27,7 +27,7 @@ function MeasureCard({ d }: { d: ParamDescriptor }) {
   const shown = showTruncated ? `${protocol.slice(0, TRUNCATE_AT)}…` : protocol;
 
   return (
-    <div data-testid="measure-card" className="surface-iron p-4 grid gap-2">
+    <div data-testid="measure-card" className="surface-iron p-4 grid gap-2 min-w-0">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <span className="text-ash text-sm">
           {d.subgroup && <span className="text-ash-3">{d.subgroup} · </span>}
@@ -35,10 +35,10 @@ function MeasureCard({ d }: { d: ParamDescriptor }) {
         </span>
         <StatusBadge status={d.entry.status} />
       </div>
-      <p className="m-0 text-xs text-ash-2">
+      <p className="m-0 text-xs text-ash-2 break-words min-w-0">
         Valeur actuelle : <span className="tnum text-ash">{fmt(value)}</span>
       </p>
-      <p className="m-0 text-xs text-ash-2 leading-snug break-words">
+      <p className="m-0 text-xs text-ash-2 leading-snug break-words min-w-0">
         {protocol ? (
           <>
             <span className="text-ash-3">À observer : </span>
@@ -64,7 +64,7 @@ function MeasureCard({ d }: { d: ParamDescriptor }) {
 export function MeasureCards() {
   const items = unknownParams(PARAM_REGISTRY);
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-3 sm:grid-cols-2 min-w-0">
       {items.map((d) => (
         <MeasureCard key={d.path} d={d} />
       ))}

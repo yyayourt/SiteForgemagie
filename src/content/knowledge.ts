@@ -1121,12 +1121,3 @@ export const MEASUREMENTS: Record<string, string> = {
   'densities.78': 'Lecture en infobulle, à consigner dans les observations avant de changer le statut.',
   'densities.79': 'Lecture en infobulle, à consigner dans les observations avant de changer le statut.',
 };
-
-/** TEMPORAIRE : supprimé en Task 5 (KnowledgePage.tsx l'importe encore). */
-export const KNOWLEDGE_SECTIONS = [] as {
-  id: string;
-  title: string;
-  paramSections: string[];
-  prose: string[];
-  certain?: string[];
-}[];

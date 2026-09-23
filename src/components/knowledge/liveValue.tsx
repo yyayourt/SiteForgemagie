@@ -14,9 +14,9 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 
 export function formatLiveValue(value: unknown): ReactNode {
   if (isPlainObject(value)) {
-    return Object.entries(value)
-      .map(([k, v]) => `${k} : ${fmt(v)}`)
-      .join(' · ');
+    const entries = Object.entries(value);
+    if (entries.length === 0) return <span className="text-ash-3">aucune valeur</span>;
+    return entries.map(([k, v]) => `${k} : ${fmt(v)}`).join(' · ');
   }
   if (typeof value === 'string') {
     return <code className="font-mono text-[12px]">{value}</code>;

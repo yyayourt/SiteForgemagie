@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // src/__tests__/components/DossierTab.test.tsx
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { ParamsProvider } from '../../app/ParamsProvider';
 import { DossierTab } from '../../components/knowledge/DossierTab';
@@ -8,7 +8,7 @@ import { unknownParams } from '../../components/knowledge/dossierModel';
 import { PARAM_REGISTRY } from '../../data/paramRegistry';
 
 afterEach(cleanup);
-const show = () => render(<ParamsProvider><DossierTab /></ParamsProvider>);
+const show = (focusSection?: string | null) => render(<ParamsProvider><DossierTab focusSection={focusSection} /></ParamsProvider>);
 
 describe('DossierTab', () => {
   it('une carte « à mesurer » par paramètre INCONNU ou CONTRADICTION', () => {
@@ -26,5 +26,11 @@ describe('DossierTab', () => {
     expect(btn.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(btn);
     expect(btn.getAttribute('aria-expanded')).toBe('true');
+  });
+  it('focusSection « densities » défile vers le premier groupe dossier-densities-*', () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    show('densities');
+    expect(scrollIntoView).toHaveBeenCalled();
   });
 });

@@ -15,12 +15,17 @@ export function DossierTab({ focusSection }: { focusSection?: string | null }) {
 
   useEffect(() => {
     if (!focusSection) return;
-    document.getElementById(`dossier-${focusSection}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Préfixe : les densités sont éclatées en groupes `dossier-densities-<famille>`, focus 'densities'
+    // doit atteindre le premier groupe qui commence par cet id.
+    document.querySelector(`[id^="dossier-${focusSection}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- au montage seulement
   }, []);
 
   return (
-    <div className="grid gap-6">
+    // flex-col (pas grid) : un item flex-col s'étire par défaut à la largeur du conteneur au lieu
+    // de se dimensionner sur son contenu (table large), ce qui évite une fuite de largeur au-delà
+    // du scroll interne de ParamTable (overflow-x-auto) jusqu'au document.
+    <div className="flex flex-col gap-6 min-w-0">
       <input
         type="search"
         aria-label="Rechercher un paramètre"
@@ -33,7 +38,7 @@ export function DossierTab({ focusSection }: { focusSection?: string | null }) {
       {groups.length === 0 && <p className="text-ash-2 text-sm m-0">Aucun paramètre ne correspond.</p>}
 
       {groups.map((g) => (
-        <section key={g.id} id={`dossier-${g.id}`} className="grid gap-3" aria-labelledby={`dossier-${g.id}-title`}>
+        <section key={g.id} id={`dossier-${g.id}`} className="flex flex-col gap-3 min-w-0" aria-labelledby={`dossier-${g.id}-title`}>
           <h2 id={`dossier-${g.id}-title`} className="text-[20px] text-molten-text soft m-0">
             {g.label}
           </h2>
@@ -59,7 +64,7 @@ export function DossierTab({ focusSection }: { focusSection?: string | null }) {
         </section>
       ))}
 
-      <section id="dossier-mesurer" className="grid gap-3" aria-labelledby="dossier-mesurer-title">
+      <section id="dossier-mesurer" className="flex flex-col gap-3 min-w-0" aria-labelledby="dossier-mesurer-title">
         <h2 id="dossier-mesurer-title" className="text-[20px] text-st-unknown soft m-0">
           Aide-nous à mesurer
         </h2>

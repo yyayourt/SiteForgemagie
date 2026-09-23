@@ -59,7 +59,10 @@ function ParamRow({ d }: { d: ParamDescriptor }) {
 export function ParamTable({ items }: { items: ParamDescriptor[] }) {
   if (items.length === 0) return null;
   return (
-    <div className="overflow-x-auto rounded-control border border-iron-edge">
+    // [contain:layout] : empêche le débordement horizontal interne (table large) de fuiter dans
+    // scrollWidth des ancêtres (Chromium calcule sinon le scrollWidth du document en incluant le
+    // contenu scrollable interne malgré overflow-x-auto, une fois niché dans plusieurs flex/grid).
+    <div className="w-full min-w-0 overflow-x-auto rounded-control border border-iron-edge [contain:layout]">
       <table className="w-full text-[13px] border-collapse">
         <thead>
           <tr className="text-left text-ash-3 bg-well">
