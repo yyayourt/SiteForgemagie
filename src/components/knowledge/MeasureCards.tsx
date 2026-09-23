@@ -22,6 +22,7 @@ function MeasureCard({ d }: { d: ParamDescriptor }) {
   const documented = MEASUREMENTS[d.path];
   const fallback = d.entry.note;
   const protocol = documented ?? fallback ?? '';
+  const protocolLabel = documented ? 'À observer : ' : fallback ? 'Note : ' : null;
   const canTruncate = !documented && protocol.length > TRUNCATE_AT;
   const showTruncated = canTruncate && !expanded;
   const shown = showTruncated ? `${protocol.slice(0, TRUNCATE_AT)}…` : protocol;
@@ -41,7 +42,7 @@ function MeasureCard({ d }: { d: ParamDescriptor }) {
       <p className="m-0 text-xs text-ash-2 leading-snug break-words min-w-0">
         {protocol ? (
           <>
-            <span className="text-ash-3">À observer : </span>
+            <span className="text-ash-3">{protocolLabel}</span>
             {shown}
           </>
         ) : (
