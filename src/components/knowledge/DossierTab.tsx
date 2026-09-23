@@ -43,7 +43,7 @@ export function DossierTab({ focusSection }: { focusSection?: string | null }) {
       {groups.length === 0 && <p className="text-ash-2 text-sm m-0">Aucun paramètre ne correspond.</p>}
 
       {groups.map((g) => (
-        <section key={g.id} id={`dossier-${g.id}`} className="flex flex-col gap-3 min-w-0" aria-labelledby={`dossier-${g.id}-title`}>
+        <section key={g.id} id={`dossier-${g.id}`} tabIndex={-1} className="flex flex-col gap-3 min-w-0" aria-labelledby={`dossier-${g.id}-title`}>
           <h2 id={`dossier-${g.id}-title`} className="text-[20px] text-molten-text soft m-0">
             {g.label}
           </h2>
@@ -69,7 +69,7 @@ export function DossierTab({ focusSection }: { focusSection?: string | null }) {
         </section>
       ))}
 
-      <section id="dossier-mesurer" className="flex flex-col gap-3 min-w-0" aria-labelledby="dossier-mesurer-title">
+      <section id="dossier-mesurer" tabIndex={-1} className="flex flex-col gap-3 min-w-0" aria-labelledby="dossier-mesurer-title">
         <h2 id="dossier-mesurer-title" className="text-[20px] text-st-unknown soft m-0">
           Aide-nous à mesurer
         </h2>

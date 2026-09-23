@@ -26,7 +26,13 @@ const COMPRENDRE_ENTRIES: TocEntry[] = [
 ];
 
 function scrollToSection(id: string): void {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Déplace le focus clavier sur la section visée (elle porte tabIndex={-1}) : sans ça, la
+  // navigation depuis le sommaire ou le schéma laisse le focus sur le bouton cliqué, loin de la
+  // section qui vient de défiler à l'écran.
+  el.focus({ preventScroll: true });
 }
 
 /** Page « Savoir », générée depuis empirical_params.json + le contenu de src/content/. */

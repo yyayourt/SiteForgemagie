@@ -1,12 +1,23 @@
 // @vitest-environment jsdom
 // src/__tests__/components/KnowledgePage.test.tsx
-import { describe, it, expect, afterEach, beforeEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { ParamsProvider } from '../../app/ParamsProvider';
 import { KnowledgePage } from '../../pages/KnowledgePage';
 
-afterEach(cleanup);
-beforeEach(() => { window.location.hash = '#savoir'; });
+const originalScrollIntoView = Element.prototype.scrollIntoView;
+
+afterEach(() => {
+  cleanup();
+  Element.prototype.scrollIntoView = originalScrollIntoView;
+});
+beforeEach(() => {
+  window.location.hash = '#savoir';
+  // jsdom n'implémente ni scrollTo ni scrollIntoView : sans stub, chaque appel écrit un
+  // avertissement « Not implemented » sur stderr (scrollTo) ou lève (scrollIntoView, undefined).
+  window.scrollTo = vi.fn();
+  Element.prototype.scrollIntoView = vi.fn();
+});
 const show = () => render(<ParamsProvider><KnowledgePage /></ParamsProvider>);
 
 describe('KnowledgePage', () => {
@@ -22,5 +33,10 @@ describe('KnowledgePage', () => {
     show();
     fireEvent.click(screen.getByRole('tab', { name: 'Dossier' }));
     expect(window.location.hash).toBe('#savoir/dossier');
+  });
+  it('naviguer via le sommaire déplace le focus sur la section visée (M4)', () => {
+    show();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Glossaire' })[0]);
+    expect(document.activeElement?.id).toBe('glossaire');
   });
 });
