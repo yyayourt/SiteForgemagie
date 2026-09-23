@@ -5,22 +5,22 @@
  */
 import { useParams } from '../../app/ParamsProvider';
 import { readParam } from '../../data/params';
+import { PARAM_BY_PATH } from '../../data/paramRegistry';
 import { UNDERSTAND_SECTIONS, type KnowledgeExample, type KnowledgeItem } from '../../content/knowledge';
 import { GLOSSARY } from '../../content/glossary';
 import { StatusBadge } from '../shell/Badges';
 import { KnowledgeItemList } from './KnowledgeItemList';
 import { RunePathDiagram } from './RunePathDiagram';
-import { fmt } from './format';
+import { formatLiveValue } from './liveValue';
 
-/** Valeur live d'un paramètre cité dans un exemple, affichée « chemin : valeur ». */
+/** Valeur live d'un paramètre cité dans un exemple, affichée « libellé : valeur ». */
 function ExampleParamValue({ path }: { path: string }) {
   const { overrides } = useParams();
   const value = readParam<unknown>(path, overrides);
-  const formatted = fmt(value);
+  const label = PARAM_BY_PATH.get(path)?.label ?? path;
   return (
     <span className="text-[11px] text-ash-3">
-      {path} :{' '}
-      {typeof value === 'string' ? <code className="font-mono text-[12px]">{formatted}</code> : <span className="tnum text-ash-2">{formatted}</span>}
+      {label} : {formatLiveValue(value)}
     </span>
   );
 }
