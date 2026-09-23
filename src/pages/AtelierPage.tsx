@@ -7,7 +7,7 @@ import { ItemSlab } from '../components/atelier/ItemSlab';
 import { ForgeSlot } from '../components/atelier/ForgeSlot';
 import { RunePalette } from '../components/atelier/RunePalette';
 import { SidePanel } from '../components/atelier/SidePanel';
-import { exoToDropOnRetarget, nextLineId, resolveTier, tierClick, type ArmedTier, type SlotKind } from '../components/atelier/forgeSelection';
+import { exosToDropOnRetarget, nextLineId, resolveTier, tierClick, type ArmedTier, type SlotKind } from '../components/atelier/forgeSelection';
 import { useForgeShortcuts } from '../hooks/useForgeShortcuts';
 
 interface Props {
@@ -34,16 +34,15 @@ export function AtelierPage({ atelier, onSaveToShowcase }: Props) {
   const canForge = !!item && !itemLocked && mode === 'forge';
   const densityOf = useCallback((cid: number) => getDensity(cid, overrides), [overrides]);
 
-  /** Change de cible ; un exo créé puis laissé à 0 est retiré (choix d'interface). */
+  /** Change de cible ; tout exo créé puis laissé à 0 (pas seulement le sélectionné) est retiré (choix d'interface, F4). */
   const retarget = useCallback(
     (cid: number) => {
-      const drop = exoToDropOnRetarget(stats, selectedId, cid);
-      if (drop !== null) atelier.removeExo(drop);
+      for (const id of exosToDropOnRetarget(stats, cid)) atelier.removeExo(id);
       atelier.selectLine(cid);
       setSlotKind('rune');
       setArmed(null);
     },
-    [atelier, stats, selectedId]
+    [atelier, stats]
   );
 
   const pickCharacteristic = useCallback(
@@ -53,13 +52,12 @@ export function AtelierPage({ atelier, onSaveToShowcase }: Props) {
         return;
       }
       if (onItem) return retarget(cid);
-      const drop = exoToDropOnRetarget(stats, selectedId, cid);
-      if (drop !== null) atelier.removeExo(drop);
+      for (const id of exosToDropOnRetarget(stats, cid)) atelier.removeExo(id);
       atelier.addExo(cid); // ADD_EXO vise la nouvelle ligne
       setSlotKind('rune');
       setArmed(null);
     },
-    [atelier, mode, retarget, stats, selectedId]
+    [atelier, mode, retarget, stats]
   );
 
   const fuse = useCallback(

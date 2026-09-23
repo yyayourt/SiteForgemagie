@@ -112,7 +112,7 @@ export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, o
         {selectable ? (
           <button
             type="button"
-            onClick={() => onSelect(stat.characteristicId)}
+            onClick={(e) => { e.stopPropagation(); onSelect(stat.characteristicId); }}
             className={`font-display font-semibold text-[17px] soft text-left leading-tight ${text} hover:underline decoration-molten-text/40 underline-offset-4`}
             aria-pressed={selected}
           >

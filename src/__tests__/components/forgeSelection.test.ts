@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exoToDropOnRetarget, nextLineId, resolveTier, tierClick } from '../../components/atelier/forgeSelection';
+import { exosToDropOnRetarget, nextLineId, resolveTier, tierClick } from '../../components/atelier/forgeSelection';
 import type { SimulatedStat } from '../../types';
 
 const stat = (characteristicId: number, extra: Partial<SimulatedStat> = {}): SimulatedStat => ({
@@ -36,16 +36,22 @@ describe('tierClick', () => {
   });
 });
 
-describe('exoToDropOnRetarget', () => {
-  const stats = [stat(11), stat(1, { isExo: true, baseMin: 0, baseMax: 0, currentValue: 0 }), stat(23, { isExo: true, baseMin: 0, baseMax: 0, currentValue: 1 })];
-  it("retire un exo resté à 0 quand on vise ailleurs", () => {
-    expect(exoToDropOnRetarget(stats, 1, 11)).toBe(1);
+describe('exosToDropOnRetarget', () => {
+  const stats = [
+    stat(11),
+    stat(1, { isExo: true, baseMin: 0, baseMax: 0, currentValue: 0 }),
+    stat(23, { isExo: true, baseMin: 0, baseMax: 0, currentValue: 1 }),
+    stat(30, { isExo: true, baseMin: 0, baseMax: 0, currentValue: 0 }),
+  ];
+  it('retire TOUS les exos restés à 0 (pas seulement le sélectionné) quand on vise ailleurs (F4)', () => {
+    expect(exosToDropOnRetarget(stats, 11)).toEqual([1, 30]);
   });
-  it("ne retire rien si l'exo a une valeur, si on revise la même ligne, ou si la cible courante est naturelle", () => {
-    expect(exoToDropOnRetarget(stats, 23, 11)).toBeNull();
-    expect(exoToDropOnRetarget(stats, 1, 1)).toBeNull();
-    expect(exoToDropOnRetarget(stats, 11, 1)).toBeNull();
-    expect(exoToDropOnRetarget(stats, null, 1)).toBeNull();
+  it("exclut la nouvelle cible même si elle est un exo à 0, et ignore les exos non nuls", () => {
+    expect(exosToDropOnRetarget(stats, 1)).toEqual([30]);
+    expect(exosToDropOnRetarget(stats, 23)).toEqual([1, 30]);
+  });
+  it('rien à retirer : tableau vide', () => {
+    expect(exosToDropOnRetarget([stat(11)], 11)).toEqual([]);
   });
 });
 

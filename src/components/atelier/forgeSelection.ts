@@ -21,11 +21,15 @@ export function tierClick(armed: ArmedTier, characteristicId: number, tier: Rune
   return { armed: { characteristicId, tier }, fire };
 }
 
-/** Exo à retirer quand la cible change : la cible courante est un exo encore à 0. */
-export function exoToDropOnRetarget(stats: readonly SimulatedStat[], currentId: number | null, nextId: number): number | null {
-  if (currentId === null || currentId === nextId) return null;
-  const current = stats.find((s) => s.characteristicId === currentId);
-  return current && current.isExo && current.currentValue === 0 ? currentId : null;
+/**
+ * Exos à retirer quand la cible change : TOUTE ligne exotique restée à 0 (pas seulement celle
+ * qui était sélectionnée) sauf la nouvelle cible elle-même. Un exo créé puis laissé à 0
+ * pendant qu'on visite d'autres tuiles ne doit pas survivre indéfiniment (annulation possible
+ * via Annuler ; la pollution de l'historique en naviguant reste une limitation connue, non
+ * traitée ici).
+ */
+export function exosToDropOnRetarget(stats: readonly SimulatedStat[], nextId: number): number[] {
+  return stats.filter((s) => s.isExo && s.currentValue === 0 && s.characteristicId !== nextId).map((s) => s.characteristicId);
 }
 
 /** Ligne suivante/précédente parmi les lignes forgeables et non verrouillées, sans boucler. */
