@@ -85,8 +85,16 @@ export function ItemSlab({ atelier, onSaveToShowcase, onSelectLine, tierOptions,
       <div className="flex flex-wrap items-center gap-2 py-3">
         <button type="button" onClick={atelier.undo} disabled={!atelier.canUndo} className="btn-well px-3 py-1.5 text-sm" title="Annuler (Ctrl+Z)">Annuler</button>
         <button type="button" onClick={atelier.redo} disabled={!atelier.canRedo} className="btn-well px-3 py-1.5 text-sm" title="Rétablir (Ctrl+Y)">Rétablir</button>
-        {mode === 'adjust' && <span className="text-[11px] px-2 py-0.5 rounded-full border border-model text-model">mode Ajuster</span>}
-        <details ref={toolsMenuRef} className="relative">
+        {mode === 'adjust' && (
+          <button type="button" onClick={() => atelier.setMode('forge')} className="text-[11px] px-2 py-0.5 rounded-full border border-model text-model hover:bg-[rgb(255_255_255/0.04)]" title="Repasser en mode Forger : les changements passeront de nouveau par le moteur">
+            Repasser en Forger
+          </button>
+        )}
+        <details
+          ref={toolsMenuRef}
+          className="relative"
+          onKeyDown={(e) => { if (e.key === 'Escape' && toolsMenuRef.current) toolsMenuRef.current.open = false; }}
+        >
           <summary className="btn-well px-3 py-1.5 text-sm list-none cursor-pointer select-none" aria-label="Plus d'outils">⋯</summary>
           <div
             className="surface-iron absolute z-30 left-0 top-10 w-64 p-2 grid gap-1 shadow-panel text-sm"
@@ -153,7 +161,7 @@ export function ItemSlab({ atelier, onSaveToShowcase, onSelectLine, tierOptions,
               onSelect={onSelectLine}
               onUpdate={atelier.updateStat}
               onRemoveExo={atelier.removeExo}
-              tiers={selectedId === stat.characteristicId ? tierOptions : undefined}
+              tiers={selectedId === stat.characteristicId && !itemLocked ? tierOptions : undefined}
               activeTier={activeTier}
               armedTier={armed && armed.characteristicId === stat.characteristicId ? armed.tier : null}
               onTierClick={onTierClick}
