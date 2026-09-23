@@ -186,7 +186,7 @@ export function useActiveSection(ids: string[]): string | null;
 ```
 
 - `App.tsx` : `pageFromHash` → `const h = window.location.hash.replace('#', '').split('/')[0];` (reste inchangé). Vérifier que `navigate('savoir')` écrit toujours `#savoir`.
-- `KnowledgeToc` : `<nav aria-label="Sommaire">` ; ≥ 1024 px `lg:sticky lg:top-4` liste de liens (`aria-current="true"` sur l'actif, style `text-molten-text`) ; < 1024 px enveloppé dans `<details>` « Sommaire ». `onNavigate` appelle `document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })` dans la page.
+- `KnowledgeToc` : `<nav aria-label="Sommaire">` ; ≥ 1024 px `lg:sticky lg:top-4` liste de boutons stylés en lien (`aria-current="true"` sur l'actif, style `text-molten-text`) ; < 1024 px enveloppé dans `<details>` « Sommaire ». `onNavigate` appelle `document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })` dans la page.
 - `useActiveSection` : IntersectionObserver (`rootMargin: '0px 0px -70% 0px'`) ; si `IntersectionObserver` est absent (jsdom), renvoie le premier id.
 
 - [ ] **Step 1: Failing tests**
@@ -229,15 +229,15 @@ describe('KnowledgeToc', () => {
   it('marque l’entrée active et navigue au clic', () => {
     const onNavigate = vi.fn();
     render(<KnowledgeToc entries={[{ id: 'a', label: 'Alpha' }, { id: 'b', label: 'Bêta' }]} activeId="b" onNavigate={onNavigate} />);
-    const links = screen.getAllByRole('link', { name: 'Bêta' });
+    const links = screen.getAllByRole('button', { name: 'Bêta' });
     expect(links[0].getAttribute('aria-current')).toBe('true');
-    fireEvent.click(screen.getAllByRole('link', { name: 'Alpha' })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Alpha' })[0]);
     expect(onNavigate).toHaveBeenCalledWith('a');
   });
 });
 ```
 
-(Les liens ont `href={'#' + id}`… non : le hash sert au routage. Utiliser `href="#savoir"`-compatible : `<a href={`#${id}`}>` casserait le routeur. **Décision : `<a role="link" href="#" onClick={(e) => { e.preventDefault(); onNavigate(id); }}>`** — mieux : `<button>` stylé en lien ; le test cherche alors `getAllByRole('button', …)`. Choisir **button** et adapter le test en conséquence (`getAllByRole('button', { name: 'Bêta' })`).)
+(Les entrées du sommaire sont des `<button>` stylés en lien : un `<a href="#id">` casserait le routeur par hash de `App.tsx`.)
 
 - [ ] **Step 2: See them fail.** **Step 3: Implement.** **Step 4: See them pass** + `npx tsc -b`, `npm run lint`.
 - [ ] **Step 5: Commit** — `git commit -m "Savoir : onglets dans le hash, sommaire lateral"`
