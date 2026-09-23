@@ -51,7 +51,7 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
   } else if (slotKind === 'orb') {
     body = (
       <div className="grid gap-2">
-        <p className="m-0 flex flex-wrap items-center gap-1.5 text-[13px] text-ash-2">
+        <div className="m-0 flex flex-wrap items-center gap-1.5 text-[13px] text-ash-2">
           Remet l'objet à un jet de craft aléatoire, retire les exos, vide le reliquat.
           <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" />
           Loi du jet <StatusBadge status={rollLaw?.status ?? 'INCONNU'} /> ; refus sur objet transcendé <StatusBadge status="SOURCE PRIMAIRE" />.
@@ -59,7 +59,7 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
             <p className="m-0">La loi du jet est le paramètre « {atelier.craftParams.rollDistribution} » (section « Jet de craft » des paramètres), le même que pour « Jet aléatoire ».</p>
             <ul className="m-0 mt-2 p-0 list-none">{FM_ORBS.filter((o) => !o.nameFr.includes('(lié)')).map((o) => <li key={o.id}>{o.nameFr} · niv. {o.level}</li>)}</ul>
           </InfoTip>
-        </p>
+        </div>
         <button type="button" className="btn-cta w-full py-3 text-[18px]" onClick={() => atelier.applyOrb()}>Réinitialiser avec un orbe</button>
       </div>
     );
@@ -67,13 +67,13 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
     const runes = selected ? atelier.transcendenceOptions(selected.characteristicId) : [];
     body = (
       <div className="grid gap-2">
-        <p className="m-0 flex flex-wrap items-center gap-1.5 text-[13px] text-ash-2">
+        <div className="m-0 flex flex-wrap items-center gap-1.5 text-[13px] text-ash-2">
           Se pose sans perte puis verrouille l'objet. <StatusBadge status="SOURCE PRIMAIRE" />
           Refus si over ou exo présent : <StatusBadge status={lockNote?.status ?? 'HYPOTHÈSE COMMUNAUTAIRE'} />
           <InfoTip label="Règles de la transcendance">
             <p className="m-0">Devblog 2.58 : plus aucune forgemagie ni orbe après la pose.</p>
           </InfoTip>
-        </p>
+        </div>
         {runes.map((r) => (
           <button key={r.runeId} type="button" onClick={() => selected && atelier.applyTranscendence(selected.characteristicId, r.runeId)} className="btn-cta flex items-center justify-between px-4 py-2.5 text-[15px]" title={`${r.nameFr}, niveau ${r.level}`}>
             <span>{r.nameFr.replace(/^Rune /, '')}</span>
@@ -107,7 +107,7 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
           {estimate && (
             <>
               <OutcomeEstimate estimate={estimate.estimate} model={estimate.model} isHeavyExo={estimate.isHeavyExo} heavyByWeight={estimate.heavyByWeight} characteristicId={selected.characteristicId} />
-              <p className={`m-0 mt-1.5 flex items-center gap-1.5 text-[11px] tnum ${estimate.overCapUsage > 1 ? 'text-ec' : estimate.overCapUsage >= 0.85 ? 'text-molten-text' : 'text-ash-3'}`}>
+              <div className={`m-0 mt-1.5 flex items-center gap-1.5 text-[11px] tnum ${estimate.overCapUsage > 1 ? 'text-ec' : estimate.overCapUsage >= 0.85 ? 'text-molten-text' : 'text-ash-3'}`}>
                 {applicable <= 0
                   ? 'Dépasserait la borne over/exo : la rune sera refusée.'
                   : option && applicable < option.value
@@ -117,7 +117,7 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
                   <p className="m-0">Estimation d'un modèle paramétré, pas la formule du serveur. Seuls le plancher de quinze pour cent en forgemagie normale et le plancher d'un pour cent en exo PA/PM sont officiels.</p>
                   <p className="m-0 mt-2">Troncature : hypothèse « la rune s'arrête à la limite ».{atelier.probabilityParams.model === 'official_factors_linear' && atelier.probabilityParams.officialFactorsLinear.d !== 0 ? ` Pente d = ${atelier.probabilityParams.officialFactorsLinear.d}.` : ''}</p>
                 </InfoTip>
-              </p>
+              </div>
             </>
           )}
         </div>

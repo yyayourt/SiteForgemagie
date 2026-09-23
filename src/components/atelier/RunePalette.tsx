@@ -81,7 +81,7 @@ export function RunePalette(props: RunePaletteProps) {
           {groups.map((g) => (
             <div key={g.key}>
               <h3 className="text-[11px] uppercase tracking-wide text-ash-3 mb-1.5">{g.label}</h3>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
                 {g.tiles.map((t) => {
                   const selected = t.characteristicId === selectedId && slotKind === 'rune';
                   return (
@@ -93,11 +93,11 @@ export function RunePalette(props: RunePaletteProps) {
                       disabled={tileDisabled(t)}
                       onClick={() => onPickCharacteristic(t.characteristicId, t.onItem)}
                       title={`${t.name} · ${t.density} poids par point${t.onItem ? '' : ' · exo'}${t.heavy ? ' · exo lourd' : ''}`}
-                      className={`relative grid justify-items-center gap-0.5 rounded-[10px] border px-1 py-1.5 text-[10.5px] leading-tight transition-colors disabled:opacity-40
+                      className={`relative grid justify-items-center gap-0.5 rounded-[10px] border px-1 py-1.5 !text-[10.5px] leading-tight transition-colors disabled:opacity-40
                         ${selected ? 'border-molten-text bg-[rgb(255_194_92/0.08)]' : t.onItem ? 'border-iron-edge hover:border-ash-3' : 'border-exo/40 hover:border-exo'}`}
                     >
                       <RuneIcon characteristicId={t.characteristicId} img={getRepresentativeRuneImg(t.characteristicId)} size={30} />
-                      <span className={`w-full truncate text-center ${t.onItem ? 'text-ash-2' : 'text-exo'}`}>{t.name}</span>
+                      <span className={`w-full line-clamp-2 break-words text-center leading-tight ${t.onItem ? 'text-ash-2' : 'text-exo'}`}>{t.name}</span>
                       {t.heavy && <span className="absolute top-0.5 right-1 text-[10px] text-exo" aria-hidden="true">✦</span>}
                     </button>
                   );
