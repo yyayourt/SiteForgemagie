@@ -51,4 +51,40 @@ describe('useForgeShortcuts', () => {
     expect(h.onTier).not.toHaveBeenCalled();
     input.remove();
   });
+
+  it('ignoré quand un dialogue modal (ParamsDrawer) est ouvert (F1)', () => {
+    const h = handlers();
+    renderHook(() => useForgeShortcuts(h, true));
+    const dialog = document.createElement('div');
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    document.body.appendChild(dialog);
+    fireEvent.keyDown(window, { key: ' ' });
+    fireEvent.keyDown(window, { key: '1' });
+    fireEvent.keyDown(window, { key: 'ArrowDown' });
+    expect(h.onFuse).not.toHaveBeenCalled();
+    expect(h.onTier).not.toHaveBeenCalled();
+    expect(h.onMove).not.toHaveBeenCalled();
+    dialog.remove();
+  });
+
+  it('Espace laisse passer l\'activation native quand la cible est un bouton focalisé (F2)', () => {
+    const h = handlers();
+    renderHook(() => useForgeShortcuts(h, true));
+    const button = document.createElement('button');
+    document.body.appendChild(button);
+    const ev = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true });
+    Object.defineProperty(ev, 'target', { value: button });
+    button.dispatchEvent(ev);
+    expect(h.onFuse).not.toHaveBeenCalled();
+    expect(ev.defaultPrevented).toBe(false);
+    button.remove();
+  });
+
+  it('AZERTY : & avec code Digit1 choisit le palier 1 (F5)', () => {
+    const h = handlers();
+    renderHook(() => useForgeShortcuts(h, true));
+    fireEvent.keyDown(window, { key: '&', code: 'Digit1' });
+    expect(h.onTier).toHaveBeenCalledWith(0);
+  });
 });
