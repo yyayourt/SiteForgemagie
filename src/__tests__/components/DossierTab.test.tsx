@@ -33,4 +33,8 @@ describe('DossierTab', () => {
     show('densities');
     expect(scrollIntoView).toHaveBeenCalled();
   });
+  it('focusSection venu du hash ne doit jamais faire planter un sélecteur CSS (guillemet)', () => {
+    Element.prototype.scrollIntoView = vi.fn();
+    expect(() => show('foo"bar')).not.toThrow();
+  });
 });

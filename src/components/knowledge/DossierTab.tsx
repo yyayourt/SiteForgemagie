@@ -15,9 +15,14 @@ export function DossierTab({ focusSection }: { focusSection?: string | null }) {
 
   useEffect(() => {
     if (!focusSection) return;
-    // Préfixe : les densités sont éclatées en groupes `dossier-densities-<famille>`, focus 'densities'
-    // doit atteindre le premier groupe qui commence par cet id.
-    document.querySelector(`[id^="dossier-${focusSection}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // focusSection vient du hash de l'URL : ne jamais l'interpoler dans un sélecteur CSS (un `"` y
+    // ferait planter querySelector). On liste les sections du Dossier et on compare les id en JS :
+    // correspondance exacte d'abord (ex. 'overCap' -> 'dossier-overCap'), puis préfixe de groupe pour
+    // les densités éclatées en `dossier-densities-<famille>` (focus 'densities' -> premier groupe).
+    const target = Array.from(document.querySelectorAll('[id^="dossier-"]')).find(
+      (el) => el.id === `dossier-${focusSection}` || el.id.startsWith(`dossier-${focusSection}-`)
+    );
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- au montage seulement
   }, []);
 

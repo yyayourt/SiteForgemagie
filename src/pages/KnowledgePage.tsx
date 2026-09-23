@@ -47,7 +47,10 @@ export function KnowledgePage() {
     setTab(next);
     setFocusSection(anchor ?? null);
     window.location.hash = hashForTab(next, anchor);
-    window.scrollTo({ top: 0 });
+    // Un changement d'onglet simple remonte en haut ; ouvrir une ancre précise (onOpenDossier) ne
+    // doit pas remonter en haut puisque DossierTab va lui-même défiler jusqu'à la section visée
+    // (double défilement sinon).
+    if (!anchor) window.scrollTo({ top: 0 });
   }, []);
 
   const handleOpenDossier = useCallback((section: string) => goToTab('dossier', section), [goToTab]);
