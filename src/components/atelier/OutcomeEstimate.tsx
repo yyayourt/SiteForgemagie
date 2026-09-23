@@ -10,7 +10,8 @@
  * 1. la grille à trois colonnes prévue pour un nombre unique **coupe** un intervalle au
  *    milieu (« 1 % – 32 » puis « % ») : l'intervalle prend donc une ligne par issue ;
  * 2. le badge « modèle empirique » ne doit apparaître que si le chiffre vient **du modèle** —
- *    un exo lourd vient d'une politique de projet, un exo léger d'un intervalle sans source.
+ *    un exo lourd vient d'une politique de projet (liste) ou d'une mesure (poids cumulé), un
+ *    exo léger d'un intervalle sans source.
  */
 
 import type { ProbabilityModelName } from '../../data/params';
@@ -71,20 +72,28 @@ export function OutcomeEstimate({ estimate, model, isHeavyExo, heavyByWeight = f
         </p>
       )}
 
-      {estimate.kind === 'point' && estimate.status === 'POLITIQUE' && (
+      {estimate.kind === 'point' && estimate.attemptKind === 'heavy_exo' && heavyByWeight && (
+        <p className="m-0 mt-2 text-[11px] text-molten-text leading-snug" data-testid="heavy-exo-note">
+          <StatusBadge status="MODÈLE EMPIRIQUE" />{' '}
+          Ligne à trente de poids ou plus au-delà du jet : elle ne passe plus qu'en succès
+          critique, sans succès neutre possible. Mesuré sur le deuxième point d'un pourcentage de
+          dommages aux sorts : environ {pct(estimate.probabilities.pSC)} de succès critique et aucun
+          succès neutre sur dix à quinze mille runes (bêta 3.6, objet à jet aléatoire). Sur un objet
+          au jet parfait, un relevé plus petit tombe vers un pour cent : le simulateur ne tient pas
+          compte de la qualité de l'objet ici. Aucune source Ankama.
+        </p>
+      )}
+
+      {estimate.kind === 'point' && estimate.attemptKind === 'heavy_exo' && !heavyByWeight && (
         <p className="m-0 mt-2 text-[11px] text-molten-text leading-snug" data-testid="heavy-exo-note">
           <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" />{' '}
-          {heavyByWeight ? (
-            <>
-              Ligne à trente de poids ou plus au-delà du jet : d'après les guides, elle ne passe
-              plus qu'en succès critique, comme un exo PA — c'est ce qui rend le deuxième point
-              d'un pourcentage de dommages si dur. Aucune source Ankama.
-            </>
-          ) : isHeavyExoRateVerbatim(characteristicId) ? (
+          {isHeavyExoRateVerbatim(characteristicId) ? (
             <>
               Exotique PA ou PM. Ankama écrit que le taux « peut descendre jusqu'à un pour cent si
               l'on souhaite ajouter un PA ou un PM exotique » : c'est un plancher attesté, pas la
-              valeur du cas.
+              valeur du cas. Deux relevés indépendants sur l'exo PM d'un Gelano (dix mille et près
+              de neuf mille runes) donnent un virgule un pour cent : le plancher est corroboré sur
+              un objet simple.
             </>
           ) : (
             <>
@@ -94,8 +103,8 @@ export function OutcomeEstimate({ estimate, model, isHeavyExo, heavyByWeight = f
             </>
           )}{' '}
           Le simulateur retient ce plancher comme valeur. En théorie l'intervalle d'une création
-          d'effet monte jusqu'à trente-deux pour cent ; où tombe cette rune entre les deux n'est
-          documenté nulle part.
+          d'effet monte jusqu'à trente-deux pour cent ; sur un objet chargé, aucune mesure ne dit
+          où tombe cette rune entre les deux.
         </p>
       )}
     </>

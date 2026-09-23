@@ -23,12 +23,13 @@
  * modèle à huit degrés de liberté qui s'ajuste à n'importe quoi sur quelques dizaines de
  * tentatives — du surajustement présenté comme une reconstitution.
  *
- * Le complément est réparti SN/EC par ecShare. Le garde-fou d'exotisme (exoGuard.ts) et les
+ * Le complément est réparti SN/EC par `splitNormal` (snSplit : SN plafonné à 50 % par défaut,
+ * ou part fixe ecShare). Le garde-fou d'exotisme (exoGuard.ts) et les
  * bornes officielles (constraints.ts) s'appliquent ENSUITE, dans cet ordre.
  */
 
 import type { ProbabilityParams } from '../../../data/params';
-import { distanceToMax, splitComplement, NEUTRAL_STRUCTURAL_FLAGS, type ProbabilityModel } from '../types';
+import { distanceToMax, splitComplement, splitNormal, NEUTRAL_STRUCTURAL_FLAGS, type ProbabilityModel } from '../types';
 
 export const officialFactorsLinearModel: ProbabilityModel = {
   name: 'official_factors_linear',
@@ -42,8 +43,9 @@ export const officialFactorsLinearModel: ProbabilityModel = {
 
     const pSC = a + b * distance - c * level - d * usage - e * quality + structuralTerm(input, params);
 
-    const ecShare = input.isHeavyExo ? params.heavyExoEcShare : params.ecShare;
-    return splitComplement(pSC, ecShare);
+    // Régime « SC seul » : part d'EC dédiée ; sinon règle de répartition normale (snSplit).
+    if (input.isHeavyExo) return splitComplement(pSC, params.heavyExoEcShare);
+    return splitNormal(pSC, params);
   },
 };
 

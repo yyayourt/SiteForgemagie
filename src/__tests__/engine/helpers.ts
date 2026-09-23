@@ -50,14 +50,27 @@ export function makeState(
 
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
 
-/** Paramètres du fichier empirical_params.json, avec surcharges de test. */
+/**
+ * Paramètres du fichier empirical_params.json, avec surcharges de test.
+ *
+ * Exception : `lossSelection.quantization` est fixé à `ceil` (déterministe). Les tests qui
+ * utilisent ce helper vérifient d'AUTRES règles (sélection, cascade, malus, troncature) ; le
+ * point supplémentaire aléatoire du défaut `ceil_random_extra` consommerait le RNG séquentiel et
+ * brouillerait ce qu'ils mesurent. Le défaut réel est couvert par quantization.test.ts.
+ */
 export function testParams(overrides: DeepPartial<EngineParams> = {}): EngineParams {
   const base = getEngineParams();
   return {
     ...base,
     ...overrides,
     densities: (overrides.densities as EngineParams['densities']) ?? base.densities,
-    lossSelection: { ...base.lossSelection, ...overrides.lossSelection },
+    runeQuantum: (overrides.runeQuantum as EngineParams['runeQuantum']) ?? base.runeQuantum,
+    lossSelection: {
+      ...base.lossSelection,
+      quantization: 'ceil',
+      ...overrides.lossSelection,
+      deficitRatio: { ...base.lossSelection.deficitRatio, ...overrides.lossSelection?.deficitRatio },
+    } as EngineParams['lossSelection'],
     overCapExcess: { ...base.overCapExcess, ...overrides.overCapExcess },
     residualPool: { ...base.residualPool, ...overrides.residualPool },
     transcendence: {

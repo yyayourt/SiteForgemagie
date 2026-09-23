@@ -17,8 +17,7 @@ import { rollItem, computeRollQuality } from '../logic/craft';
 import {
   drawOutcome,
   estimateOutcome,
-  isHeavyExo,
-  isHeavyRegime,
+  heavyRegimeTriggerOf,
   nonNaturalLineWeightAfter,
   itemQualityExcluding,
   mathRandomRng,
@@ -252,7 +251,7 @@ export function useAtelier() {
       const overCapUsage = overCapUsageAfter(engineState, rune, engineParams);
       const applicableValue = maxApplicableRuneValue(engineState, rune, engineParams);
       // Régime 1 % : liste OU poids non naturel de la ligne APRÈS la rune (heavyRegime.ts).
-      const heavy = isHeavyRegime(
+      const heavyTrigger = heavyRegimeTriggerOf(
         {
           characteristicId,
           isExo: target.isExo,
@@ -264,6 +263,7 @@ export function useAtelier() {
         },
         probabilityParams
       );
+      const heavy = heavyTrigger !== null;
       // Qualité globale : hors ligne visée (SOURCE PRIMAIRE — v1.27). Décompte des over/exo :
       // ligne visée COMPRISE, donc mesuré sur l'état APRÈS la rune — deux traitements
       // différents du même jet, conformément au DevBlog.
@@ -275,6 +275,7 @@ export function useAtelier() {
           runeWeight: option.weight,
           runeValue: option.value,
           isHeavyExo: heavy,
+          heavyTrigger: heavyTrigger ?? undefined,
           residualPool: state.residualPool,
           weightBudget: budget.remainingBudget,
           overCapUsage,
@@ -286,7 +287,7 @@ export function useAtelier() {
         },
         probabilityParams
       );
-      const heavyByWeight = heavy && !isHeavyExo(characteristicId, target.isExo, probabilityParams);
+      const heavyByWeight = heavyTrigger === 'cumulative';
       return { estimate: probabilityEstimate, model: probabilityParams.model, isHeavyExo: heavy, heavyByWeight, overCapUsage, applicableValue };
     },
     [stats, runeOptions, probabilityParams, level, state.residualPool, budget.remainingBudget, engineState, engineParams]

@@ -7,6 +7,7 @@
  */
 
 import type { ProbabilityParams } from '../../data/params';
+import { MAX_SN } from './devblogAnchors';
 
 /**
  * Drapeaux structurels du DevBlog Ankama 1.27 (`SOURCE PRIMAIRE — v1.27` pour leur
@@ -39,8 +40,13 @@ export interface ProbabilityInput {
   runeWeight: number;
   /** Valeur ajoutée par la rune (points) : décide si la tentative est un overmax. */
   runeValue: number;
-  /** Régime 1 % (liste PA/PM/PO/Invocations, ou poids cumulé ≥ seuil : heavyRegime.ts) : garde-fou au lieu du modèle. */
+  /** Régime « SC seul » (liste PA/PM/PO/Invocations, ou poids cumulé ≥ seuil : heavyRegime.ts) : garde-fou au lieu du modèle. */
   isHeavyExo: boolean;
+  /**
+   * Déclencheur du régime « SC seul » (heavyRegimeTriggerOf) : décide du pSC retenu (1 % pour
+   * la liste, cumulativeRegimeSc pour le poids cumulé). Optionnel : absent = `list`.
+   */
+  heavyTrigger?: 'list' | 'cumulative';
   /** Reliquat serveur (état propre). Aucun modèle certain ne l'utilise. */
   residualPool: number;
   /** Budget de planification (dérivé de l'état visible). Utilisé seulement par pool_ratio_legacy. */
@@ -117,6 +123,28 @@ export function splitComplement(pSC: number, ecShare: number): ProbabilityOutput
   const share = Math.min(1, Math.max(0, ecShare));
   const rest = 1 - sc;
   return { pSC: sc, pSN: rest * (1 - share), pEC: rest * share };
+}
+
+/**
+ * Répartition SN/EC en FM normale et overmax, selon `params.snSplit`.
+ *
+ * `capped_50` (défaut depuis le 2026-09-23, MODÈLE EMPIRIQUE) : pSN = min(0,50 ; 1 − pSC),
+ * l'EC prend le reste. Cette seule règle reproduit EXACTEMENT les quatre ancres « normales »
+ * du DevBlog 1.27 — 66/34/0, 43/50/7, 15/50/35, 32/50/18 — ainsi que la variante relayée
+ * 34/50/16 et le témoignage Alterya 30/50/20 : SN/EC n'est donc pas un degré de liberté, toute
+ * l'inconnue est dans pSC. C'est la phrase primaire « SN au maximum de 50 %, proche de ce
+ * maximum dans la majorité des cas ; il diminue si la transformation est très facile, au
+ * profit du succès critique ». Seule l'ancre 5 (1/0/99) y échappe : régime « SC seul »,
+ * traité par le garde-fou d'exotisme.
+ *
+ * `ec_share` : ancienne part fixe `ecShare` du complément (17,5 % d'EC sur une rune facile là
+ * où l'ancre 1 donne 0).
+ */
+export function splitNormal(pSC: number, params: Pick<ProbabilityParams, 'snSplit' | 'ecShare'>): ProbabilityOutput {
+  if (params.snSplit === 'ec_share') return splitComplement(pSC, params.ecShare);
+  const sc = Math.min(1, Math.max(0, pSC));
+  const sn = Math.min(MAX_SN, 1 - sc);
+  return { pSC: sc, pSN: sn, pEC: Math.max(0, 1 - sc - sn) };
 }
 
 /** Drapeaux neutres : aucun effet, quelles que soient les pentes. */

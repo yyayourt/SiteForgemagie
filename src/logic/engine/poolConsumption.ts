@@ -27,6 +27,13 @@
  * sessions longues. La campagne de reproduction requise est d'environ 20 EC sur objet à puits
  * non nul, avec relevé du reliquat avant et après.
  *
+ * Mise à jour du 2026-09-23 : A1 s'explique SANS toucher à cette règle, par la quantité
+ * retirée (`lossSelection.quantization = ceil_random_extra`, losses.ts `pointsToRemove`).
+ * Le puits absorbe 0,2 ; il reste 0,8 = 4 vita exactement (ratio entier), un point de plus est
+ * retiré (5 vita = 1,0) et l'excédent de 0,2 recrée le reliquat : puits net inchangé, d'où
+ * l'absence de mention « − reliquat ». Test : quantization.test.ts. La campagne reste utile
+ * pour départager les deux explications.
+ *
  * L'interface existe pour éviter un refactor le jour où la campagne aura tranché ; elle ne
  * change **rien** aux sorties aujourd'hui.
  */

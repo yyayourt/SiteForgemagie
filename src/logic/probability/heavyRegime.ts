@@ -44,12 +44,26 @@ export function isHeavyExo(characteristicId: number, isExo: boolean, params: Pro
   return isExo && params.heavyExoCharacteristics.includes(characteristicId);
 }
 
-/** La tentative relève-t-elle du régime 1 % ? Applique la règle choisie. */
+/**
+ * Ce qui fait entrer la tentative dans le régime « SC seul », ou `null` si elle n'y est pas.
+ * - `list` : caractéristique de la liste (PA, PM, PO, Invocations). pSC = 1 %, plancher du
+ *   tutoriel ; mesuré à 1,11 % sur l'exo PM d'un Gelano (Fek 10 000 runes, Dasech 8 949).
+ * - `cumulative` : poids non naturel de la ligne ≥ seuil (2ᵉ point d'un % Do…). pSC =
+ *   `cumulativeRegimeSc`, mesuré à 3,4 % sans aucun SN (Waveformer, bêta 3.6, 10–15 k runes).
+ * La liste a priorité : un PA reste `list` quel que soit son poids.
+ */
+export type HeavyRegimeTrigger = 'list' | 'cumulative';
+
+export function heavyRegimeTriggerOf(q: HeavyRegimeQuery, params: ProbabilityParams): HeavyRegimeTrigger | null {
+  if (isHeavyExo(q.characteristicId, q.isExo, params)) return 'list';
+  if (params.heavyExoRule !== 'cumulative_weight') return null;
+  if (!q.isExo && !params.heavyExoIncludeOvermax) return null;
+  return q.nonNaturalWeightAfter >= params.heavyExoWeightThreshold ? 'cumulative' : null;
+}
+
+/** La tentative relève-t-elle du régime « SC seul » ? Applique la règle choisie. */
 export function isHeavyRegime(q: HeavyRegimeQuery, params: ProbabilityParams): boolean {
-  if (isHeavyExo(q.characteristicId, q.isExo, params)) return true;
-  if (params.heavyExoRule !== 'cumulative_weight') return false;
-  if (!q.isExo && !params.heavyExoIncludeOvermax) return false;
-  return q.nonNaturalWeightAfter >= params.heavyExoWeightThreshold;
+  return heavyRegimeTriggerOf(q, params) !== null;
 }
 
 /**

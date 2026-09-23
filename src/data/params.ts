@@ -9,6 +9,7 @@
  */
 
 import paramsJson from '../../empirical_params.json';
+import runeTiersJson from '../../data/rune-tiers.json';
 
 export type EpistemicStatus =
   | 'SOURCE PRIMAIRE'
@@ -44,7 +45,12 @@ export type OverCapExcessLossBasis = 'full_rune' | 'applied_only';
 export type LossSelectionStrategyName =
   | 'uniform'
   | 'weighted_by_weight'
-  | 'weighted_by_value_times_weight';
+  | 'weighted_by_value_times_weight'
+  | 'weighted_by_deficit_ratio';
+/** Nombre de points retirés sur la ligne qui solde une perte (voir losses.ts). */
+export type LossQuantization = 'ceil' | 'ceil_random_extra' | 'strict';
+/** Répartition du complément de pSC entre SN et EC en FM normale (voir probability/types.ts). */
+export type SnSplitRule = 'capped_50' | 'ec_share';
 export type NonPositiveLineContribution = 'skip' | 'offset';
 /**
  * SN dont la perte ne peut pas etre payee. no_effect (defaut, SOURCE PRIMAIRE - v1.27) :
@@ -133,6 +139,25 @@ export function getDensityMap(overrides?: ParamOverrides): ReadonlyMap<number, n
   return new Map([...DENSITIES.keys()].map((id) => [id, getDensity(id, overrides)!]));
 }
 
+/**
+ * Quantum de perte d'une caractéristique : poids de sa PLUS PETITE rune (valeur du plus petit
+ * palier × densité). Vi = 5 × 0,2 = 1 ; Ini = 10 × 0,1 = 1 ; Pod = 10 × 0,25 = 2,5 ; Ga Pa = 100.
+ * Sert à la sélection des pertes `weighted_by_deficit_ratio` : les témoignages Dofus 3 (fil
+ * « Priorité en forgemagie », 24/01/2026) traitent Vi et Ini comme des runes de poids 1, pas 0,2.
+ * Sans rune dans le dataset : la densité elle-même.
+ */
+export function getRuneQuantumMap(densities: ReadonlyMap<number, number>): ReadonlyMap<number, number> {
+  const tiers = runeTiersJson.tiers as Record<string, Partial<Record<'normal' | 'pa' | 'ra', { value: number }>>>;
+  const out = new Map<number, number>();
+  for (const [id, density] of densities) {
+    const entry = tiers[String(id)];
+    const values = entry ? (['normal', 'pa', 'ra'] as const).flatMap((k) => (entry[k] ? [entry[k]!.value] : [])) : [];
+    const smallest = values.filter((v) => v > 0).sort((a, b) => a - b)[0];
+    out.set(id, smallest !== undefined ? smallest * density : density);
+  }
+  return out;
+}
+
 /** Caractéristiques dotées d'une densité (donc pesables dans le budget de poids). */
 export const CHARACTERISTICS_WITH_DENSITY: readonly number[] = [...DENSITIES.keys()];
 
@@ -184,7 +209,15 @@ export interface EngineParams {
     prioritizeOverExo: boolean;
     /** SOURCE PRIMAIRE — v1.27 (« rien ne se passe ») ; jamais observé en Unity. */
     unpayableSn: UnpayableSnBehaviour;
+    /** MODÈLE EMPIRIQUE (N = 6) : quantité retirée sur la ligne qui solde la perte. */
+    quantization: LossQuantization;
+    /** MODÈLE EMPIRIQUE (N = 6) : chance du point en plus quand le ratio perte / densité est entier. */
+    exactRatioExtraPointChance: number;
+    /** Stratégie weighted_by_deficit_ratio : pentes et plancher (HYPOTHÈSE / INCONNU). */
+    deficitRatio: { heavyExponent: number; lightExponent: number; floor: number };
   };
+  /** characteristicId → poids de la plus petite rune (getRuneQuantumMap). */
+  runeQuantum: ReadonlyMap<number, number>;
   residualPool: {
     resetOnEquipOrMarket: boolean;
     /** Informatif (CONTRADICTION) : le client affiche-t-il le reliquat ? Sans effet sur le moteur. */
@@ -219,7 +252,15 @@ export function getEngineParams(overrides?: ParamOverrides): EngineParams {
       strategy: r<LossSelectionStrategyName>('params.lossSelection.strategy'),
       prioritizeOverExo: r<boolean>('params.lossSelection.prioritizeOverExo'),
       unpayableSn: r<UnpayableSnBehaviour>('params.lossSelection.unpayableSn'),
+      quantization: r<LossQuantization>('params.lossSelection.quantization'),
+      exactRatioExtraPointChance: r<number>('params.lossSelection.exactRatioExtraPointChance'),
+      deficitRatio: {
+        heavyExponent: r<number>('params.lossSelection.deficitRatio.heavyExponent'),
+        lightExponent: r<number>('params.lossSelection.deficitRatio.lightExponent'),
+        floor: r<number>('params.lossSelection.deficitRatio.floor'),
+      },
     },
+    runeQuantum: getRuneQuantumMap(getDensityMap(overrides)),
     residualPool: {
       resetOnEquipOrMarket: r<boolean>('params.residualPool.resetOnEquipOrMarket'),
       visibleInClient: r<boolean>('params.residualPool.visibleInClient'),
@@ -345,8 +386,12 @@ export interface ProbabilityParams {
   heavyExoIncludeOvermax: boolean;
   /** Part du complément (1 − pSC) allant à l'EC en FM normale (INCONNU). */
   ecShare: number;
+  /** Répartition SN/EC en FM normale : capped_50 (MODÈLE EMPIRIQUE, 5 triplets) ou ecShare. */
+  snSplit: SnSplitRule;
   /** Part du complément allant à l'EC en exo lourd (HYPOTHÈSE COMMUNAUTAIRE, 1 = pas de SN). */
   heavyExoEcShare: number;
+  /** pSC du régime « SC seul » atteint par le poids cumulé de la ligne (MODÈLE EMPIRIQUE, Waveformer 3.6). */
+  cumulativeRegimeSc: number;
   /**
    * Quelle borne d'un intervalle INCONNU sert au tirage d'issue (donc au Monte Carlo).
    * `best` par défaut (2026-09-16) : l'exo léger est traité comme la création d'effet facile
@@ -377,7 +422,9 @@ export function getProbabilityParams(overrides?: ParamOverrides): ProbabilityPar
     heavyExoWeightThreshold: r<number>('heavyExoWeightThreshold'),
     heavyExoIncludeOvermax: r<boolean>('heavyExoIncludeOvermax'),
     ecShare: r<number>('ecShare'),
+    snSplit: r<SnSplitRule>('snSplit'),
     heavyExoEcShare: r<number>('heavyExoEcShare'),
+    cumulativeRegimeSc: r<number>('cumulativeRegimeSc'),
     unknownIntervalSampling: r<UnknownIntervalSampling>('unknownIntervalSampling'),
     officialFactorsLinear: {
       a: r<number>('officialFactorsLinear.a'),

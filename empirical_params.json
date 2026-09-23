@@ -2,7 +2,7 @@
   "$comment": "Paramètres NON certains du simulateur. Chaque entrée porte value / status / source / note / bounds / default. Statuts : SOURCE PRIMAIRE, MODÈLE EMPIRIQUE, HYPOTHÈSE COMMUNAUTAIRE, CONTRADICTION, INCONNU (cf. CLAUDE.md). Les règles SOURCE PRIMAIRE ne sont pas ici : elles sont codées en dur et testées. Sources abrégées : A = docs/knowledge/audit-forgemagie-dofus3.md ; R = docs/knowledge/Reconstruction_of_the_DOFUS_3_Unity_Forgemagie_Algorithm__2026_V.md ; AP = docs/audit-projet-existant.md ; X = docs/knowledge/2026-09-07-croisement-densites-reliquat.md (croisement des tables de densité et du reliquat, document source non modifiable).",
   "schemaVersion": 1,
   "gameVersion": "3.6.10.11",
-  "updatedAt": "2026-09-16",
+  "updatedAt": "2026-09-23",
   "params": {
     "overCapWeight": {
       "value": 101,
@@ -83,18 +83,19 @@
     },
     "lossSelection": {
       "strategy": {
-        "value": "weighted_by_value_times_weight",
-        "status": "INCONNU",
-        "source": "A §6 (modèles A–E concurrents, tous C) ; R PARTIE 5 et 16 ; A §15.2 (« bonne approximation, à signaler comme telle »)",
-        "note": "Loi de sélection de la ligne qui perd. uniform : équiprobable parmi les lignes admissibles (pseudo-code du PDF) ; weighted_by_weight : ∝ densité unitaire ; weighted_by_value_times_weight : ∝ valeur × densité (« masse magique »). Aucune expérience publiée ne départage ces modèles. Défaut = modèle le plus répandu dans les guides, sans preuve.",
+        "value": "weighted_by_deficit_ratio",
+        "status": "HYPOTHÈSE COMMUNAUTAIRE",
+        "source": "A §6 (modèles A–E concurrents, tous C) ; R PARTIE 5 et 16 ; A §15.2 (« bonne approximation, à signaler comme telle ») ; DevBlog 1.27 (SOURCE PRIMAIRE — v1.27, qualitatif) ; témoignages Alterya 2012, JOL 3736, tutoriel Touch 2018, DekaPhobia/Banjore 05/2025, fil dofus.com « Priorité en forgemagie » 24/01/2026 (recherche ciblée du 2026-09-23).",
+        "note": "Loi de sélection de la ligne qui perd. uniform : équiprobable parmi les lignes admissibles (pseudo-code du PDF) ; weighted_by_weight : ∝ densité unitaire ; weighted_by_value_times_weight : ∝ valeur × densité (« masse magique »). Aucune expérience publiée ne départage ces modèles. Défaut = modèle le plus répandu dans les guides, sans preuve. weighted_by_deficit_ratio (défaut depuis le 2026-09-23) : poids ∝ ε + (1 − ε)·f(r), r = quantum de la ligne / déficit restant, asymétrique (ligne trop lourde fortement épargnée, ligne légère peu pénalisée), plancher ε > 0. Seul modèle compatible avec le DevBlog 1.27 (« un bonus trop puissant par rapport à ce qui doit être enlevé a une chance d'être épargné, mais ce n'est pas systématique ») : weighted_by_value_times_weight le CONTREDIT (il favorise les lignes lourdes : un PA 1 × 100 pèse plus qu'une Force 50 × 1).",
         "bounds": {
           "enum": [
             "uniform",
             "weighted_by_weight",
-            "weighted_by_value_times_weight"
+            "weighted_by_value_times_weight",
+            "weighted_by_deficit_ratio"
           ]
         },
-        "default": "weighted_by_value_times_weight"
+        "default": "weighted_by_deficit_ratio"
       },
       "prioritizeOverExo": {
         "value": true,
@@ -122,6 +123,67 @@
           ]
         },
         "default": "no_effect"
+      },
+      "quantization": {
+        "value": "ceil_random_extra",
+        "status": "MODÈLE EMPIRIQUE",
+        "source": "Observations Yanis 2026-09-08/09/10 (client 3.6.10.11, docs/knowledge/2026-09-23-analyse-simulateur.md §2) : quand la perte restante est un multiple EXACT de la densité de la ligne, un point de plus est retiré 4 fois sur 6 (11 ini et 31 ini pour 1,0 et 3,0 ; 6 vita pour 1,0 ; A1 5 vita pour 0,8) et 0 fois sur 2 (28 vita pour 5,6 ; 9 vita pour 1,8). Témoignages DekaPhobia / Banjore (forum, 04/05/2025, Dofus 3) : « une rune de densité 1 retire aléatoirement 5 ou 6 Vi », « Fuite −21 puis −20 », « une rune Pod retire toujours exactement 13 Vi » (12,5 → 13, ratio non entier : jamais de point en plus).",
+        "note": "Nombre de points retirés sur la ligne qui solde la perte. ceil : plus petit entier couvrant la perte (ancien défaut, 2 observations sur 7). strict : toujours un point de plus si le ratio est entier (réfuté par « 5 ou 6 » et par A2). ceil_random_extra (défaut depuis le 2026-09-23) : ceil, plus un point avec la probabilité exactRatioExtraPointChance quand le ratio perte / densité est entier ; le surplus part au reliquat. Explique l'anomalie A1 (puits inchangé) sans mécanisme de puits partiel. Mécanisme serveur réel INCONNU (arrondi flottant float32 plausible : DofusDB stocke 0,2 comme 0,20000000298).",
+        "bounds": {
+          "enum": [
+            "ceil",
+            "ceil_random_extra",
+            "strict"
+          ]
+        },
+        "default": "ceil_random_extra"
+      },
+      "exactRatioExtraPointChance": {
+        "value": 0.67,
+        "status": "MODÈLE EMPIRIQUE",
+        "source": "4 cas sur 6 à ratio entier (observations 2026-09-08/09/10) ; IC95 de Wilson ≈ 0,30–0,90. Le cas « 12 ini pour 1,0 » du 2026-09-09 est exclu : état avant non transcrit.",
+        "note": "Probabilité du point supplémentaire quand la perte restante est un multiple exact de la densité (quantization = ceil_random_extra). N = 6 : très incertain, à réviser à chaque série transcrite.",
+        "bounds": {
+          "min": 0,
+          "max": 1
+        },
+        "default": 0.67
+      },
+      "deficitRatio": {
+        "$comment": "Forme de la stratégie weighted_by_deficit_ratio (src/logic/engine/lossSelection.ts). r = quantum de la ligne (poids de sa plus petite rune) / déficit restant. w = floor + (1 − floor)·f(r) ; f = r^(−heavyExponent) si r > 1, r^(lightExponent) sinon. Tendance : HYPOTHÈSE COMMUNAUTAIRE + DevBlog qualitatif ; valeurs : INCONNU. Expérience qui tranche : objet Vi + Fo + PA, puits 0, runes de poids 1, au moins 300 pertes relevées — uniforme ≈ 33 % de PA touché, ce modèle ≈ 2 %.",
+        "heavyExponent": {
+          "value": 1,
+          "status": "INCONNU",
+          "source": "Recherche ciblée du 2026-09-23 (sélection de la ligne qui perd) : aucune source ne donne de formule ; valeur proposée pour respecter les ordres de grandeur des témoignages.",
+          "note": "Pente côté ligne TROP LOURDE (r > 1). 1 : une ligne 10 fois trop lourde pèse 10 fois moins. « Extrêmement rare de faire sauter un PA avec une petite rune » (tutoriel Touch 2018).",
+          "bounds": {
+            "min": 0.5,
+            "max": 2
+          },
+          "default": 1
+        },
+        "lightExponent": {
+          "value": 0.25,
+          "status": "INCONNU",
+          "source": "Recherche ciblée du 2026-09-23 (sélection de la ligne qui perd) : aucune source ne donne de formule ; valeur proposée pour respecter les ordres de grandeur des témoignages.",
+          "note": "Pente côté ligne PLUS LÉGÈRE (r ≤ 1). Faible : les lignes légères sont touchées normalement (« une Pa Ine fait partir 1 sagesse, ou 3 agi, 3 chance », Alterya). 0 = aucune pénalité côté léger.",
+          "bounds": {
+            "min": 0,
+            "max": 1
+          },
+          "default": 0.25
+        },
+        "floor": {
+          "value": 0.03,
+          "status": "INCONNU",
+          "source": "Recherche ciblée du 2026-09-23 (sélection de la ligne qui perd) : aucune source ne donne de formule ; valeur proposée pour respecter les ordres de grandeur des témoignages. DevBlog 1.27 : « ce n'est pas systématique » (1 PA perdu pour une rune Ine) ⇒ plancher > 0.",
+          "note": "Plancher ε. 0,1 rendrait le PA trop souvent touché par des runes de poids 1 ; 0 rendrait l'exemple du DevBlog impossible.",
+          "bounds": {
+            "min": 0,
+            "max": 0.2
+          },
+          "default": 0.03
+        }
       }
     },
     "residualPool": {
@@ -318,12 +380,25 @@
         "value": 0.5,
         "status": "INCONNU",
         "source": "VALEUR INCHANGÉE, JUSTIFICATION REVUE le 2026-09-10. L'ancienne note disait que les triplets « 66/34/0, 43/50/7, 15/50/35 » venaient « d'une seule source ancienne recopiée » et n'étaient « pas utilisables » : CADUC. Le DevBlog Ankama original a été retrouvé (docs/knowledge/sources/S1-devblog-ankama-1.27.md) - ce sont des chiffres d'Ankama, SOURCE PRIMAIRE - v1.27. Leur transposition à Unity reste une HYPOTHÈSE. La valeur 0,5 reste posée arbitrairement : elle n'a jamais été dérivée de ces ancres.",
-        "note": "Part du complément (1 - pSC) attribuée à l'échec critique en FM normale ; le reste va au succès neutre. 0,5 posé arbitrairement pour faire tourner la simulation. À noter : les ancres 2, 3 et 4 du DevBlog donnent SN = 50 dans les trois cas, ce qu'une part fixe du complément ne peut pas reproduire (elle donne 42,5 % à pSC = 0,15). Le modèle devblog_1_27 traite ce point ; official_factors_linear non.",
+        "note": "Part du complément (1 - pSC) attribuée à l'échec critique en FM normale ; le reste va au succès neutre. 0,5 posé arbitrairement pour faire tourner la simulation. À noter : les ancres 2, 3 et 4 du DevBlog donnent SN = 50 dans les trois cas, ce qu'une part fixe du complément ne peut pas reproduire (elle donne 42,5 % à pSC = 0,15). Le modèle devblog_1_27 traite ce point ; official_factors_linear non. Depuis le 2026-09-23, n'est utilisé que si snSplit = ec_share (défaut capped_50, qui reproduit les quatre ancres).",
         "bounds": {
           "min": 0,
           "max": 1
         },
         "default": 0.5
+      },
+      "snSplit": {
+        "value": "capped_50",
+        "status": "MODÈLE EMPIRIQUE",
+        "source": "Dérivé des ancres du DevBlog 1.27 (SOURCE PRIMAIRE — v1.27, docs/knowledge/sources/S1-devblog-ankama-1.27.md) : pSN = min(0,50 ; 1 − pSC) reproduit EXACTEMENT 66/34/0, 43/50/7, 15/50/35 et 32/50/18 (et la variante relayée 34/50/16) ; + Alterya 2012, remontée d'un PA naturel ≈ 30/50/20 [TEM]. 5 triplets conformes. Analyse : docs/knowledge/2026-09-23-analyse-simulateur.md §1 et §8.",
+        "note": "Répartition du complément (1 − pSC) entre SN et EC en FM normale et overmax. capped_50 (défaut depuis le 2026-09-23) : le SN prend tout le complément jusqu'à 50 %, l'EC le reste — phrase primaire « SN au maximum de 50 %, proche de ce maximum dans la majorité des cas ». ec_share : part fixe ecShare (ancien défaut, 17,5 % d'EC sur une rune facile là où l'ancre 1 donne 0). Transposition à Unity : HYPOTHÈSE, comme les ancres. Ne concerne pas le régime « SC seul » (exo lourd), réparti par heavyExoEcShare.",
+        "bounds": {
+          "enum": [
+            "capped_50",
+            "ec_share"
+          ]
+        },
+        "default": "capped_50"
       },
       "heavyExoEcShare": {
         "value": 1,
@@ -335,6 +410,17 @@
           "max": 1
         },
         "default": 1
+      },
+      "cumulativeRegimeSc": {
+        "value": 0.034,
+        "status": "MODÈLE EMPIRIQUE",
+        "source": "Waveformer, forum officiel « FM 2% so/dist », 16-17/06/2026, bêta 3.6 : 2ᵉ % Do Per So en exo, 10 000 à 15 000 runes sur objet remis à jet aléatoire par orbes → 3,4 % (« presque 4 % »), AUCUN SN sur toute la série [MES]. Recoupements : albert-deux, 1 000 tentatives sur objet au jet parfait → 8 réussites (0,8 %, IC95 ≈ 0,35–1,6 %) ; Dividixx, « une centaine » d'objets, estime 2 à 4 % [TEM]. docs/fm-recherche-2026-09-23.md §3.",
+        "note": "pSC du régime « SC seul » quand il est atteint par le POIDS CUMULÉ de la ligne (heavyExoRule = cumulative_weight, ≥ heavyExoWeightThreshold) et non par la liste PA/PM/PO/Invocations. L'absence de SN est confirmée par la mesure ; le SC, lui, n'est PAS 1 % sur objet moyen. Dépend de la qualité de l'objet (0,8 % sur objet parfait) — le moteur n'en tient pas compte, valeur unique de l'objet moyen. Borne basse 0,01 = plancher du tutoriel Ankama, borne haute 0,32 = ancre 4.",
+        "bounds": {
+          "min": 0.01,
+          "max": 0.32
+        },
+        "default": 0.034
       },
       "unknownIntervalSampling": {
         "value": "best",

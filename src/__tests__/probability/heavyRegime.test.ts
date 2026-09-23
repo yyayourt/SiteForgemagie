@@ -5,10 +5,15 @@
  *   « le premier % Do passe comme une rune exo facile, bien au-delà de 1 % ; à partir du
  *     deuxième on passe à 30 de puits donc 1 % ».
  * Réfutation prévue : des SN observés au 2ᵉ point d'un % Do.
+ *
+ * Révision du 2026-09-23 : la mesure Waveformer (bêta 3.6, 10–15 k runes, 2ᵉ % Do Per So) CONFIRME
+ * l'absence de SN mais donne un SC de 3,4 %, pas 1 %. Le déclencheur par poids cumulé a donc son
+ * propre pSC (`cumulativeRegimeSc`, statut MESURE) ; la liste garde 1 % (POLITIQUE).
  */
 import { describe, it, expect } from 'vitest';
 import {
   estimateOutcome,
+  heavyRegimeTriggerOf,
   isHeavyExo,
   isHeavyRegime,
   nonNaturalLineWeightAfter,
@@ -96,6 +101,7 @@ describe('de bout en bout : estimation et Monte Carlo sur % Do distance', () => 
     runeWeight: 15,
     runeValue: 1,
     isHeavyExo,
+    heavyTrigger: isHeavyExo ? 'cumulative' : undefined,
     residualPool: 0,
     weightBudget: 0,
   });
@@ -106,14 +112,34 @@ describe('de bout en bout : estimation et Monte Carlo sur % Do distance', () => 
     expect(e.sampling).toEqual(ANCHOR_BEST_CREATION);
   });
 
-  it('2ᵉ point : point POLITIQUE 1/0/99', () => {
+  it('2ᵉ point : point MESURE 3,4 / 0 / 96,6 (Waveformer) — SC seul, mais pas 1 %', () => {
     const e = estimateOutcome(input(true, 1), params());
     expect(e.kind).toBe('point');
+    expect(e.status).toBe('MESURE');
+    expect(e.sampling.pSC).toBeCloseTo(0.034, 12);
+    expect(e.sampling.pSN).toBe(0);
+    expect(e.sampling.pEC).toBeCloseTo(0.966, 12);
+  });
+
+  it('le déclencheur liste garde 1 / 0 / 99 (POLITIQUE), même au poids cumulé', () => {
+    const e = estimateOutcome({ ...input(true, 0), heavyTrigger: 'list' }, params());
     expect(e.status).toBe('POLITIQUE');
     expect(e.sampling).toEqual(ANCHOR_WORST_CREATION);
   });
 
-  it('Monte Carlo : la ligne absente est tirée à 32/50/18, la ligne à +1 est tirée à 1/0/99', () => {
+  it('cumulativeRegimeSc est paramétrable et ne descend jamais sous le plancher de 1 %', () => {
+    expect(estimateOutcome(input(true, 1), params({ cumulativeRegimeSc: 0.05 })).sampling.pSC).toBeCloseTo(0.05, 12);
+    expect(estimateOutcome(input(true, 1), params({ cumulativeRegimeSc: 0.001 })).sampling.pSC).toBeCloseTo(0.01, 12);
+  });
+
+  it('heavyRegimeTriggerOf : la liste a priorité sur le poids', () => {
+    const p = params();
+    expect(heavyRegimeTriggerOf({ characteristicId: CHAR.PA, isExo: true, nonNaturalWeightAfter: 100 }, p)).toBe('list');
+    expect(heavyRegimeTriggerOf({ characteristicId: DO_DISTANCE, isExo: true, nonNaturalWeightAfter: 30 }, p)).toBe('cumulative');
+    expect(heavyRegimeTriggerOf({ characteristicId: DO_DISTANCE, isExo: true, nonNaturalWeightAfter: 15 }, p)).toBeNull();
+  });
+
+  it('Monte Carlo : la ligne absente est tirée à 32/50/18, la ligne à +1 au SC mesuré du poids cumulé', () => {
     // le dataset porte bien la densité 15 pour cette caractéristique
     expect(engine.densities.get(DO_DISTANCE)).toBe(15);
     const empty = makeState([line({ characteristicId: CHAR.VITALITE, value: 300, baseMin: 200, baseMax: 300 })]);
@@ -125,6 +151,7 @@ describe('de bout en bout : estimation et Monte Carlo sur % Do distance', () => 
       line({ characteristicId: DO_DISTANCE, value: 1, baseMin: 0, baseMax: 0, isExo: true }),
     ]);
     const second = simulateRuneAttempts(withOne, rune, engine, params(), createSeededRng(1), { runs: 200 });
-    expect(second.probabilities).toEqual(ANCHOR_WORST_CREATION);
+    expect(second.probabilities.pSC).toBeCloseTo(params().cumulativeRegimeSc, 12);
+    expect(second.probabilities.pSN).toBe(0);
   });
 });

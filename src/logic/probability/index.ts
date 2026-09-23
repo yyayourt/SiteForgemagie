@@ -36,6 +36,7 @@ export type {
 export {
   distanceToMax,
   splitComplement,
+  splitNormal,
   attemptKindOf,
   structuralFlagsOf,
   NEUTRAL_STRUCTURAL_FLAGS,
@@ -96,7 +97,14 @@ export function getProbabilityModel(name: ProbabilityModelName): ProbabilityMode
 
 export const PROBABILITY_MODEL_NAMES = Object.keys(MODELS) as ProbabilityModelName[];
 
-export { isHeavyExo, isHeavyRegime, nonNaturalLineWeightAfter, type HeavyRegimeQuery } from './heavyRegime';
+export {
+  isHeavyExo,
+  isHeavyRegime,
+  heavyRegimeTriggerOf,
+  nonNaturalLineWeightAfter,
+  type HeavyRegimeQuery,
+  type HeavyRegimeTrigger,
+} from './heavyRegime';
 
 /**
  * Estimation complète : triplet OU intervalle, avec son statut et la nature de la tentative.
@@ -111,7 +119,7 @@ export function estimateOutcome(
   const attemptKind = attemptKindOf(input.line, input.runeValue, input.isHeavyExo);
 
   // Garde-fou d'exotisme : il PRÉCÈDE le modèle sur toute création d'effet.
-  const guarded = guardExoticEstimate(attemptKind, params);
+  const guarded = guardExoticEstimate(attemptKind, params, input.heavyTrigger);
   if (guarded) return guarded;
 
   const raw = getProbabilityModel(modelName).compute(input, params);

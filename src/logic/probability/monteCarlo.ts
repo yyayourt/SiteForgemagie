@@ -10,7 +10,7 @@
 import type { EngineParams, ProbabilityModelName, ProbabilityParams } from '../../data/params';
 import type { ForgemagieItemState, Rng, Rune, RuneOutcome } from '../../types/forgemagie';
 import { applyRune, maxApplicableRuneValue } from '../engine';
-import { computeOutcomeProbabilities, drawOutcome, isHeavyRegime, nonNaturalLineWeightAfter } from './index';
+import { computeOutcomeProbabilities, drawOutcome, heavyRegimeTriggerOf, nonNaturalLineWeightAfter } from './index';
 import type { ProbabilityInput, ProbabilityOutput } from './types';
 import { overCapUsageAfter } from './overCapUsage';
 
@@ -60,19 +60,21 @@ export function buildProbabilityInput(
   const density = engineParams.densities.get(rune.characteristicId) ?? 0;
   const probLine = { value: line?.value ?? 0, baseMax: line?.baseMax ?? 0, isExo };
   const applicableValue = maxApplicableRuneValue(state, rune, engineParams);
+  const heavyTrigger = heavyRegimeTriggerOf(
+    {
+      characteristicId: rune.characteristicId,
+      isExo,
+      nonNaturalWeightAfter: nonNaturalLineWeightAfter(probLine, applicableValue, density),
+    },
+    probabilityParams
+  );
   return {
     itemLevel: state.level,
     line: probLine,
     runeWeight: rune.value * density,
     runeValue: rune.value,
-    isHeavyExo: isHeavyRegime(
-      {
-        characteristicId: rune.characteristicId,
-        isExo,
-        nonNaturalWeightAfter: nonNaturalLineWeightAfter(probLine, applicableValue, density),
-      },
-      probabilityParams
-    ),
+    isHeavyExo: heavyTrigger !== null,
+    heavyTrigger: heavyTrigger ?? undefined,
     residualPool: state.residualPool,
     weightBudget,
     overCapUsage: overCapUsageAfter(state, rune, engineParams),

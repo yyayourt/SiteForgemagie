@@ -69,6 +69,7 @@
 import type { ProbabilityParams, UnknownIntervalSampling } from '../../data/params';
 import { MIN_SC_HEAVY_EXO } from './constraints';
 import { ANCHOR_BEST_CREATION, ANCHOR_WORST_CREATION } from './devblogAnchors';
+import type { HeavyRegimeTrigger } from './heavyRegime';
 import { splitComplement, type AttemptKind, type ProbabilityOutput } from './types';
 
 /**
@@ -84,10 +85,15 @@ export type ProbabilityEstimate =
        * Statut à afficher avec le chiffre.
        * `MODÈLE` : sortie du modèle paramétré.
        * `POLITIQUE` : le chiffre ne vient pas d'un modèle mais d'une décision de projet —
-       * retenir la borne basse d'un intervalle non documenté (cas de l'exo lourd).
+       * retenir la borne basse attestée (exo lourd de la liste ; 1 % corroboré par la mesure
+       * sur l'exo PM d'un Gelano, N ≈ 19 000).
+       * `MESURE` : le chiffre est la valeur mesurée du cas (régime « SC seul » atteint par le
+       * poids cumulé : `cumulativeRegimeSc`, Waveformer, N ≈ 10–15 k).
        */
-      status: 'MODÈLE' | 'POLITIQUE';
+      status: 'MODÈLE' | 'POLITIQUE' | 'MESURE';
       attemptKind: AttemptKind;
+      /** Déclencheur du régime « SC seul », présent seulement pour `heavy_exo`. */
+      heavyTrigger?: HeavyRegimeTrigger;
     }
   | {
       kind: 'interval';
@@ -103,26 +109,33 @@ export type ProbabilityEstimate =
     };
 
 /**
- * Triplet d'un exo lourd : SC épinglé au plancher attesté (1 %), complément partagé par
- * `heavyExoEcShare`. Le plancher est primaire ; en faire la valeur est une politique de projet.
+ * Triplet du régime « SC seul », complément partagé par `heavyExoEcShare` (SN nul par défaut —
+ * confirmé par la mesure : aucun SN sur 10–15 k runes, Waveformer 3.6).
+ * - déclencheur `list` (PA/PM/PO/Invocations) : SC au plancher attesté (1 %), que la mesure
+ *   corrobore pour l'exo PM d'un Gelano (1,11 %, IC95 ≈ 0,96–1,26 %, Fek + Dasech) ;
+ * - déclencheur `cumulative` (2ᵉ point d'un % Do…) : SC = `cumulativeRegimeSc` (3,4 % mesuré).
  */
-export function heavyExoProbabilities(params: ProbabilityParams): ProbabilityOutput {
-  return splitComplement(MIN_SC_HEAVY_EXO, params.heavyExoEcShare);
+export function heavyExoProbabilities(params: ProbabilityParams, trigger: HeavyRegimeTrigger = 'list'): ProbabilityOutput {
+  const sc = trigger === 'cumulative' ? Math.max(MIN_SC_HEAVY_EXO, params.cumulativeRegimeSc) : MIN_SC_HEAVY_EXO;
+  return splitComplement(sc, params.heavyExoEcShare);
 }
 
 /**
  * Applique le garde-fou. Renvoie `null` si la tentative n'est pas une création d'effet :
- * l'appelant garde alors la sortie de son modèle.
+ * l'appelant garde alors la sortie de son modèle. `heavyTrigger` absent = `list`.
  */
 export function guardExoticEstimate(
   attemptKind: AttemptKind,
-  params: ProbabilityParams
+  params: ProbabilityParams,
+  heavyTrigger: HeavyRegimeTrigger = 'list'
 ): ProbabilityEstimate | null {
   if (attemptKind === 'heavy_exo') {
-    // `POLITIQUE` et non `SOURCE PRIMAIRE` : la source garantit que 1 % est atteignable,
-    // pas que ce soit le taux. Retenir ce plancher comme valeur est une politique de projet.
-    const probabilities = heavyExoProbabilities(params);
-    return { kind: 'point', probabilities, sampling: probabilities, status: 'POLITIQUE', attemptKind };
+    // `list` → `POLITIQUE` : la source garantit que 1 % est atteignable, la mesure le
+    // corrobore sur un objet simple ; l'appliquer à tout objet reste une décision de projet.
+    // `cumulative` → `MESURE` : valeur mesurée du cas moyen (Waveformer).
+    const probabilities = heavyExoProbabilities(params, heavyTrigger);
+    const status = heavyTrigger === 'cumulative' ? 'MESURE' : 'POLITIQUE';
+    return { kind: 'point', probabilities, sampling: probabilities, status, attemptKind, heavyTrigger };
   }
   if (attemptKind === 'exo') {
     const bound = params.unknownIntervalSampling;
@@ -176,6 +189,11 @@ export const SAMPLING_BOUND_LABEL: Record<UnknownIntervalSampling, string> = {
  * empêche de sur-estimer. Seul l'exo lourd en a un — et ce plafond est une POLITIQUE, pas
  * une borne officielle : Ankama n'en publie aucune. Voir `MIN_SC_HEAVY_EXO`.
  */
-export function guardCeilingFor(attemptKind: AttemptKind): number | null {
-  return attemptKind === 'heavy_exo' ? MIN_SC_HEAVY_EXO : null;
+export function guardCeilingFor(
+  attemptKind: AttemptKind,
+  params?: ProbabilityParams,
+  heavyTrigger: HeavyRegimeTrigger = 'list'
+): number | null {
+  if (attemptKind !== 'heavy_exo') return null;
+  return params ? heavyExoProbabilities(params, heavyTrigger).pSC : MIN_SC_HEAVY_EXO;
 }

@@ -5,8 +5,9 @@
  * 1. La perte demandée est d'abord absorbée par le reliquat (residualPool), consommé en
  *    priorité (docs/knowledge R PARTIE 2, HYPOTHÈSE COMMUNAUTAIRE forte).
  * 2. Le reste est retiré sur des lignes choisies par la stratégie de sélection ; sur une
- *    ligne, on retire un nombre ENTIER de points : ceil(reste / densité), borné par ce que
- *    la ligne peut perdre.
+ *    ligne, on retire un nombre ENTIER de points (`pointsToRemove` : ceil(reste / densité),
+ *    plus parfois un point quand le ratio est entier — lossSelection.quantization), borné par
+ *    ce que la ligne peut perdre.
  * 3. Reliquat créé = poids réellement retiré − perte demandée restante, jamais négatif
  *    (définition « reliquat = perte − rune », convergence communautaire, A §4.1).
  * 4. Si aucune ligne ne peut absorber le reste, il est perdu (unabsorbedWeight) et le
@@ -90,9 +91,44 @@ function candidatesOf(lines: ItemLine[], params: EngineParams, overExoOnly: bool
     } else if (removablePoints(line) <= 0) {
       continue;
     }
-    out.push({ line, density });
+    out.push({ line, density, quantum: params.runeQuantum?.get(line.characteristicId) ?? density });
   }
   return out;
+}
+
+/**
+ * Nombre de points à retirer sur une ligne de densité `density` pour couvrir `remaining`.
+ * Règle : `params.lossSelection.quantization` (MODÈLE EMPIRIQUE, N = 6).
+ *
+ * - `ceil` : le plus petit entier qui couvre la perte.
+ * - `strict` : un point de plus quand le ratio est entier (le poids retiré dépasse STRICTEMENT
+ *   la perte). Réfuté par « 5 ou 6 Vi » et par l'observation A2 ; gardé pour comparaison.
+ * - `ceil_random_extra` (défaut) : `ceil`, plus un point avec la probabilité
+ *   `exactRatioExtraPointChance` quand le ratio est entier. Observé : 11 ini pour 1,0 ;
+ *   6 vita pour 1,0 ; 31 ini pour 3,0 ; 5 vita pour 0,8 (A1) — mais 9 vita pour 1,8 (A2) et
+ *   28 vita pour 5,6. Témoignage Dofus 3 : « une rune de densité 1 retire aléatoirement 5 ou
+ *   6 Vi » ; « une rune Pod retire toujours exactement 13 Vi » (12,5 → 13, ratio non entier,
+ *   jamais de point en plus). Le surplus part au reliquat.
+ *
+ * « Entier » s'entend en arithmétique exacte : 5,6 / 0,2 vaut 27,999… en flottant, c'est
+ * bien un ratio entier (tolérance 1e-6). Le RNG n'est consommé QUE pour un ratio entier, pour
+ * ne pas décaler les tirages des autres cas.
+ */
+export function pointsToRemove(remaining: number, density: number, params: EngineParams, rng: Rng): number {
+  const EPS = 1e-9;
+  const base = Math.ceil(remaining / density - EPS);
+  const ratio = remaining / density;
+  const exactRatio = Math.abs(ratio - Math.round(ratio)) < 1e-6;
+  if (!exactRatio) return base;
+  switch (params.lossSelection.quantization) {
+    case 'strict':
+      return base + 1;
+    case 'ceil_random_extra':
+      return rng.next() < params.lossSelection.exactRatioExtraPointChance ? base + 1 : base;
+    case 'ceil':
+    default:
+      return base;
+  }
 }
 
 /**
@@ -138,11 +174,11 @@ export function applyLoss(
     }
     if (candidates.length === 0) break;
 
-    const picked = strategy.pick(candidates, rng);
+    const picked = strategy.pick(candidates, rng, { deficit: remaining, shape: params.lossSelection.deficitRatio });
     const maxPoints = overExoPhase
       ? removablePointsAsOverExo(picked.line)
       : removablePoints(picked.line);
-    const wanted = Math.ceil(remaining / picked.density - EPS);
+    const wanted = pointsToRemove(remaining, picked.density, params, rng);
     const points = Math.min(wanted, maxPoints);
     if (points <= 0) break;
 
