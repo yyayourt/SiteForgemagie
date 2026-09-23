@@ -121,7 +121,7 @@ export interface PaletteGroup {
 const CATEGORY_ORDER: StatCapCategory[] = ['special', 'primary', 'damage', 'percent_dmg', 'resistance', 'utility'];
 
 export function normalizeSearch(s: string): string {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
 export function buildPaletteGroups(opts: {
