@@ -1,4 +1,5 @@
-import type { SimulatedStat, AtelierMode, ForgeEvent } from '../../types';
+import type { SimulatedStat, AtelierMode, ForgeEvent, RuneTier } from '../../types';
+import type { RuneOption } from '../../hooks/useAtelier';
 import { getRepresentativeRuneImg } from '../../data/dataset';
 import { RuneIcon } from './RuneIcon';
 
@@ -14,6 +15,12 @@ interface Props {
   onSelect: (characteristicId: number) => void;
   onUpdate: (characteristicId: number, value: number) => void;
   onRemoveExo?: (characteristicId: number) => void;
+  /** Paliers de rune, affichés seulement sur la ligne visée en mode forger */
+  tiers?: RuneOption[];
+  activeTier?: RuneTier;
+  /** Palier armé (1er clic) : le clic suivant sur lui fusionne */
+  armedTier?: RuneTier | null;
+  onTierClick?: (tier: RuneTier) => void;
 }
 
 type Tone = 'natural' | 'over' | 'exo' | 'zero' | 'sacrificed' | 'locked';
@@ -58,7 +65,7 @@ const SPARKS = [
  * « ajuster », la valeur s'édite directement.
  * Les micro-interactions (frappe, perte, refus) sont rejouées par clé d'événement.
  */
-export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, onSelect, onUpdate, onRemoveExo }: Props) {
+export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, onSelect, onUpdate, onRemoveExo, tiers, activeTier, armedTier, onTierClick }: Props) {
   const tone = toneOf(stat);
   const text = TONE_TEXT[tone];
   // Un exo encore à 0 (ligne créée, rune pas encore posée) reste lisible comme exo
@@ -186,6 +193,28 @@ export function ItemLine({ stat, mode, selected, maxOver, maxReachable, event, o
           </button>
         )}
       </div>
+
+      {selected && mode === 'forge' && tiers && tiers.length > 0 && onTierClick && (
+        <div className="col-span-full flex flex-wrap justify-end gap-1.5 pt-1" role="group" aria-label={`Paliers de rune ${stat.statName}`}>
+          {tiers.map((o, i) => {
+            const armed = armedTier === o.tier;
+            return (
+              <button
+                key={o.tier}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onTierClick(o.tier); }}
+                aria-pressed={activeTier === o.tier}
+                title={`${o.nameFr} : +${o.value}, poids ${o.weight.toFixed(1)} · touche ${i + 1} · ${armed ? 'cliquer encore pour fusionner' : 'cliquer pour choisir, encore pour fusionner'}`}
+                className={`btn-well inline-flex items-center gap-1.5 px-2 py-1 text-[13px] tnum ${activeTier === o.tier ? 'text-ash border-molten-text/60' : 'text-ash-2'} ${armed ? 'ring-2 ring-molten-text/70' : ''}`}
+              >
+                <RuneIcon characteristicId={stat.characteristicId} img={o.img} size={18} />
+                <b className="font-display">+{o.value}</b>
+                {armed && <span className="text-[10px] text-molten-text">fusionner</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </li>
   );
 }

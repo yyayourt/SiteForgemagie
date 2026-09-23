@@ -1,21 +1,30 @@
-import { useEffect, useState } from 'react';
-import type { AtelierApi } from '../../hooks/useAtelier';
+import { useEffect, useState, type ReactNode } from 'react';
+import type { AtelierApi, RuneOption } from '../../hooks/useAtelier';
+import type { RuneTier } from '../../types';
+import type { ArmedTier } from './forgeSelection';
 import { computeMaxReachable } from '../../logic/planning/weightBudget';
 import { getLineOverRoom, getStatAbsoluteMaxInContext } from '../../data/statCaps';
 import { getParamEntry } from '../../data/params';
 import { useParams } from '../../app/ParamsProvider';
 import { InfoTip, StatusBadge } from '../shell/Badges';
 import { ItemLine } from './ItemLine';
-import { ExoPicker } from './ExoPicker';
+import { Crucible } from './Crucible';
 
 interface Props {
   atelier: AtelierApi;
   /** Fige l'objet courant dans la vitrine ; renvoie vrai si sauvegardé */
   onSaveToShowcase?: () => boolean;
+  onSelectLine: (characteristicId: number) => void;
+  tierOptions: RuneOption[];
+  activeTier: RuneTier;
+  armed: ArmedTier;
+  onTierClick: (tier: RuneTier) => void;
+  /** Le slot de fusion, rendu sous les lignes */
+  children?: ReactNode;
 }
 
 /** La dalle d'enclume : l'objet et ses lignes, le héros de l'atelier. */
-export function ItemSlab({ atelier, onSaveToShowcase }: Props) {
+export function ItemSlab({ atelier, onSaveToShowcase, onSelectLine, tierOptions, activeTier, armed, onTierClick, children }: Props) {
   const { overrides } = useParams();
   const { item, stats, mode, selectedId, lastEvent, budget, itemLocked, rollQuality, craftParams } = atelier;
   const [savedTick, setSavedTick] = useState(0);
@@ -68,58 +77,35 @@ export function ItemSlab({ atelier, onSaveToShowcase }: Props) {
           <div className="font-display font-bold text-[26px] tnum text-ash leading-none">{budget.qualityPercent.toFixed(1)} %</div>
           <div className="text-xs text-ash-3 mt-1">du jet parfait</div>
         </div>
+        <div className="basis-full"><Crucible residualPool={atelier.residualPool} event={lastEvent} /></div>
       </div>
 
-      {/* Mode et outils */}
+      {/* Barre d'outils */}
       <div className="flex flex-wrap items-center gap-2 py-3">
-        <div className="inline-flex p-0.5 rounded-control well" role="group" aria-label="Mode de l'atelier">
-          <button type="button" onClick={() => atelier.setMode('forge')} aria-pressed={mode === 'forge'} className={`px-3 py-1.5 rounded-[8px] text-sm ${mode === 'forge' ? 'bg-iron-2 text-ash shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]' : 'text-ash-2 hover:text-ash'}`} title="Frapper des runes : les changements passent par le moteur (reliquat, pertes, verrous)">
-            Forger
-          </button>
-          <button type="button" onClick={() => atelier.setMode('adjust')} aria-pressed={mode === 'adjust'} className={`px-3 py-1.5 rounded-[8px] text-sm ${mode === 'adjust' ? 'bg-iron-2 text-ash shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]' : 'text-ash-2 hover:text-ash'}`} title="Régler les lignes à la main pour planifier : agit sur le budget de poids, pas sur le reliquat">
-            Ajuster
-          </button>
-        </div>
-        <div className="ml-auto flex flex-wrap items-center gap-1.5">
-          <button type="button" onClick={atelier.undo} disabled={!atelier.canUndo} className="btn-well px-3 py-1.5 text-sm" title="Annuler (Ctrl+Z)">Annuler</button>
-          <button type="button" onClick={atelier.redo} disabled={!atelier.canRedo} className="btn-well px-3 py-1.5 text-sm" title="Rétablir (Ctrl+Y)">Rétablir</button>
-          <button type="button" onClick={atelier.resetToPerfect} className="btn-well px-3 py-1.5 text-sm" title="Repartir d'un objet neuf : toutes les lignes au jet parfait, exos retirés, reliquat et journal vidés">Objet neuf</button>
-          {onSaveToShowcase && (
-            <button
-              type="button"
-              onClick={() => { if (onSaveToShowcase()) setSavedTick((t) => t + 1); }}
-              className="btn-well px-3 py-1.5 text-sm inline-flex items-center gap-1.5"
-              title="Figer l'objet tel quel dans la vitrine : lignes, reliquat, runes consommées, coût, historique"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 7h16v13H4zM8 7V4h8v3M4 12h16" /></svg>
-              Sauvegarder dans la vitrine
-            </button>
-          )}
-          {savedTick > 0 && (
-            <span key={savedTick} className="entry-forged text-xs text-over" role="status">
-              Figé dans la vitrine
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Saisie rapide du jet */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 -mt-1">
-        <div className="inline-flex items-center gap-1.5" role="group" aria-label="Saisie rapide du jet">
-          <span className="text-xs text-ash-3">Jet</span>
-          <button type="button" onClick={atelier.setAllToMax} disabled={itemLocked} className="btn-well px-2.5 py-1 text-xs" title="Toutes les lignes naturelles à leur maximum ; exos et reliquat intacts">Tout au max</button>
-          <button type="button" onClick={atelier.setAllToMin} disabled={itemLocked} className="btn-well px-2.5 py-1 text-xs" title="Toutes les lignes naturelles à leur minimum ; exos et reliquat intacts">Tout au min</button>
-          <button
-            type="button"
-            onClick={() => atelier.rollRandom()}
-            disabled={itemLocked}
-            className="btn-well px-2.5 py-1 text-xs inline-flex items-center gap-1.5"
-            title={`Tirer chaque ligne naturelle dans son intervalle, loi « ${craftParams.rollDistribution} » (paramètre INCONNU) ; exos et reliquat intacts`}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><circle cx="9" cy="9" r="1.2" fill="currentColor" /><circle cx="15" cy="15" r="1.2" fill="currentColor" /><circle cx="15" cy="9" r="1.2" fill="currentColor" /><circle cx="9" cy="15" r="1.2" fill="currentColor" /></svg>
-            Jet aléatoire
-          </button>
-        </div>
+        <button type="button" onClick={atelier.undo} disabled={!atelier.canUndo} className="btn-well px-3 py-1.5 text-sm" title="Annuler (Ctrl+Z)">Annuler</button>
+        <button type="button" onClick={atelier.redo} disabled={!atelier.canRedo} className="btn-well px-3 py-1.5 text-sm" title="Rétablir (Ctrl+Y)">Rétablir</button>
+        {mode === 'adjust' && <span className="text-[11px] px-2 py-0.5 rounded-full border border-model text-model">mode Ajuster</span>}
+        <details className="relative">
+          <summary className="btn-well px-3 py-1.5 text-sm list-none cursor-pointer select-none" aria-label="Plus d'outils">⋯</summary>
+          <div className="surface-iron absolute z-30 left-0 top-10 w-64 p-2 grid gap-1 shadow-panel text-sm">
+            <div className="inline-flex p-0.5 rounded-control well" role="group" aria-label="Mode de l'atelier">
+              <button type="button" onClick={() => atelier.setMode('forge')} aria-pressed={mode === 'forge'} className={`px-3 py-1.5 rounded-[8px] text-sm ${mode === 'forge' ? 'bg-iron-2 text-ash shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]' : 'text-ash-2 hover:text-ash'}`} title="Frapper des runes : les changements passent par le moteur (reliquat, pertes, verrous)">
+                Forger
+              </button>
+              <button type="button" onClick={() => atelier.setMode('adjust')} aria-pressed={mode === 'adjust'} className={`px-3 py-1.5 rounded-[8px] text-sm ${mode === 'adjust' ? 'bg-iron-2 text-ash shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]' : 'text-ash-2 hover:text-ash'}`} title="Régler les lignes à la main pour planifier : agit sur le budget de poids, pas sur le reliquat">
+                Ajuster
+              </button>
+            </div>
+            <button type="button" onClick={atelier.resetToPerfect} className="btn-well px-3 py-1.5 text-left">Objet neuf</button>
+            <button type="button" onClick={atelier.setAllToMax} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left">Jet : tout au max</button>
+            <button type="button" onClick={atelier.setAllToMin} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left">Jet : tout au min</button>
+            <button type="button" onClick={() => atelier.rollRandom()} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left" title={`Loi « ${craftParams.rollDistribution} » (paramètre INCONNU) ; exos et reliquat intacts`}>Jet aléatoire</button>
+            {onSaveToShowcase && (
+              <button type="button" onClick={() => { if (onSaveToShowcase()) setSavedTick((t) => t + 1); }} className="btn-well px-3 py-1.5 text-left">Sauvegarder dans la vitrine</button>
+            )}
+          </div>
+        </details>
+        {savedTick > 0 && <span key={savedTick} className="entry-forged text-xs text-over" role="status">Figé dans la vitrine</span>}
 
         {rollQuality && qualityPct !== null && (
           <div className="ml-auto inline-flex items-center gap-2 text-xs text-ash-3" title={`${rollQuality.weightAchieved.toFixed(1)} sur ${rollQuality.weightMax.toFixed(1)} de poids de craft, ${rollQuality.rolledLines} ligne(s) à intervalle`}>
@@ -160,24 +146,19 @@ export function ItemSlab({ atelier, onSaveToShowcase }: Props) {
               maxOver={maxOver}
               maxReachable={maxReachable}
               event={lastEvent}
-              onSelect={atelier.selectLine}
+              onSelect={onSelectLine}
               onUpdate={atelier.updateStat}
               onRemoveExo={atelier.removeExo}
+              tiers={selectedId === stat.characteristicId ? tierOptions : undefined}
+              activeTier={activeTier}
+              armedTier={armed && armed.characteristicId === stat.characteristicId ? armed.tier : null}
+              onTierClick={onTierClick}
             />
           );
         })}
       </ul>
 
-      {mode === 'adjust' && !itemLocked && (
-        <div className="pt-3 mt-2 border-t border-slab-edge/60">
-          <ExoPicker currentStats={stats} onAdd={atelier.addExo} />
-        </div>
-      )}
-      {mode === 'forge' && (
-        <p className="pt-3 mt-2 border-t border-slab-edge/60 text-xs text-ash-3">
-          Cliquez une ligne pour la viser, puis choisissez une rune dans le panneau « Frapper ». Pour ajouter un exo ou régler un jet à la main, passez en mode « Ajuster ».
-        </p>
-      )}
+      {children}
     </section>
   );
 }
