@@ -26,7 +26,7 @@ export function BudgetScale({ budget }: Props) {
   const nearCap = !atCap && usedPercent >= 85;
 
   return (
-    <section className="surface-iron p-4 sm:p-5" aria-labelledby="budget-title">
+    <section aria-labelledby="budget-title">
       <div className="flex items-center justify-between gap-2 mb-1">
         <h2 id="budget-title" className="text-[15px] text-ash-2">
           Budget de poids <span className="ml-1 text-[11px] px-2 py-0.5 rounded-full border border-iron-edge text-ash-3 align-middle">planification</span>
@@ -34,6 +34,7 @@ export function BudgetScale({ budget }: Props) {
         <InfoTip label="Ce qu'est le budget de poids">
           <p className="m-0"><strong className="text-ash">Budget de poids</strong> : compté sur les lignes visibles. Poids libéré par les lignes descendues sous leur jet parfait, moins poids consommé par les overs et les exos. Il peut être négatif : c'est ce que vous <em>planifiez</em>.</p>
           <p className="m-0 mt-2">Le <strong className="text-ash">reliquat</strong>, dans le creuset, est ce que le serveur <em>retient</em> réellement après chaque perte. Les deux ne se convertissent pas l'un dans l'autre.</p>
+          <p className="m-0 mt-2">La balance dit ce que vous planifiez ; le reliquat, ce que le serveur retient.</p>
         </InfoTip>
       </div>
 
@@ -77,10 +78,6 @@ export function BudgetScale({ budget }: Props) {
           {scope === 'global' ? `borne cumulée sur l'objet · reste ${Math.max(0, cap - overExoTotal).toFixed(1)}` : 'borne par ligne · cumul indicatif'}
         </p>
       </div>
-
-      <p className="text-xs text-ash-3 mt-2 leading-snug">
-        La balance dit ce que vous planifiez ; le creuset, ce que le serveur retient.
-      </p>
     </section>
   );
 }

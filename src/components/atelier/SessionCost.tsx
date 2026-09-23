@@ -22,9 +22,9 @@ export function SessionCost({ consumed, onReset }: Props) {
   const baseId = useId();
 
   return (
-    <section className="surface-iron p-4 sm:p-5" aria-labelledby="cost-title">
+    <section aria-labelledby="cost-title">
       <div className="flex items-center justify-between gap-2 mb-2">
-        <h2 id="cost-title" className="text-[17px] text-ash">Coût de la session</h2>
+        <h2 id="cost-title" className="sr-only">Coût de la session</h2>
         <InfoTip label="Comment le coût est calculé">
           <p className="m-0">Chaque action acceptée par le moteur consomme son objet : une rune par frappe (même en échec critique), un orbe par réinitialisation. Annuler une frappe rend la rune.</p>
           <p className="m-0 mt-2">Les prix sont les vôtres : saisis ici, mémorisés sur cet appareil, jamais fournis par l'application. Le total n'additionne que les lignes dont le prix est renseigné.</p>

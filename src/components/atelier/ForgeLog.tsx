@@ -60,12 +60,11 @@ export function ForgeLog({ log, lastEvent, onClear }: Props) {
   const entries = [...log].reverse();
 
   return (
-    <section className="surface-iron p-4 sm:p-5" aria-labelledby="log-title">
+    <section aria-labelledby="log-title">
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-3">
-        <h2 id="log-title" className="text-[17px] text-ash">Livre de forge</h2>
-        <span className="text-xs text-ash-3">chaque frappe, telle que le moteur l'a appliquée</span>
+        <h2 id="log-title" className="sr-only">Livre de forge</h2>
         {log.length > 0 && (
-          <div className="ml-auto flex items-center gap-4 text-[13px] text-ash-2 tnum">
+          <div className="w-full flex items-center gap-3 text-[12px] text-ash-2 tnum">
             <span>Frappes <b className="text-ash">{applied.filter((e) => e.kind === 'rune').length}</b></span>
             <span className="text-sc">SC <b>{count('SC')}</b></span>
             <span className="text-sn">SN <b>{count('SN')}</b></span>
@@ -77,20 +76,20 @@ export function ForgeLog({ log, lastEvent, onClear }: Props) {
 
       {log.length === 0 ? (
         <p className="well rounded-control px-4 py-5 text-sm text-ash-3 text-center">
-          Le livre est vierge. Tentez une rune : chaque issue s'inscrira ici avec sa perte, la ligne touchée et le reliquat.
+          Le livre est vierge. Fusionnez une rune : chaque issue s'inscrit ici avec sa perte et le reliquat.
         </p>
       ) : (
-        <ol className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3 max-h-[380px] overflow-y-auto pr-1">
+        <ol className="m-0 p-0 list-none grid gap-1.5 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1">
           {entries.map((e) => {
             const o = OUTCOME[e.outcome];
             const latest = lastEvent?.id === e.id;
             return (
               <li
                 key={e.id}
-                className={`well rounded-control grid grid-cols-[34px_1fr_auto] gap-2.5 items-center px-3 py-2.5 text-[13px] ${latest ? 'entry-forged border-ash-3' : ''} ${e.refusedReason ? 'opacity-70' : ''}`}
+                className={`well rounded-control grid grid-cols-[26px_1fr_auto] gap-2 items-center px-2 py-2 text-[12.5px] ${latest ? 'entry-forged border-ash-3' : ''} ${e.refusedReason ? 'opacity-70' : ''}`}
               >
                 <span
-                  className={`w-[30px] h-[30px] rounded-full grid place-items-center font-display font-bold text-[10px] border border-current ${e.refusedReason ? 'text-ash-3' : e.snNoOp ? NO_OP.cls : o.cls}`}
+                  className={`w-[24px] h-[24px] rounded-full grid place-items-center font-display font-bold text-[10px] border border-current ${e.refusedReason ? 'text-ash-3' : e.snNoOp ? NO_OP.cls : o.cls}`}
                   title={e.refusedReason ? 'refusée' : e.snNoOp ? NO_OP.long : o.long}
                 >
                   {e.refusedReason ? '×' : e.kind === 'orb' ? '◌' : e.snNoOp ? NO_OP.label : o.label}
