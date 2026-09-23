@@ -26,3 +26,4 @@ dist-ssr
 # Fichiers locaux Claude Code (autorisations personnelles)
 .claude/settings.local.json
 .playwright-mcp/
+.superpowers/
