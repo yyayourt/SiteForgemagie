@@ -93,7 +93,7 @@ export function RunePalette(props: RunePaletteProps) {
                       disabled={tileDisabled(t)}
                       onClick={() => onPickCharacteristic(t.characteristicId, t.onItem)}
                       title={`${t.name} · ${t.density} poids par point${t.onItem ? '' : ' · exo'}${t.heavy ? ' · exo lourd' : ''}`}
-                      className={`relative grid justify-items-center gap-0.5 rounded-[10px] border px-1 py-1.5 !text-[10.5px] leading-tight transition-colors disabled:opacity-40
+                      className={`relative grid justify-items-center gap-0.5 rounded-[10px] border px-1 py-1.5 text-[10.5px] leading-tight transition-colors disabled:opacity-40
                         ${selected ? 'border-molten-text bg-[rgb(255_194_92/0.08)]' : t.onItem ? 'border-iron-edge hover:border-ash-3' : 'border-exo/40 hover:border-exo'}`}
                     >
                       <RuneIcon characteristicId={t.characteristicId} img={getRepresentativeRuneImg(t.characteristicId)} size={30} />
