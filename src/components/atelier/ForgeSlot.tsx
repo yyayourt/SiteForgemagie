@@ -54,8 +54,9 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
         <p className="m-0 flex flex-wrap items-center gap-1.5 text-[13px] text-ash-2">
           Remet l'objet à un jet de craft aléatoire, retire les exos, vide le reliquat.
           <StatusBadge status="HYPOTHÈSE COMMUNAUTAIRE" />
+          Loi du jet <StatusBadge status={rollLaw?.status ?? 'INCONNU'} /> ; refus sur objet transcendé <StatusBadge status="SOURCE PRIMAIRE" />.
           <InfoTip label="Loi du jet de l'orbe">
-            <p className="m-0">La loi du jet est un paramètre <StatusBadge status={rollLaw?.status ?? 'INCONNU'} /> (« {atelier.craftParams.rollDistribution} », section « Jet de craft » des paramètres), le même que pour « Jet aléatoire ». Le refus sur un objet transcendé est <StatusBadge status="SOURCE PRIMAIRE" />.</p>
+            <p className="m-0">La loi du jet est le paramètre « {atelier.craftParams.rollDistribution} » (section « Jet de craft » des paramètres), le même que pour « Jet aléatoire ».</p>
             <ul className="m-0 mt-2 p-0 list-none">{FM_ORBS.filter((o) => !o.nameFr.includes('(lié)')).map((o) => <li key={o.id}>{o.nameFr} · niv. {o.level}</li>)}</ul>
           </InfoTip>
         </p>
@@ -68,8 +69,9 @@ export function ForgeSlot({ atelier, slotKind, tier, onFuse, showHelp, onToggleH
       <div className="grid gap-2">
         <p className="m-0 flex flex-wrap items-center gap-1.5 text-[13px] text-ash-2">
           Se pose sans perte puis verrouille l'objet. <StatusBadge status="SOURCE PRIMAIRE" />
+          Refus si over ou exo présent : <StatusBadge status={lockNote?.status ?? 'HYPOTHÈSE COMMUNAUTAIRE'} />
           <InfoTip label="Règles de la transcendance">
-            <p className="m-0">Devblog 2.58 : plus aucune forgemagie ni orbe après la pose. Le refus si un over ou un exo est déjà présent est une <StatusBadge status={lockNote?.status ?? 'HYPOTHÈSE COMMUNAUTAIRE'} />.</p>
+            <p className="m-0">Devblog 2.58 : plus aucune forgemagie ni orbe après la pose.</p>
           </InfoTip>
         </p>
         {runes.map((r) => (

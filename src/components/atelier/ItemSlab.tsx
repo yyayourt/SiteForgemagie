@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { AtelierApi, RuneOption } from '../../hooks/useAtelier';
 import type { RuneTier } from '../../types';
 import type { ArmedTier } from './forgeSelection';
@@ -28,6 +28,7 @@ export function ItemSlab({ atelier, onSaveToShowcase, onSelectLine, tierOptions,
   const { overrides } = useParams();
   const { item, stats, mode, selectedId, lastEvent, budget, itemLocked, rollQuality, craftParams } = atelier;
   const [savedTick, setSavedTick] = useState(0);
+  const toolsMenuRef = useRef<HTMLDetailsElement>(null);
 
   // Confirmation éphémère après une sauvegarde dans la vitrine
   useEffect(() => {
@@ -85,9 +86,12 @@ export function ItemSlab({ atelier, onSaveToShowcase, onSelectLine, tierOptions,
         <button type="button" onClick={atelier.undo} disabled={!atelier.canUndo} className="btn-well px-3 py-1.5 text-sm" title="Annuler (Ctrl+Z)">Annuler</button>
         <button type="button" onClick={atelier.redo} disabled={!atelier.canRedo} className="btn-well px-3 py-1.5 text-sm" title="Rétablir (Ctrl+Y)">Rétablir</button>
         {mode === 'adjust' && <span className="text-[11px] px-2 py-0.5 rounded-full border border-model text-model">mode Ajuster</span>}
-        <details className="relative">
+        <details ref={toolsMenuRef} className="relative">
           <summary className="btn-well px-3 py-1.5 text-sm list-none cursor-pointer select-none" aria-label="Plus d'outils">⋯</summary>
-          <div className="surface-iron absolute z-30 left-0 top-10 w-64 p-2 grid gap-1 shadow-panel text-sm">
+          <div
+            className="surface-iron absolute z-30 left-0 top-10 w-64 p-2 grid gap-1 shadow-panel text-sm"
+            onClick={() => { if (toolsMenuRef.current) toolsMenuRef.current.open = false; }}
+          >
             <div className="inline-flex p-0.5 rounded-control well" role="group" aria-label="Mode de l'atelier">
               <button type="button" onClick={() => atelier.setMode('forge')} aria-pressed={mode === 'forge'} className={`px-3 py-1.5 rounded-[8px] text-sm ${mode === 'forge' ? 'bg-iron-2 text-ash shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]' : 'text-ash-2 hover:text-ash'}`} title="Frapper des runes : les changements passent par le moteur (reliquat, pertes, verrous)">
                 Forger
@@ -96,12 +100,12 @@ export function ItemSlab({ atelier, onSaveToShowcase, onSelectLine, tierOptions,
                 Ajuster
               </button>
             </div>
-            <button type="button" onClick={atelier.resetToPerfect} className="btn-well px-3 py-1.5 text-left">Objet neuf</button>
-            <button type="button" onClick={atelier.setAllToMax} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left">Jet : tout au max</button>
-            <button type="button" onClick={atelier.setAllToMin} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left">Jet : tout au min</button>
-            <button type="button" onClick={() => atelier.rollRandom()} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left" title={`Loi « ${craftParams.rollDistribution} » (paramètre INCONNU) ; exos et reliquat intacts`}>Jet aléatoire</button>
+            <button type="button" onClick={atelier.resetToPerfect} className="btn-well px-3 py-1.5 text-left" title="Repartir d'un objet neuf : toutes les lignes au jet parfait, exos retirés, reliquat et journal vidés">Objet neuf</button>
+            <button type="button" onClick={atelier.setAllToMax} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left" title="Toutes les lignes naturelles à leur maximum ; exos et reliquat intacts">Jet : tout au max</button>
+            <button type="button" onClick={atelier.setAllToMin} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left" title="Toutes les lignes naturelles à leur minimum ; exos et reliquat intacts">Jet : tout au min</button>
+            <button type="button" onClick={() => atelier.rollRandom()} disabled={itemLocked} className="btn-well px-3 py-1.5 text-left" title={`Tirer chaque ligne naturelle dans son intervalle, loi « ${craftParams.rollDistribution} » (paramètre INCONNU) ; exos et reliquat intacts`}>Jet aléatoire</button>
             {onSaveToShowcase && (
-              <button type="button" onClick={() => { if (onSaveToShowcase()) setSavedTick((t) => t + 1); }} className="btn-well px-3 py-1.5 text-left">Sauvegarder dans la vitrine</button>
+              <button type="button" onClick={() => { if (onSaveToShowcase()) setSavedTick((t) => t + 1); }} className="btn-well px-3 py-1.5 text-left" title="Figer l'objet tel quel dans la vitrine : lignes, reliquat, runes consommées, coût, historique">Sauvegarder dans la vitrine</button>
             )}
           </div>
         </details>
