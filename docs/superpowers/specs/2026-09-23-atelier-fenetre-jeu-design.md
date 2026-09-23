@@ -94,8 +94,10 @@ Le palier choisi est remonté d'`ActionPanel` vers `AtelierPage` (état partagé
 ## 5. Prévision : `OutcomeEstimate` en barre
 
 - Forme `point` : barre empilée SC/SN/EC (largeurs = probabilités), chiffres dessous.
-- Forme `interval` : trois segments aux bornes `best`, avec une zone hachurée montrant
-  l'étendue `worst`→`best` ; chiffres « a – b » dessous.
+- Forme `interval` : deux barres fines empilées, « meilleure création » (`best`) et
+  « pire création » (`worst`) ; chiffres « a – b » dessous. (Remplace la zone hachurée
+  envisagée : deux triplets complets sont plus lisibles et ne suggèrent pas de loi entre
+  les bornes, qui est INCONNUE.)
 - Badge du modèle (`ModelBadge`) et `StatusBadge` conservés, visibles.
 - Paragraphes (note d'intervalle, note exo lourd, « estimation d'un modèle paramétré ») →
   `InfoTip` à côté du badge. Le texte est conservé mot pour mot.
