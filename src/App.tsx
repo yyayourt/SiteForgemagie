@@ -12,7 +12,7 @@ import { computeSessionCost } from './state/sessionCost';
 import { showcaseToAtelierState, type ShowcaseEntry } from './state/showcase';
 
 function pageFromHash(): Page {
-  const h = window.location.hash.replace('#', '');
+  const h = window.location.hash.replace('#', '').split('/')[0];
   return h === 'montecarlo' || h === 'savoir' || h === 'vitrine' ? h : 'atelier';
 }
 
