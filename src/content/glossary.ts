@@ -68,7 +68,7 @@ export const GLOSSARY: GlossaryEntry[] = [
     id: 'exo-leger',
     term: 'Exo léger',
     definition:
-      'Exo sous le seuil de 30 (ex. 1ᵉʳ point de % Dommages). Chances entre 1/0/99 et 32/50/18 ; le simulateur tire à 32/50/18.',
+      'Exo sous le seuil de 30 (réglable dans le Dossier) (ex. 1ᵉʳ point de % Dommages). Chances entre 1/0/99 et 32/50/18 ; le simulateur tire à 32/50/18 (réglable dans le Dossier).',
     status: 'INCONNU',
   },
   {

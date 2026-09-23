@@ -300,7 +300,7 @@ export const UNDERSTAND_SECTIONS: UnderstandSection[] = [
       {
         text: 'Répartition SN = min(50 %, 1 − SC) : elle reproduit les triplets 66/34/0, 43/50/7, 15/50/35, 32/50/18 et Alterya 30/50/20.',
         status: ME,
-        source: 'paramètre params.probability.snSplit (5 triplets)',
+        source: 'paramètre params.probability.snSplit (ajusté sur 4 triplets du DevBlog 2010 et un relevé d’Alterya)',
       },
       {
         text: 'Les cinq triplets Ankama : 66/34/0, 43/50/7, 15/50/35, 32/50/18, 1/0/99 (règle de 2010, transposition à Unity non vérifiée).',
